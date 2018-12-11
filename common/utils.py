@@ -46,5 +46,5 @@ def execute_day(_globals, year, day, part):
 def read_input(year, day):
     import os
     file_dir = os.path.dirname(os.path.realpath(__file__))
-    with open("{0}/../{1}/day{2}".format(file_dir,year, day),"r") as fileReader:
+    with open("{0}/../{1}/input/day{2}".format(file_dir,year, day),"r") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
