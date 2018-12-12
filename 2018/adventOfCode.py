@@ -7,6 +7,7 @@ file_dir = os.path.dirname(os.path.realpath(__file__))
 import sys
 sys.path.insert(0, file_dir + "\\..\\")
 from common.utils import execute_day, read_input
+from collections import deque
 
 start_day = 1
 
@@ -692,6 +693,7 @@ def day10_2(data):
     return counter
 
 """ DAY 11 """
+
 import math
 def day11_cell_value(serial, x, y):
     rack_id = x + 10
@@ -753,30 +755,123 @@ def day11_solve_exact_size(memoization, grid, size):
     return (coordinate, max_total)
 
 def day11_solve_range(grid, min_size, max_size):
-    max_total = -9999
+    max_total = -9999999999
     coordinate = (1, 1)
     max_size_total = min_size
     memoization = {}
-    for size in range(- max_size-1, min_size-1):
-        current_coordinate, current_total = day11_solve_exact_size(memoization, grid, -size)
+    for size in range(min_size, max_size+1):
+        current_coordinate, current_total = day11_solve_exact_size(memoization, grid, size)
         if current_total > max_total:
             max_total = current_total
             coordinate = current_coordinate
-            max_size_total = -size
+            max_size_total = size
     return (coordinate, max_size_total)
 
 def day11_1(data):
-    #data = read_input(2018, 1101)
-    memoization = {}
-    serial = int(data[0])
-    grid = day11_grid(serial)
-    return day11_solve_exact_size(memoization, grid, 3)[0]
+     #data = read_input(2018, 1101)
+     memoization = {}
+     serial = int(data[0])
+     grid = day11_grid(serial)
+     return day11_solve_exact_size(memoization, grid, 3)[0]
 
 def day11_2(data):
     #data = read_input(2018, 1101)
     serial = int(data[0])
     grid = day11_grid(serial)
-    return day11_solve_range(grid, 1, 300)
+    return day11_solve_range(grid, 2, 299)
+
+""" DAY 12 """
+
+def day12_parse_input(data):
+    initial_state = deque(re.findall("initial state: ([\.|#]*)",data[0])[0])
+    rules = deque([])
+    for rule in data[2:]:
+        parts = rule.split(" => ")
+        rules.append((parts[0], parts[1]))
+    return (initial_state, rules)
+
+def day12_get_rule(pots, rules, position):
+    for rule in rules:
+        prev = rule[0]
+        match = True
+        for i in range(len(prev)):
+            match &= prev[i] == pots[position + i - 2]
+        if match:
+            return rule[1]
+    return None
+
+def day12_process_generation(pots, rules, start):
+    new_pots = deque([])
+    pots.appendleft(".")
+    pots.appendleft(".")
+    pots.appendleft(".")
+    pots.appendleft(".")
+    pots.append(".")
+    pots.append(".")
+    pots.append(".")
+    pots.append(".")
+    for i in range(2, len(pots)-2):
+        result = day12_get_rule(pots, rules, i)
+        if result == None:
+            new_pots.append(pots[i])
+        else:
+            new_pots.append(result)
+
+    start = start-2
+    curr = new_pots[0]
+    while curr == ".":
+        new_pots.popleft()
+        start += 1
+        curr = new_pots[0]
+
+    curr = new_pots[-1]
+    while curr == ".":
+        new_pots.pop()
+        curr = new_pots[-1]
+            
+    return (new_pots, start)
+
+def day12_solve(pots, rules, generations):
+    memoization = {}
+    history = deque([])
+    start = 0
+    for i in range(generations):
+        history.append(("".join(pots), start))
+        memoization["".join(pots)] = i
+        #print("".join(pots))
+        #print(start)
+        pots, start = day12_process_generation(pots, rules, start)
+        new_pots = "".join(pots)
+        if new_pots in memoization:
+            itera = memoization[new_pots]
+            j = 0
+            while(j < itera):
+                history.popleft()
+                j +=1
+            pos = (generations-i)%len(history)
+            pos_shift = start - history[pos][1]
+            import math
+            iterations = math.floor((generations-(i+1))/len(history))
+            pots = history[pos][0]
+            start += pos_shift*iterations
+            break
+
+    total = 0
+    for i in range(len(pots)):
+        if pots[i] == "#":
+            total += start + i
+    
+    return total
+
+def day12_1(data):
+    #data = read_input(2018, 1201)
+    pots, rules = day12_parse_input(data)
+    return day12_solve(pots, rules, 20)
+
+def day12_2(data):
+    #data = read_input(2018, 1201)
+    pots, rules = day12_parse_input(data)
+    return day12_solve(pots, rules, 50000000000)
 
 #start_day = 11
 """ MAIN FUNCTION """

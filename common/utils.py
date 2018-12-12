@@ -1,5 +1,6 @@
 from threading import Thread
 import functools
+from timeit import default_timer as timer
 
 """ AUX FUNCTIONS """
 class SignalCatchingError(Exception):
@@ -7,7 +8,7 @@ class SignalCatchingError(Exception):
     pass
 
 HEAVY_EXERCISE = "nil (too computationally heavy)"
-EXERCISE_TIMEOUT = 10000#3 #secs
+EXERCISE_TIMEOUT = 120 #secs
 
 def timeout(seconds_before_timeout):
     def deco(func):
@@ -37,11 +38,13 @@ def timeout(seconds_before_timeout):
 def execute_day(_globals, year, day, part):
     func_name = "day{0}_{1}".format(day, part)
     if func_name in _globals:
+        start = timer()
         try:
             result = timeout(seconds_before_timeout=EXERCISE_TIMEOUT)(_globals[func_name])(read_input(year, day))
         except SignalCatchingError:
             result = HEAVY_EXERCISE
-        print("Day {0}, part {1}: {2}".format(day, part, result))
+        end = timer()
+        print("Day {0}, part {1}: {2} ({3:.3f} secs)".format(day, part, result, end - start))
 
 def read_input(year, day):
     import os
