@@ -873,7 +873,173 @@ def day12_2(data):
     pots, rules = day12_parse_input(data)
     return day12_solve(pots, rules, 50000000000)
 
-#start_day = 11
+""" Day 13 """
+
+class Turn:
+    Left = 0
+    Straight = 1
+    Right = 2
+
+class Direction:
+    Left = 0
+    Up = 1
+    Right = 2
+    Down = 3
+
+def day13_print_direction(dir):
+    if dir == Direction.Up:
+        return "^"
+    elif dir == Direction.Down:
+        return "v"
+    elif dir == Direction.Left:
+        return "<"
+    elif dir == Direction.Right:
+        return ">"
+
+def day13_debug_map(map, positions):
+    for y in range(len(map)):
+        line = ""
+        for x in range(len(map[y])):
+            cart = [positions[k] for k in range(len(positions)) if positions[k][0] == x and positions[k][1] == y]
+            if len(cart) == 1:
+                cart = cart[0]
+            else:
+                cart = None
+
+            if cart == None:
+                line += map[y][x]
+            else:
+                line += day13_print_direction(cart[2])
+        print(line)
+    print()
+    import time
+    time.sleep(0.5)
+
+def day13_get_cart_direction(pos):
+    if pos == "^":
+        return Direction.Up
+    elif pos == "v":
+        return Direction.Down
+    elif pos =="<":
+        return Direction.Left
+    elif pos == ">":
+        return Direction.Right
+    return None
+
+def day13_parse_input(data):
+    map = []
+    positions = []
+    for row in range(len(data)):
+        new_row = []
+        for column in range(len(data[row])):
+            direction = day13_get_cart_direction(data[row][column])
+            if direction == None:
+                new_row.append(data[row][column])
+            else:
+                positions.append((column, row, direction, Turn.Right))
+                if direction == Direction.Left or direction == Direction.Right:
+                    new_row.append("-")
+                else:
+                    new_row.append("|")
+        map.append(new_row)
+    return map, sorted(positions, key=lambda v: (v[0], v[1]))
+
+def day13_direction_on_turn(direction, turn):
+    if turn == Turn.Straight:
+        return direction
+    elif turn == Turn.Right:
+        return (direction + 1) % 4
+    else:
+        return (direction + 3) % 4
+
+def day13_next_turn(location, direction, last_turn):
+    if location == "/":
+        if direction == Direction.Up:
+            return (Direction.Right, last_turn)
+        if direction == Direction.Left:
+            return (Direction.Down, last_turn)
+        if direction == Direction.Right:
+            return (Direction.Up, last_turn)
+        if direction == Direction.Down:
+            return (Direction.Left, last_turn)
+    elif location == "\\":
+        if direction == Direction.Up:
+            return (Direction.Left, last_turn)
+        if direction == Direction.Left:
+            return (Direction.Up, last_turn)
+        if direction == Direction.Right:
+            return (Direction.Down, last_turn)
+        if direction == Direction.Down:
+            return (Direction.Right, last_turn)
+    elif location == "+":
+        turn = (last_turn + 1) % 3
+        return (day13_direction_on_turn(direction, turn), turn)
+    return direction, last_turn
+
+def day13_get_direction_delta(direction):
+    if direction == Direction.Up:
+        return (0, -1)
+    elif direction == Direction.Down:
+        return (0, 1)
+    elif direction == Direction.Left:
+        return (-1, 0)
+    elif direction == Direction.Right:
+        return (1, 0)
+
+def day13_move_cart(map, positions, cart):
+    x = positions[cart][0]
+    y = positions[cart][1]
+    direction = positions[cart][2]
+    last_turn = positions[cart][3]
+    location = map[y][x]
+    
+    delta_x, delta_y = day13_get_direction_delta(direction)
+    new_x, new_y = x + delta_x, y + delta_y
+    for i in range(len(positions)):
+        if i != cart and positions[i][0] == new_x and positions[i][1] == new_y:
+            return "X", new_x, new_y, i
+    
+    new_direction, new_turn = day13_next_turn(map[new_y][new_x], direction, last_turn)
+
+    return (new_x, new_y, new_direction, new_turn)
+
+def day13_solve(map, positions):
+    while True:
+        #day13_debug_map(map, positions)
+        for i in range(len(positions)):
+            new_position = day13_move_cart(map, positions, i)
+            if new_position[0] == "X":
+                return new_position[1], new_position[2]
+            positions[i] = new_position
+        positions = sorted(positions, key=lambda v: (v[0], v[1]))
+
+def day13_solve2(map, positions):
+    while True:
+        #day13_debug_map(map, positions)
+        crashing_carts = []
+        for i in range(len(positions)):
+            new_position = day13_move_cart(map, positions, i)
+            if new_position[0] == "X":
+                crashing_carts.append(new_position[3])
+                crashing_carts.append(i)
+            else:
+                positions[i] = new_position
+        positions = [positions[i] for i in range(len(positions)) if not i in crashing_carts]
+        if len(positions) == 1:
+            return positions[0][0], positions[0][1]
+        positions = sorted(positions, key=lambda v: (v[0], v[1]))
+
+def day13_1(data):
+    data = read_input(2018, 1301)
+    map, positions = day13_parse_input(data)
+    return day13_solve(map, positions)
+
+def day13_2(data):
+    #data = read_input(2018, 1302)
+    map, positions = day13_parse_input(data)
+    return day13_solve2(map, positions)
+
+#start_day = 13
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i in range(start_day,26):
