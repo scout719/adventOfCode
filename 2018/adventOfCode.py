@@ -848,7 +848,7 @@ def day12_solve(pots, rules, generations):
             while(j < itera):
                 history.popleft()
                 j +=1
-            pos = (generations-i)%len(history)
+            pos = (generations-(i+1))%len(history)
             pos_shift = start - history[pos][1]
             import math
             iterations = math.floor((generations-(i+1))/len(history))
@@ -1039,7 +1039,99 @@ def day13_2(data):
     map, positions = day13_parse_input(data)
     return day13_solve2(map, positions)
 
-#start_day = 13
+""" DAY 18 """
+
+class AcreContents:
+    open = "."
+    trees = "|"
+    lumberyard = "#"
+
+    @staticmethod
+    def count_states(state, adjacents):
+        return len([True for a in adjacents if a == state])
+
+    @staticmethod
+    def next_state(current, adjacents):
+        if current == AcreContents.open:
+            if AcreContents.count_states(AcreContents.trees, adjacents) >= 3:
+                return AcreContents.trees
+        elif current == AcreContents.trees:
+            if AcreContents.count_states(AcreContents.lumberyard, adjacents) >= 3:
+                return AcreContents.lumberyard
+        elif current == AcreContents.lumberyard:
+            if AcreContents.count_states(AcreContents.lumberyard, adjacents) == 0 or AcreContents.count_states(AcreContents.trees, adjacents) == 0:
+                return AcreContents.open
+        return current
+
+def day18_debug_area(area):
+    for i in range(len(area)):
+        out = ""
+        for j in range(len(area[i])):
+            out += area[i][j]
+        print(out)
+    print()
+    #import time
+    #time.sleep(1)
+
+def day18_get_adjacent_cells(area, i_coord, j_coord):
+    adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)] #the adjacency matrix
+    result = []
+    for di, dj in adjacency:
+        if 0 <= (i_coord + di) < len(area) and 0 <= j_coord + dj < len(area[0]): #boundaries check
+            #yielding is usually faster than constructing a list and returning it if you're just using it once
+            result.append(area[i_coord + di][j_coord + dj])
+    return result
+
+def day18_compute_change(area, i, j):
+    adjacents = day18_get_adjacent_cells(area, i, j)
+    return AcreContents.next_state(area[i][j], adjacents)
+
+def day18_process(area, minutes):
+    prev_area = area
+    history = deque([])
+    memoization = {}
+    for t in range(minutes):
+        #day18_debug_area(prev_area)
+        history.append(prev_area)
+        memoization["".join(prev_area)] = t
+        #print(t)
+        new_area = []
+        for i in range(len(prev_area)):
+            new_area.append("")
+            for j in range(len(prev_area[i])):
+                new_state = day18_compute_change(prev_area, i, j)
+                new_area[i] += new_state
+        
+        new_area_key = "".join(new_area)
+        if new_area_key in memoization:
+            itera = memoization[new_area_key]
+            j = 0
+            while(j < itera):
+                history.popleft()
+                j +=1
+            pos = (minutes-(t+1))%len(history)
+            prev_area = history[pos]
+            break
+        prev_area = new_area
+    return prev_area
+
+def day18_1(data):
+    #data = read_input(2018, 1801)
+    area = data
+    new_area = day18_process(area, 10)
+    trees = len([True for line in new_area for s in line if s == AcreContents.trees])
+    lumberyards = len([True for line in new_area for s in line if s == AcreContents.lumberyard])
+    return trees * lumberyards
+
+def day18_2(data):
+    #data = read_input(2018, 1801)
+    area = data
+    new_area = day18_process(area, 1000000000)
+    trees = len([True for line in new_area for s in line if s == AcreContents.trees])
+    lumberyards = len([True for line in new_area for s in line if s == AcreContents.lumberyard])
+    return trees * lumberyards
+
+#start_day = 18
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i in range(start_day,26):
