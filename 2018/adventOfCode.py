@@ -1030,7 +1030,7 @@ def day13_solve2(map, positions):
         positions = sorted(positions, key=lambda v: (v[0], v[1]))
 
 def day13_1(data):
-    data = read_input(2018, 1301)
+    #data = read_input(2018, 1301)
     map, positions = day13_parse_input(data)
     return day13_solve(map, positions)
 
@@ -1038,6 +1038,90 @@ def day13_2(data):
     #data = read_input(2018, 1302)
     map, positions = day13_parse_input(data)
     return day13_solve2(map, positions)
+
+""" DAY 14 """
+
+def day14_debug_recipes(recipes, elves):
+    out = ""
+    for i in range(len(recipes)):
+        recipe = recipes[i]
+        if elves[0] == i:
+            recipe = "({0})".format(recipe)
+        elif elves[1] == i:
+            recipe = "[{0}]".format(recipe)
+        else:
+            recipe = " {0} ".format(recipe)
+
+        out += " " + str(recipe)
+    print(out)
+
+def day14_break_number(number):
+    return [int(v) for v in str(number)]
+
+def day14_solve(nr_recipes):
+    recipes = [3, 7]
+    elves = [0, 1]
+    recipes_len = len(recipes)
+    for i in range(nr_recipes+10):
+        #day14_debug_recipes(recipes, elves)
+        recipe_0 = recipes[elves[0]]
+        recipe_1 = recipes[elves[1]]
+        new_recipe = recipe_0 + recipe_1
+        new_recipes = day14_break_number(new_recipe)
+        recipes.extend(new_recipes)
+        recipes_len += len(new_recipes)
+        elves[0] = (elves[0] + recipe_0 + 1) % recipes_len
+        elves[1] = (elves[1] + recipe_1 + 1) % recipes_len
+
+    return recipes[nr_recipes:nr_recipes+10]
+
+def day14_solve2(nr_recipes, value):
+    recipes = [3, 7]
+    elves = [0, 1]
+    start = 0
+    #value = str(nr_recipes)
+    size = len(value)
+    recipes_len = len(recipes)
+    while True:
+        #day14_debug_recipes(recipes, elves)
+        recipe_0 = recipes[elves[0]]
+        recipe_1 = recipes[elves[1]]
+        new_recipe = recipe_0 + recipe_1
+        new_recipes = day14_break_number(new_recipe)
+        recipes.extend(new_recipes)
+        recipes_len += len(new_recipes)
+        elves[0] = (elves[0] + recipe_0 + 1) % recipes_len
+        elves[1] = (elves[1] + recipe_1 + 1) % recipes_len
+        if recipes_len - start > size:
+            #day14_debug_recipes(recipes, [start, -1])
+            while start < recipes_len - size:
+                if str(recipes[start]) == value[0]:
+                    tmp_value = "".join([str(r) for r in recipes[start:start + size]])
+                    if tmp_value == value:
+                        return start
+                start += 1
+
+    return recipes[nr_recipes:nr_recipes+10]
+
+def day14_1(data):
+    #data = ["9"]
+    #data = ["5"]
+    #data = ["18"]
+    #data = ["2018"]
+
+    nr_recipes = int(data[0])
+    return "".join([str(i) for i in day14_solve(nr_recipes)])
+
+def day14_2(data):
+    #data = ["9"]
+    #data = ["5"]
+    #data = ["18"]
+    #data = ["2018"]
+
+    #data = ["59414"]
+    nr_recipes = int(data[0])
+    #return "".join([str(i) for i in day14_solve(nr_recipes)])
+    return day14_solve2(nr_recipes, data[0])
 
 """ DAY 18 """
 
