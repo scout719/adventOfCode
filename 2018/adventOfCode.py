@@ -1120,8 +1120,188 @@ def day14_2(data):
 
     #data = ["59414"]
     nr_recipes = int(data[0])
-    #return "".join([str(i) for i in day14_solve(nr_recipes)])
     return day14_solve2(nr_recipes, data[0])
+
+""" DAY 16 """
+
+class Inst16:
+    def addr(regs, a, b, c):
+        regs[c] = regs[a] + regs[b]
+        return regs
+        
+    def addi(regs, a, b, c):
+        regs[c] = regs[a] + b
+        return regs
+
+    def mulr(regs, a, b, c):
+        regs[c] = regs[a] * regs[b]
+        return regs
+        
+    def muli(regs, a, b, c):
+        regs[c] = regs[a] * b
+        return regs
+
+    def banr(regs, a, b, c):
+        regs[c] = regs[a] & regs[b]
+        return regs
+        
+    def bani(regs, a, b, c):
+        regs[c] = regs[a] & b
+        return regs
+
+    def borr(regs, a, b, c):
+        regs[c] = regs[a] | regs[b]
+        return regs
+        
+    def bori(regs, a, b, c):
+        regs[c] = regs[a] | b
+        return regs
+
+    def setr(regs, a, b, c):
+        regs[c] = regs[a]
+        return regs
+        
+    def seti(regs, a, b, c):
+        regs[c] = a
+        return regs
+        
+    def gtir(regs, a, b, c):
+        if a > regs[b]:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+        
+    def gtri(regs, a, b, c):
+        if regs[a] > b:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+        
+    def gtrr(regs, a, b, c):
+        if regs[a] > regs[b]:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+        
+    def eqir(regs, a, b, c):
+        if a == regs[b]:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+        
+    def eqri(regs, a, b, c):
+        if regs[a] == b:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+        
+    def eqrr(regs, a, b, c):
+        if regs[a] == regs[b]:
+            regs[c] = 1
+        else:
+            regs[c] = 0
+        return regs
+    
+    ops = [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr]
+
+def day16_parse_input(data):
+    samples = []
+    i = 0
+    while i < len(data):
+        if data[i] == "":
+            break
+        # Before: [3, 2, 1, 1]
+        # 9 2 1 2
+        # After:  [3, 2, 2, 1]
+        before = [ int(x) for x in re.findall("Before: \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
+        i+=1
+        inst = [ int(x) for x in re.findall("(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
+        i+=1
+        after = [ int(x) for x in re.findall("After:  \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
+        i+=1
+        i+=1
+        samples.append((before, inst, after))
+    
+    program = []
+    while i < len(data):
+        if data[i] != "":
+            # 9 2 1 2
+            inst = [ int(x) for x in re.findall("(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
+            program.append(inst)
+        i+=1
+        
+    return samples, program
+
+def day16_check_op(fun, before, inst, after):
+    result = fun(before[:], inst[1], inst[2], inst[3])
+    return all([result[i] == after[i] for i in range(len(result))])
+
+def day16_check_sample(before, inst, after):
+    ops = Inst16.ops
+    counter = 0
+    for op in ops:
+        if day16_check_op(op, before, inst, after):
+            counter += 1
+    return counter
+
+def day16_update_mapping(mapping, before, inst, after):
+    ops = Inst16.ops
+    counter = 0
+    matched = []
+    for op in ops:
+        if day16_check_op(op, before, inst, after):
+            matched.append(op)
+    opcode = inst[0]
+    prev_map = mapping[opcode]
+    mapping[opcode] = [op for op in prev_map if op in matched]
+
+def day16_solve1(samples):
+    counter = 0
+    for before, inst, after in samples:
+        if day16_check_sample(before, inst, after) >= 3:
+            counter += 1
+    return counter
+
+def day16_calculate_mapping(samples):
+    mapping = [Inst16.ops for i in range(len(Inst16.ops))]
+    for before, inst, after in samples:
+        day16_update_mapping(mapping, before, inst, after)
+    
+    while True:
+        for i in range(len(mapping)):
+            if len(mapping[i]) == 1:
+                op = mapping[i][0]
+                for j in range(len(mapping)):
+                    if i != j:
+                        mapping[j] = [op2 for op2 in mapping[j] if op2 != op]
+        if all([len(mapping[i]) == 1 for i in range(len(mapping))]):
+            break
+    mapping = [m[0] for m in mapping]
+    return mapping
+
+def day16_solve2(samples, program):
+    mapping = day16_calculate_mapping(samples)
+
+    regs = [0,0,0,0]
+    for line in program:
+        op = mapping[line[0]]
+        regs = op(regs, line[1], line[2], line[3])
+    return regs[0]
+
+def day16_1(data):
+    #data = read_input(2018, 1601)
+    samples, program = day16_parse_input(data)
+    return day16_solve1(samples)
+
+def day16_2(data):
+    #data = read_input(2018, 1601)
+    samples, program = day16_parse_input(data)
+    return day16_solve2(samples, program)
 
 """ DAY 18 """
 
