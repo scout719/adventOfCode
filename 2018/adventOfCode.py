@@ -1,8 +1,12 @@
 import re
+re = re
 import string
+string = string
 import sys
 import functools
+functools = functools
 import os
+os = os
 file_dir = os.path.dirname(os.path.realpath(__file__))
 import sys
 sys.path.insert(0, file_dir + "\\..\\")
@@ -1302,6 +1306,238 @@ def day16_2(data):
     #data = read_input(2018, 1601)
     samples, program = day16_parse_input(data)
     return day16_solve2(samples, program)
+
+""" DAY 17 """
+
+from struct import pack
+
+class Bitmap():
+  def __init__(s, width, height):
+    s._bfType = 19778 # Bitmap signature
+    s._bfReserved1 = 0
+    s._bfReserved2 = 0
+    s._bcPlanes = 1
+    s._bcSize = 12
+    s._bcBitCount = 24
+    s._bfOffBits = 26
+    s._bcWidth = width
+    s._bcHeight = height
+    s._bfSize = 26+s._bcWidth*3*s._bcHeight
+    s.clear()
+
+  def clear(s):
+    s._graphics = [(0,0,0)]*s._bcWidth*s._bcHeight
+
+  def setPixel(s, x, y, color):
+    if isinstance(color, tuple):
+      if x<0 or y<0 or x>s._bcWidth-1 or y>s._bcHeight-1:
+        raise ValueError('Coords out of range')
+      if len(color) != 3:
+        raise ValueError('Color must be a tuple of 3 elems')
+      s._graphics[y*s._bcWidth+x] = (color[2], color[1], color[0])
+    else:
+      raise ValueError('Color must be a tuple of 3 elems')
+
+  def write(s, file):
+    with open(file, 'wb') as f:
+      f.write(pack('<HLHHL', 
+                   s._bfType, 
+                   s._bfSize, 
+                   s._bfReserved1, 
+                   s._bfReserved2, 
+                   s._bfOffBits)) # Writing BITMAPFILEHEADER
+      f.write(pack('<LHHHH', 
+                   s._bcSize, 
+                   s._bcWidth, 
+                   s._bcHeight, 
+                   s._bcPlanes, 
+                   s._bcBitCount)) # Writing BITMAPINFO
+      for px in s._graphics:
+        f.write(pack('<BBB', *px))
+      for i in range (0, (s._bcWidth*3) % 4):
+        f.write(pack('B', 0))
+
+class Day17_Type:
+    clay = 0
+    sand = 1
+    water = 2
+    settled = 3
+
+    @staticmethod
+    def render_square(square):
+        if square == Day17_Type.clay:
+            return "#"
+        elif square == Day17_Type.sand:
+            return "."
+        elif square == Day17_Type.water:
+            return "|"
+        elif square == Day17_Type.settled:
+            return "~"
+
+    @staticmethod
+    def render_square_rgb(square):
+        if square == Day17_Type.clay:
+            return (0, 0, 0)
+        elif square == Day17_Type.sand:
+            return (255, 255, 255)
+        elif square == Day17_Type.water:
+            return (102, 165, 255)
+        elif square == Day17_Type.settled:
+            return (0, 0, 255)
+
+bitmap_counter = 0
+def day17_debug_ground_bmp(ground, y):
+    global bitmap_counter
+
+    height = 100
+    half = int(100/2)
+    lower = max(y - half, 0)
+    size = (y + half + 1) - lower
+    b = Bitmap(436, size)
+    b.clear()
+    for i in range(lower, y + half + 1):
+        for j in range(len(ground[i])):
+            coord = y + half     - i
+            b.setPixel(j, coord, Day17_Type.render_square_rgb(ground[i][j]))
+    b.write('test/file{:09d}.bmp'.format(bitmap_counter))
+    bitmap_counter += 1
+
+def day17_debug_ground_ascii(ground, y):
+    for i in range(y - 10, y + 11):
+        line = ground[i]
+        print("".join([Day17_Type.render_square(s) for s in line]))
+    print()
+    import time
+    time.sleep(.1)
+
+def day17_debug_full_ground_bmp(ground):
+    global bitmap_counter
+
+    size = len(ground)
+    half = int(size / 2)
+    b = Bitmap(436, size)
+    b.clear()
+    for i in range(len(ground)):
+        for j in range(len(ground[i])):
+            coord = (size-1) - i
+            b.setPixel(j, coord, Day17_Type.render_square_rgb(ground[i][j]))
+    b.write('test/a_full_ground.bmp')
+
+def day17_parse_input(data):
+    slices = []
+    min_y = 9999999
+    max_y = 0
+    for line in data:
+        if line[0] == "x":
+            # x=501, y=3..7
+            ground_slice = [ int(x) for x in re.findall("x=(\d+), y=(\d+)..(\d+)",line)[0]]
+            slices.append(ground_slice)
+            if ground_slice[1] < min_y:
+                min_y = ground_slice[1]
+            if ground_slice[2] > max_y:
+                max_y = ground_slice[2]
+        else:
+            # y=501, x=3..7
+            ground_slice = [ int(x) for x in re.findall("y=(\d+), x=(\d+)..(\d+)",line)[0]]
+            for i in range(ground_slice[1], ground_slice[2]+1):
+                ground_slice2 = (i, ground_slice[0], ground_slice[0])
+                slices.append(ground_slice2)
+                if ground_slice2[1] < min_y:
+                    min_y = ground_slice2[1]
+                if ground_slice2[2] > max_y:
+                    max_y = ground_slice2[2]
+    
+    slices = sorted(slices, key=lambda s: s[0])
+    min_x = slices[0][0] - 2
+    max_x = slices[-1][0] + 2
+
+    ground = [[ Day17_Type.sand for j in range(min_x, max_x)] for i in range(max_y + 2)]
+    for s in slices:
+        for i in range(s[1], s[2]+1):
+            ground[i][s[0] - min_x] = Day17_Type.clay
+    
+    return ground, min_x, min_y
+
+def day17_flow_water(ground, y, x):
+    stack = deque([(y, x)])
+    while(len(stack) > 0):
+        i, j = stack.popleft()
+        
+        if i+1 >= len(ground) or i < 0 or j+1 >= len(ground[0]) or j-1 < 0:
+            continue
+        if ground[i][j] == Day17_Type.clay or ground[i][j] == Day17_Type.settled:
+            continue
+
+        if ground[i][j] == Day17_Type.sand:
+            ground[i][j] = Day17_Type.water
+        
+        k = j-1
+        left_wall = False
+        right_wall = False
+        keep_going = False
+        while(k > 0):
+            if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
+                left_wall = True
+                break
+            if ground[i][k] == Day17_Type.sand:
+                keep_going = True
+                break
+            k -= 1
+        
+        k = j+1
+        while(k < len(ground[i])):
+            if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
+                right_wall = True
+                break
+            if ground[i][k] == Day17_Type.sand:
+                keep_going = True
+                break
+            k += 1
+
+        if left_wall and right_wall:
+            ground[i][j] = Day17_Type.settled
+        
+        #day17_debug_ground_bmp(ground, i)
+        
+        if ground[i+1][j] == Day17_Type.clay or ground[i+1][j] == Day17_Type.settled:
+            if ground[i][j-1] != ground[i][j]:
+                stack.append((i, j-1))
+            if ground[i][j+1] != ground[i][j]:
+                stack.append((i, j+1))
+
+        if ground[i][j] == Day17_Type.settled and ground[i-1][j] == Day17_Type.water:
+                stack.append((i-1, j))
+
+        if ground[i+1][j] != ground[i][j]:
+            stack.append((i+1, j))
+
+def day17_solve(ground, min_x, min_y):
+    day17_flow_water(ground, 0, 500 - min_x)
+
+    #day17_debug_full_ground_bmp(ground)
+    
+    counter_water = 0
+    counter_retained = 0
+    for i in range(len(ground)):
+        for j in range(len(ground[i])):
+            if i >= min_y:
+                if ground[i][j] == Day17_Type.settled:
+                    counter_water += 1
+                    counter_retained += 1
+                if ground[i][j] == Day17_Type.water:
+                    counter_water += 1
+
+    return counter_water, counter_retained
+
+def day17_1(data):
+    #data = read_input(2018, 1701)
+    ground, min_x, min_y = day17_parse_input(data)
+    return day17_solve(ground, min_x, min_y)[0]
+
+def day17_2(data):
+    #data = read_input(2018, 1701)
+    ground, min_x, min_y = day17_parse_input(data)
+    return day17_solve(ground, min_x, min_y)[1]
 
 """ DAY 18 """
 
