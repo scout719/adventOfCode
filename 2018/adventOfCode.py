@@ -14,6 +14,7 @@ from common.utils import execute_day, read_input
 from collections import deque
 from collections import Counter
 import multiprocessing as mp
+mp = mp
 import math
 import time
 
@@ -1743,7 +1744,7 @@ def day23_space_paralel2(bots, best_bot):
     #partial(multiply,2)
     process = range(min_z, max_z+1)#[bots[per_thread*i: per_thread*i+per_thread] for i in range(threads)]
     #print(process)
-    results = pool.map(partial(day23_new_bew, bots, min_x, max_x, min_y, max_y), process)
+    results = pool.map(functools.partial(day23_new_bew, bots, min_x, max_x, min_y, max_y), process)
     pool.close()
     pool.join()
     #print(results)
