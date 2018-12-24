@@ -12,6 +12,10 @@ import sys
 sys.path.insert(0, file_dir + "\\..\\")
 from common.utils import execute_day, read_input
 from collections import deque
+from collections import Counter
+import multiprocessing as mp
+import math
+import time
 
 start_day = 1
 
@@ -468,7 +472,6 @@ def day8_process_operation(data, operation, curr_node, nodes, operations):
         return (data, curr_node[2], operations)
 
 def day8_parse_tree(data):
-    from collections import deque
     i = 0
     nodes = []
     # Metadata, children, parent
@@ -581,7 +584,6 @@ def day9_play_game_mine(players, highest_marble):
     return scores
 
 def day9_play_game_optimized(players, highest_marble):
-    from collections import deque
     scores = [0 for i in range(players)]
     marbles = deque([0])
     next_marble = 1
@@ -698,7 +700,6 @@ def day10_2(data):
 
 """ DAY 11 """
 
-import math
 def day11_cell_value(serial, x, y):
     rack_id = x + 10
     level = rack_id * y
@@ -854,7 +855,7 @@ def day12_solve(pots, rules, generations):
                 j +=1
             pos = (generations-(i+1))%len(history)
             pos_shift = start - history[pos][1]
-            import math
+
             iterations = math.floor((generations-(i+1))/len(history))
             pots = history[pos][0]
             start += pos_shift*iterations
@@ -916,7 +917,6 @@ def day13_debug_map(map, positions):
                 line += day13_print_direction(cart[2])
         print(line)
     print()
-    import time
     time.sleep(0.5)
 
 def day13_get_cart_direction(pos):
@@ -1407,7 +1407,6 @@ def day17_debug_ground_ascii(ground, y):
         line = ground[i]
         print("".join([Day17_Type.render_square(s) for s in line]))
     print()
-    import time
     time.sleep(.1)
 
 def day17_debug_full_ground_bmp(ground):
@@ -1568,8 +1567,6 @@ def day18_debug_area(area):
             out += area[i][j]
         print(out)
     print()
-    #import time
-    #time.sleep(1)
 
 def day18_get_adjacent_cells(area, i_coord, j_coord):
     adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)] #the adjacency matrix
@@ -1705,11 +1702,6 @@ def day23_space(bots):
     return (space, min_x, min_y, min_z)
 
 def day23_space_paralel(bots):
-    import multiprocessing as mp
-    import math
-    from collections import Counter
-    from functools import partial
-
     threads = 32
     pool = mp.Pool(processes=threads)
     min_x, max_x, min_y, max_y, min_z, max_z = day23_bounds(bots)
@@ -1718,7 +1710,7 @@ def day23_space_paralel(bots):
     #partial(multiply,2)
     process = range(min_z, max_z+1)#[bots[per_thread*i: per_thread*i+per_thread] for i in range(threads)]
     #print(process)
-    results = pool.map(partial(day23_space3, bots, min_x, max_x, min_y, max_y), process)
+    results = pool.map(functools.partial(day23_space3, bots, min_x, max_x, min_y, max_y), process)
     pool.close()
     pool.join()
     #print(results)
@@ -1742,11 +1734,6 @@ def day23_expand_bots(bots):
     return new_bots
 
 def day23_space_paralel2(bots, best_bot):
-    import multiprocessing as mp
-    import math
-    from collections import Counter
-    from functools import partial
-
     min_x, max_x, min_y, max_y, min_z, max_z = day23_bounds([best_bot])
 
     threads = 32
@@ -1770,7 +1757,6 @@ def day23_space_paralel2(bots, best_bot):
     return counters
 
 def day23_space2(bots):
-    from collections import Counter
     counters = Counter()
     for x, y, z, r in bots:
         for i in range(-r, r+1):
@@ -1788,7 +1774,6 @@ def day23_space2(bots):
     return counters
 
 def day23_space2_new(bots):
-    from collections import Counter
     counters = Counter()
     for x, y, z in bots:
         key = "{0},{1},{2}".format(x, y, z)
@@ -1826,7 +1811,6 @@ def day23_bounds(bots):
     return (min_x, max_x, min_y, max_y, min_z, max_z)
 
 def day23_space3(bots, min_x, max_x, min_y, max_y, z2):
-    from collections import Counter
     counters = Counter()
     for j in range(min_y, max_y+1):
         for k in range(min_x, max_x+1):
@@ -1840,8 +1824,6 @@ def day23_space3(bots, min_x, max_x, min_y, max_y, z2):
 
 
 def day23_new_bew(bots, min_x, max_x, min_y, max_y, z2):
-    from collections import Counter
-
     counters = Counter()
     for j in range(min_y, max_y+1):
         for k in range(min_x, max_x+1):
@@ -1891,8 +1873,213 @@ def day23_2(data):
                     coord = (x + min_x, y + min_y, z + min_z)
     return counter, coord
 
-start_day = 23
+""" DAY 24 """
 
+class P_24:
+    Units = 0
+    Hit_points = 1
+    Immunity = 2
+    Weakness = 3
+    Attack_Power = 4
+    Attack_Type = 5
+    Initiative = 6
+    Id = 7
+
+def day24_parse_group(line, id):
+    # 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
+    units, hit_points, immunity, weakness, attack_power, attack_type, initiative = re.findall("(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
+    return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id)
+
+def day24_parse_input(data):
+    groups = [[],[]]
+    current_army = 0
+    id_counter = 0
+
+    for line in data:
+        if line == "Immune System:":
+            current_army = 0
+            id_counter = 0
+            continue
+        elif line == "Infection:":
+            current_army = 1
+            id_counter = 0
+            continue
+        elif line == "":
+            continue
+        group = day24_parse_group(line, "{0}_{1}".format(current_army, id_counter))
+        id_counter += 1
+        groups[current_army].append(group)
+    return groups
+
+def day24_debug_armies(armies):
+    print("Immune System:")
+    day24_debug_army(armies[0])
+    print("Infection:")
+    day24_debug_army(armies[1])
+    print()
+ 
+def day24_debug_army(army):
+    for group in army:
+        if group[P_24.Units] > 0:
+            print("Group {0} contains {1} units".format(group[P_24.Id], group[P_24.Units]))
+ 
+def day24_debug_target(attack_id, defend_id, damage):
+    print("Group {0} would deal defending group {1} {2} damage".format(attack_id, defend_id, damage))
+
+def day24_parse_id(id):
+    parts = id.split("_")
+    return (int(parts[0]), int(parts[1]))
+
+def day24_effective_power(group):
+    return group[P_24.Units] * group[P_24.Attack_Power]
+
+def day24_damage(attack_group, defend_group):
+    damage = day24_effective_power(attack_group)
+    attack_type = attack_group[P_24.Attack_Type]
+    immunity = defend_group[P_24.Immunity]
+    weakness = defend_group[P_24.Weakness]
+
+    if attack_type in immunity:
+        return 0
+    elif attack_type in weakness:
+        return 2*damage
+
+    return damage
+
+def day24_target_criteria(attack_group, defend_group):
+    return (day24_damage(attack_group, defend_group), day24_effective_power(defend_group), defend_group[P_24.Initiative])
+
+def day24_selection_criteria(group):
+    return (day24_effective_power(group), group[P_24.Initiative])
+
+def day24_select_target(group, opposing_army, targeted, include_zero):
+    available = [enemy for enemy in opposing_army if enemy[P_24.Units] > 0 and enemy[P_24.Id] not in targeted]
+    targets = sorted(available, reverse=True, key=lambda g: day24_target_criteria(group, g))
+    if len(targets) == 0:
+        return None
+    elif len(targets) > 1 and day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
+        # Can't decide
+        return None
+    
+    if day24_damage(group, targets[0]) == 0 and not include_zero:
+        return None
+
+    #day24_debug_target(group[P_24.Id], targets[0][P_24.Id], day24_damage(group, targets[0]))
+    return targets[0][P_24.Id]
+
+def day24_target_selection_phase(armies):
+    targeting_map = {}
+    for current_army in range(2):
+        opposing_army = (current_army+1)%2
+        army = sorted(armies[current_army], reverse=True, key=lambda g: day24_selection_criteria(g))
+        for group in army:
+            if group[P_24.Units] > 0:
+                target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=False)
+                if target != None:
+                    targeting_map[group[P_24.Id]] = target
+    for current_army in range(2):
+        opposing_army = (current_army+1)%2
+        army = sorted(armies[current_army], reverse=True, key=lambda g: day24_selection_criteria(g))
+        for group in army:
+            if group[P_24.Units] > 0 and not (group[P_24.Id] in targeting_map.keys()):
+                target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=True)
+                if target != None:
+                    targeting_map[group[P_24.Id]] = target
+    #print()
+    return targeting_map
+
+def day24_attack_phase(groups_by_initiative, armies, targeting_map):
+    kills = 0
+    for group_id in groups_by_initiative:
+        attack_army_id, attack_group_id = day24_parse_id(group_id)
+        attack_group = armies[attack_army_id][attack_group_id]
+        if group_id in targeting_map:
+            target_id = targeting_map[group_id]
+            target_army_id, target_group_id = day24_parse_id(target_id)
+            target_group = armies[target_army_id][target_group_id]
+            if target_group[P_24.Units] > 0:
+                damage = day24_damage(attack_group, target_group)
+                dead_units = min(math.floor(damage/(target_group[P_24.Hit_points])), target_group[P_24.Units])
+                kills += dead_units
+                #print("Group {0} attacks defending group {1}, killing {2} units".format(group_id, target_id, dead_units))
+                armies[target_army_id][target_group_id] = (target_group[P_24.Units] - dead_units, target_group[P_24.Hit_points], target_group[P_24.Immunity], target_group[P_24.Weakness], target_group[P_24.Attack_Power], target_group[P_24.Attack_Type], target_group[P_24.Initiative], target_group[P_24.Id])
+        #print()
+    return kills == 0
+
+def day24_fight(armies):
+    groups_by_initiative = [group[P_24.Id] for group in sorted([group for army in armies for group in army], reverse=True, key=lambda g: g[P_24.Initiative])]
+    while any([group[P_24.Units] > 0 for group in armies[0]]) and any([group[P_24.Units] > 0 for group in armies[1]]):
+        #day24_debug_armies(armies)
+        targeting_map = day24_target_selection_phase(armies)
+        stalemate = day24_attack_phase(groups_by_initiative, armies, targeting_map)
+        if stalemate:
+            break
+
+    return armies
+
+def day24_add_boost(army, boost):
+    return [(target_group[P_24.Units], \
+             target_group[P_24.Hit_points], \
+             target_group[P_24.Immunity], \
+             target_group[P_24.Weakness], \
+             target_group[P_24.Attack_Power] + boost, \
+             target_group[P_24.Attack_Type], \
+             target_group[P_24.Initiative], \
+             target_group[P_24.Id]) for target_group in army]
+
+def day24_clone_army(army):
+    return [(target_group[P_24.Units], \
+             target_group[P_24.Hit_points], \
+             target_group[P_24.Immunity], \
+             target_group[P_24.Weakness], \
+             target_group[P_24.Attack_Power], \
+             target_group[P_24.Attack_Type], \
+             target_group[P_24.Initiative], \
+             target_group[P_24.Id]) for target_group in army]
+
+def day24_test_boost(armies, boost):
+    new_armies = [day24_clone_army(armies[0]), day24_clone_army(armies[1])]
+    new_armies[0] = day24_add_boost(armies[0], boost)
+    new_armies = day24_fight(new_armies)
+    remaining = sum([group[P_24.Units] for group in new_armies[0]])
+    other = sum([group[P_24.Units] for group in new_armies[1]])
+    
+    return (boost, remaining, other)
+
+def day24_boost_immune(armies):
+    remaining = 0
+    other = 1
+    boost = 1
+    threads = 16
+    pool = mp.Pool(processes=threads)
+    while True:
+        process = range(boost, boost + threads + 1)
+        boost = boost + threads + 1
+
+        results = pool.map(functools.partial(day24_test_boost, armies), process)
+        success = [result for result in results if result[2] == 0]
+        success = sorted(success, key=lambda x: x[0])
+        if len(success) > 0:
+            remaining = success[0][1]
+            break
+    pool.close()
+    pool.join()
+    return remaining
+
+def day24_1(data):
+    #data = read_input(2018, 2401)
+    armies = day24_parse_input(data)
+    result = day24_fight(armies)
+    total1 = sum([group[P_24.Units] for group in armies[0]])
+    total2 = sum([group[P_24.Units] for group in armies[1]])
+    return max(total1, total2)
+
+def day24_2(data):
+    #data = read_input(2018, 2401)
+    armies = day24_parse_input(data)
+    return day24_boost_immune(armies)
+
+#start_day = 24
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i in range(start_day,26):
