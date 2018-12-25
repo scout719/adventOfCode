@@ -1627,6 +1627,61 @@ def day18_2(data):
     lumberyards = len([True for line in new_area for s in line if s == AcreContents.lumberyard])
     return trees * lumberyards
 
+""" DAY 19 """
+
+class Inst19(Inst16):
+    ops = {"addr": Inst16.addr, \
+           "addi": Inst16.addi, \
+           "mulr": Inst16.mulr, \
+           "muli": Inst16.muli, \
+           "banr": Inst16.banr, \
+           "bani": Inst16.bani, \
+           "borr": Inst16.borr, \
+           "bori": Inst16.bori, \
+           "setr": Inst16.setr, \
+           "seti": Inst16.seti, \
+           "gtir": Inst16.gtir, \
+           "gtri": Inst16.gtri, \
+           "gtrr": Inst16.gtrr, \
+           "eqir": Inst16.eqir, \
+           "eqri": Inst16.eqri, \
+           "eqrr": Inst16.eqrr }
+
+def day19_parse_input(data):
+    pointer = int(data[0][-1])
+    
+    program = []
+    for line in data[1:]:
+        inst = [x for x in re.findall("(\w+) (\d+) (\d+) (\d+)", line)[0]]
+        inst[0] = Inst19.ops[inst[0]]
+        inst[1] = int(inst[1])
+        inst[2] = int(inst[2])
+        inst[3] = int(inst[3])
+        program.append(inst)
+
+    return pointer, program
+
+def day19_run_program(pointer, program, start_0):
+    regs = [start_0, 0, 0, 0, 0, 0]
+    inst = regs[pointer]
+    while inst >= 0 and inst < len(program):
+        regs[pointer] = inst
+        f, a, b, c = program[inst]
+        f(regs, a, b, c)
+        inst = regs[pointer]
+        inst += 1
+    return regs
+
+def day19_1(data):
+    #data = read_input(2018, 1901)
+    pointer, program = day19_parse_input(data)
+    return day19_run_program(pointer, program, 0)
+
+def day19_2(data):
+    #data = read_input(2018, 1901)
+    pointer, program = day19_parse_input(data)
+    return day19_run_program(pointer, program, 1)
+
 """ DAY 23 """
 
 def day23_parse_input(data):
@@ -2080,7 +2135,7 @@ def day24_2(data):
     armies = day24_parse_input(data)
     return day24_boost_immune(armies)
 
-#start_day = 24
+#start_day = 19
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i in range(start_day,26):
