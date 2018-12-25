@@ -2135,7 +2135,57 @@ def day24_2(data):
     armies = day24_parse_input(data)
     return day24_boost_immune(armies)
 
-#start_day = 19
+""" DAY 25 """
+
+def day25_manhattan(point1, point2):
+    (a1, b1, c1, d1), (a2, b2, c2, d2) = (point1, point2)
+    return abs(a1-a2) + abs(b1-b2) + abs(c1-c2) + abs(d1-d2)
+
+def day25_constellations(points):
+    constellations = []
+
+    for point in points:
+        belonging = []
+        for i in range(len(constellations)):
+            constellation = constellations[i]
+            belongs = False
+            for other in constellation:
+                if day25_manhattan(point, other) <= 3:
+                    belongs = True
+                    break
+            if belongs:
+                belonging.append(i)
+
+        if len(belonging) == 0:
+            constellations.append(deque([point]))
+        else:
+            i = 0
+            c = constellations[belonging[i]]
+            c.append(point)
+            i+=1
+            while i < len(belonging):
+                c.extend(constellations[belonging[i]])
+                constellations[belonging[i]].clear()
+                i+=1
+    
+    return [c for c in constellations if len(c) > 0]
+
+def day25_parse_input(data):
+    # -2,-2,-2,2
+
+    points = deque([])
+    for line in data:
+        point = tuple([int(x) for x in re.findall("(-?\d+),(-?\d+),(-?\d+),(-?\d+)", line)[0]])
+        points.append(point)
+
+    return points
+
+def day25_1(data):
+    #data = read_input(2018, 2504)
+    points = day25_parse_input(data)
+    return len(day25_constellations(points))
+
+# start_day = 25
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i in range(start_day,26):
