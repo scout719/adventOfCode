@@ -1682,6 +1682,85 @@ def day19_2(data):
     pointer, program = day19_parse_input(data)
     return day19_run_program(pointer, program, 1)
 
+""" DAY 20 """
+
+def day20_calculate_paths(path):
+    stack = deque([])
+    paths = deque([])
+    current_path = deque([""])
+    for s in path:
+        if s == "(":
+            stack.append("")
+        elif s == "|":
+            for i in range(len(current_path)):
+                curr = current_path[i]
+                for j in range(len(stack)):
+                    curr += stack[j]
+                paths.append(curr)
+            stack.pop()
+            stack.append("")
+        elif s == ")":
+            for i in range(len(current_path)):
+                curr = current_path[i]
+                for j in range(len(stack)):
+                    curr += stack[j]
+                paths.append(curr)
+            if len(stack) != 0:
+                stack.pop()
+            if len(stack) == 0:
+                current_path = paths
+        elif s == "^" or s == "$":
+            continue
+        else:
+            if len(stack) == 0:
+                for i in range(len(current_path)):
+                    current_path[i] += s
+            else:
+                stack[-1] += s
+    return current_path
+
+def day20_merge_paths(first, second):
+    new_paths = deque([])
+    for path1 in first:
+        for path2 in second:
+            new_paths.append(path1 + path2)
+    return new_paths
+
+def day20_alternatives(curr, path):
+    parts = [""]
+    alternatives = []
+    while path[curr] != ")":
+        if path[curr] == "(":
+            alternative_paths, curr = day20_alternatives(curr+1, path)
+            parts = day20_merge_paths(parts, alternative_paths)
+        elif path[curr] == "|":
+            alternatives.extend(parts)
+            parts = [""]
+        else:
+            parts = [p + path[curr] for p in parts]
+        curr += 1
+
+    return alternatives, curr
+
+def day20_process(path):
+    path = path[1:]
+    paths = [""]
+    curr = 0
+    while path[curr] != "$":
+        if path[curr] == "(":
+            alternative_paths, curr = day20_alternatives(curr+1, path)
+            paths = day20_merge_paths(paths, alternative_paths)
+        elif path[curr] != ")":
+            paths = [p + path[curr] for p in paths]
+        
+        curr += 1
+    return paths
+
+#def day20_1(data):
+#    data = read_input(2018, 2001)
+#    path = data[0]
+#    return day20_process(path)
+
 """ DAY 23 """
 
 def day23_parse_input(data):
