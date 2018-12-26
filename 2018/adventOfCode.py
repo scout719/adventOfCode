@@ -1665,6 +1665,15 @@ def day19_run_program(pointer, program, start_0):
     regs = [start_0, 0, 0, 0, 0, 0]
     inst = regs[pointer]
     while inst >= 0 and inst < len(program):
+        # Make register 1 have the value of 2 * 5 right away (first loop)
+        if inst == 4 and regs[1]/regs[2] == regs[5] and regs[2] < regs[3]/regs[5]:
+            regs[2] = int(regs[3]/regs[5])
+            regs[1] = regs[2]*regs[5]
+        
+        # Make register 2 have the value of 3 (second loop)
+        if inst == 9 and regs[2] < regs[3]:
+            regs[2] = regs[3]
+
         regs[pointer] = inst
         f, a, b, c = program[inst]
         f(regs, a, b, c)
