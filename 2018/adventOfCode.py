@@ -1695,92 +1695,6 @@ def day19_2(data):
 """ DAY 20 """
 
 class PathNode:
-    def __init__(self, char):
-        "constructor class to initiate this object"
-
-        # store data
-        self.char = char
-
-        # store reference (next item)
-        self.next = []
-    
-        return
-    
-    def print(self):
-        stack = deque([(self, [""])])
-        paths = deque([])
-        while len(stack) > 0:
-            path, prevs = stack.pop()
-            if len(path.next) == 0:
-                paths.extend([p + path.char for p in prevs])
-            else:
-                stack.extend([(n, [p + path.char for p in prevs]) for n in path.next])
-
-        return paths
-
-    def append(self, node):
-        paths = deque([self])
-        visited = deque([])
-        while len(paths) > 0:
-            n = paths.pop()
-            visited.append(n)
-            if len(n.next) == 0:
-                n.next = [node]
-            else:
-                paths.extend([nn for nn in n.next if nn not in visited])
-
-def day20_merge_paths(path1, second):
-    #new_paths = deque([])
-    #for path1 in first:
-    path1.next = second
-        #for path2 in second:
-        #    new_paths.append(path1 + path2)
-    node = PathNode("")
-    for n in second:
-        n.append(node)
-    return node
-
-def day20_alternatives(curr, path):
-    parts = PathNode("")
-    alternatives = deque([parts])
-    while path[curr] != ")":
-        if path[curr] == "(":
-            alternative_paths, curr = day20_alternatives(curr+1, path)
-            parts = day20_merge_paths(parts, alternative_paths)
-        elif path[curr] == "|":
-            #alternatives.extend(parts)
-            parts = PathNode("")
-            alternatives.append(parts)
-        else:
-            node = PathNode(path[curr])
-            parts.next = [node]
-            parts = node
-        curr += 1
-        print("{0}/{1}".format(curr, len(path)))
-    return alternatives, curr
-
-def day20_get_paths(path):
-    path = path[1:]
-    start = PathNode("")
-    paths = start
-    #paths = deque([""])
-    curr = 0
-    while path[curr] != "$":
-        # print(start.print())
-        if path[curr] == "(":
-            alternative_paths, curr = day20_alternatives(curr+1, path)
-            paths = day20_merge_paths(paths, alternative_paths)
-        elif path[curr] != ")":
-            node = PathNode(path[curr])
-            paths.next = [node]
-            paths = node
-            #paths = deque([p + path[curr] for p in paths])
-        
-        curr += 1
-    #print(len(paths))
-    return start
-
-class PathNode3:
     def __init__(self, pos, dist, path):
         "constructor class to initiate this object"
 
@@ -1794,106 +1708,80 @@ class PathNode3:
     def __repr__(self):
         return "({0},{1}) - {2} - {3}".format(self.pos[0], self.pos[1], self.dist, self.path)
 
-def day20_alternatives3(curr, path, locations):
-    new_locations = deque([])
-    current_locations = deque([])
-    for n in locations:
-        current_locations.append(PathNode3(n.pos, n.dist, n.path))
-    while path[curr] != ")":
-        if path[curr] == "(":
-            current_locations, curr = day20_alternatives3(curr+1, path, current_locations)
-        elif path[curr] == "|":
-            new_locations.extend(current_locations)
-            current_locations = deque([])
-            for n in locations:
-                current_locations.append(PathNode3(n.pos, n.dist, n.path))
-        else:
-            #print(len(current_locations))
-            for node in current_locations:
-                door, pos = day20_move(node.pos, path[curr])
-                node.pos = pos
-                node.dist += 1
-                #     node.path = node.path + path[curr]
-        curr += 1
-        print("{0}/{1}".format(curr, len(path)))
-    new_locations.extend(current_locations)
-    # result = {}
-    # for l in new_locations:
-    #     key = "{0}_{1}".format(l.pos[0], l.pos[1])
-    #     if not key in result:
-    #         result[key] = l
-    #     elif l.dist < result[key].dist:
-    #         result[key] = l
-    # #print("result {0}".format(len(result)))
-    # new_locations = deque(result.values())
-    return new_locations, curr
-
-def day20_get_paths3(path):
-    path = path[1:]
-    curr = 0
-    
-    locations = deque([PathNode3((0,0),0, "")])
-    while path[curr] != "$":
-        if path[curr] == "(":
-            locations, curr = day20_alternatives3(curr+1, path, locations)
-        elif path[curr] != ")":
-            for node in locations:
-                door, pos = day20_move(node.pos, path[curr])
-                node.pos = pos
-                node.dist += 1
-                #    node.path = node.path + path[curr]
-        
-        curr += 1
-    #print(locations)
-    return locations
-
 def day20_move(pos, dir):
     x, y = pos
     if dir == "N":
-        return (x, y + 0.5), (x, y + 1)
+        return (x, y + 1)
     if dir == "S":
-        return (x, y - 0.5), (x, y - 1)
+        return (x, y - 1)
     if dir == "W":
-        return (x - 0.5, y), (x - 1, y)
+        return (x - 1, y)
     if dir == "E":
-        return (x + 0.5, y), (x + 1, y)
+        return (x + 1, y)
+    raise ValueError
 
-def day20_doors2(paths):
+def day20_update_locations(direction, current_locations, history):
+    for node in current_locations:
+        pos = day20_move(node.pos, direction)
+        node.pos = pos
+        node.dist += 1
+        key = "{0}_{1}".format(node.pos[0], node.pos[1])
+        if not key in history:
+            history[key] = node.dist
+        elif node.dist < history[key]:
+            history[key] = node.dist
+        node.path = node.path + direction
+
+def day20_alternatives(index, path, locations, distances):
+    new_locations = []
+    current_locations = [PathNode(n.pos, n.dist, n.path) for n in locations]
+    while path[index] != ")":
+        if path[index] == "(":
+            current_locations, index = day20_alternatives(index+1, path, current_locations, distances)
+        elif path[index] == "|":
+            new_locations.extend(current_locations)
+            current_locations = [PathNode(n.pos, n.dist, n.path) for n in locations]
+        else:
+            day20_update_locations(path[index], current_locations, distances)
+        index += 1
+    new_locations.extend(current_locations)
+    
+    # Remove redundant paths
     result = {}
-    stack = deque([(paths, (0,0), 0)])
-    while len(stack) > 0:
-        #print(len(stack))
-        path, pos, size = stack.pop()
-        if path.char != "":
-            door, pos = day20_move(pos, path.char)
-            size += 1
-        for n in path.next:
-            stack.append((n, pos, size))
-        if len(path.next) == 0:
-            if not pos in result:
-                result[(pos)] = sys.maxsize
-            if size < result[(pos)]:
-                result[(pos)] = size
+    for l in new_locations:
+        key = "{0}_{1}".format(l.pos[0], l.pos[1])
+        if not key in result:
+            result[key] = l
+        elif l.dist < result[key].dist:
+            result[key] = l
+    new_locations = result.values()
+    return new_locations, index
 
-    print(sorted(result.values(), reverse=True, key=lambda v: v)[0])
-
-    return result#sorted(result.values(), reverse=True, key=lambda v: (v[0], abs(v[1][0]) + abs(v[1][1])))
+def day20_get_rooms_distances(path):
+    path = path[1:]
+    index = 0
+    distances = {}
+    current_locations = [PathNode((0,0),0, "")]
+    while path[index] != "$":
+        if path[index] == "(":
+            current_locations, index = day20_alternatives(index+1, path, current_locations, distances)
+        elif path[index] != ")":
+            day20_update_locations(path[index], current_locations, distances)
+        index += 1
+    return distances
 
 def day20_1(data):
     #data = read_input(2018, 2001)
     path = data[0]
-    best = sorted(day20_get_paths3(path), reverse=True, key=lambda p: p.dist)[0]
-    print(best)
-    return best.dist
-    pos = (0,0)
-    result = {}
-    for p in best:
-        door, pos = day20_move(pos, p)
-        result[door] = 0
-    return len(result)
-    #return max([p.dist for p in day20_get_paths3(path)])
-    #print(node.print())
-    return day20_doors2(node)
+    distances = day20_get_rooms_distances(path).values()
+    best = sorted(distances, reverse=True, key=lambda v: v)[0]
+    return best
+
+def day20_2(data):
+    #data = read_input(2018, 2001)
+    path = data[0]
+    distances = day20_get_rooms_distances(path).values()
+    return len([d for d in distances if d >= 1000])
 
 """ DAY 21 """
 
@@ -2404,9 +2292,9 @@ def day25_1(data):
     points = day25_parse_input(data)
     return len(day25_constellations(points))
 
-# start_day = 25
+start_day = 20
 """ MAIN FUNCTION """
 if __name__ == "__main__":
-    for i in range(start_day,26):
+    for i in range(start_day,21):
         execute_day(globals(), 2018, i, 1)
         execute_day(globals(), 2018, i, 2)
