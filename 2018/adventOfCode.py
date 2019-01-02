@@ -159,13 +159,13 @@ def day3_2(data):
 
 def day4_process_log(log):
     shift = re.findall(r"Guard #(\d+) begins shift", log)
-    if len(shift) > 0:
+    if shift:
         return ("shift", int(shift[0]))
     wake = re.findall(r"(wakes up)", log)
-    if len(wake) > 0:
+    if wake:
         return ("wake", 0)
     asleep = re.findall(r"(falls asleep)", log)
-    if len(asleep) > 0:
+    if asleep:
         return ("asleep", 0)
 
 def day4_parse_and_sort(data):
@@ -290,12 +290,12 @@ def day6_debug_grid(grid):
     print()
 
 def day6_fill_grid(grid, coordinates):
-    for i in enumerate(grid):
-        for j in enumerate(grid[i]):
+    for i, _ in enumerate(grid):
+        for j, _ in enumerate(grid[i]):
             dists = [abs(coordinate[1]-i) + abs(coordinate[0]-j) for coordinate in coordinates]
             min_dist = sys.maxsize
             min_id = 0
-            for id_ in enumerate(dists):
+            for id_, _ in enumerate(dists):
                 if dists[id_] < min_dist:
                     min_id = id_
                     min_dist = dists[id_]
@@ -317,9 +317,9 @@ def day6_1(data):
     #day6_debug_grid(grid)
 
     ids = [i for i in range(len(coordinates))]
-    for i in enumerate(grid):
+    for i, _ in enumerate(grid):
         if i in (0, len(grid) - 1):
-            for j in enumerate(grid[i]):
+            for j, _ in enumerate(grid[i]):
                 value = grid[i][j][0]
                 if value in ids:
                     ids.remove(value)
@@ -334,8 +334,8 @@ def day6_1(data):
     max_val = 0
     for id_ in ids:
         temp_count = 0
-        for i in enumerate(grid):
-            for j in enumerate(grid[i]):
+        for i, _ in enumerate(grid):
+            for j, _ in enumerate(grid[i]):
                 if grid[i][j][0] == id_:
                     temp_count += 1
         if temp_count > max_val:
@@ -390,7 +390,7 @@ def day7_inst_order(dependencies, letters):
             stack.append(letter)
     stack.sort()
     completed = []
-    while len(stack) > 0:
+    while stack:
         next_letter = stack.pop(0)
         completed.append(next_letter)
         for step, deps in dependencies.items():
@@ -425,10 +425,10 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
     completed = []
     workers = [None for i in range(workers)]
     counter = 0
-    while len(stack) > 0 or any([w != None for w in workers]):
+    while stack or any([not w is None for w in workers]):
         counter += 1
         for i in range(len(workers)):
-            if workers[i] == None and len(stack) > 0:
+            if workers[i] is None and stack:
                 workers[i] = stack.pop(0)
             completed, worker = day7_worker(workers[i], completed)
             workers[i] = worker
@@ -437,7 +437,7 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
             if not step in completed and \
                all([let[0] != step for let in stack]) and \
                all([dep in completed for dep in deps]) and \
-               not any([w != None and w[0] == step for w in workers]):
+               not any([not w is None and w[0] == step for w in workers]):
                 stack.append((step, (ord(step)-ord("A") + 1) + step_duration))
         stack.sort()
     return counter
@@ -484,7 +484,7 @@ def day8_parse_tree(data):
     # Metadata, children, parent
     curr_node = ([], [], None)
     operations = [PropertyDescription.Header]
-    while len(operations) > 0:
+    while operations:
         operation = operations.pop(0)
         data, curr_node, operations = \
             day8_process_operation(data, operation, curr_node, nodes, operations)
@@ -505,7 +505,7 @@ def day8_1(data):
 
 def day8_node_value(node):
     metadata, children, _ = node
-    if len(children) == 0:
+    if not children:
         return sum(metadata)
 
     total = 0
@@ -643,7 +643,7 @@ class I:
 
 def day10_parse_line(line):
     # position=< 32923,  43870> velocity=<-3, -4>
-    return tuple([int(a) for a in re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>",line)[0]])
+    return tuple([int(a) for a in re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>", line)[0]])
 
 def day10_parse_input(data):
     return [day10_parse_line(line) for line in data]
@@ -720,7 +720,7 @@ def day11_cell_value(serial, x, y):
     return level
 
 def day11_grid(serial):
-    return [[day11_cell_value(serial, x+1, y+1)  for x in range(300) ] for y in range(300)]
+    return [[day11_cell_value(serial, x+1, y+1)  for x in range(300)] for y in range(300)]
 
 def day11_solve_exact_size_aux(memoization, grid, x, y, size):
     if size == 1:
@@ -745,9 +745,9 @@ def day11_solve_exact_size(memoization, grid, size):
     max_total = -99999999999
     coordinate = (1, 1)
     y = 0
-    while(y <= len(grid) - size):
+    while y <= len(grid) - size:
         x = 0
-        while(x <= len(grid) - size):
+        while x <= len(grid) - size:
             key = str(x) + "_" + str(y) + "_" + str(size)
             if key in memoization:
                 current_total = memoization[key]
@@ -798,7 +798,7 @@ def day11_2(data):
 """ DAY 12 """
 
 def day12_parse_input(data):
-    initial_state = deque(re.findall(r"initial state: ([\.|#]*)",data[0])[0])
+    initial_state = deque(re.findall(r"initial state: ([\.|#]*)", data[0])[0])
     rules = deque([])
     for rule in data[2:]:
         parts = rule.split(" => ")
@@ -827,7 +827,7 @@ def day12_process_generation(pots, rules, start):
     pots.append(".")
     for i in range(2, len(pots)-2):
         result = day12_get_rule(pots, rules, i)
-        if result == None:
+        if result is None:
             new_pots.append(pots[i])
         else:
             new_pots.append(result)
@@ -843,7 +843,7 @@ def day12_process_generation(pots, rules, start):
     while curr == ".":
         new_pots.pop()
         curr = new_pots[-1]
-            
+
     return (new_pots, start)
 
 def day12_solve(pots, rules, generations):
@@ -860,9 +860,9 @@ def day12_solve(pots, rules, generations):
         if new_pots in memoization:
             itera = memoization[new_pots]
             j = 0
-            while(j < itera):
+            while j < itera:
                 history.popleft()
-                j +=1
+                j += 1
             pos = (generations-(i+1))%len(history)
             pos_shift = start - history[pos][1]
 
@@ -875,7 +875,7 @@ def day12_solve(pots, rules, generations):
     for i in range(len(pots)):
         if pots[i] == "#":
             total += start + i
-    
+
     return total
 
 def day12_1(data):
@@ -921,7 +921,7 @@ def day13_debug_map(map_, positions):
             else:
                 cart = None
 
-            if cart == None:
+            if cart is None:
                 line += map_[y][x]
             else:
                 line += day13_print_direction(cart[2])
@@ -934,7 +934,7 @@ def day13_get_cart_direction(pos):
         return Direction.Up
     elif pos == "v":
         return Direction.Down
-    elif pos =="<":
+    elif pos == "<":
         return Direction.Left
     elif pos == ">":
         return Direction.Right
@@ -947,7 +947,7 @@ def day13_parse_input(data):
         new_row = []
         for column in range(len(data[row])):
             direction = day13_get_cart_direction(data[row][column])
-            if direction == None:
+            if direction is None:
                 new_row.append(data[row][column])
             else:
                 positions.append((column, row, direction, Turn.Right))
@@ -1182,12 +1182,12 @@ class Inst16:
     def setr(regs, a, _, c):
         regs[c] = regs[a]
         return regs
-        
+
     @staticmethod
     def seti(regs, a, _, c):
         regs[c] = a
         return regs
-        
+
     @staticmethod
     def gtir(regs, a, b, c):
         if a > regs[b]:
@@ -1195,7 +1195,7 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-        
+
     @staticmethod
     def gtri(regs, a, b, c):
         if regs[a] > b:
@@ -1203,7 +1203,7 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-        
+
     @staticmethod
     def gtrr(regs, a, b, c):
         if regs[a] > regs[b]:
@@ -1211,7 +1211,7 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-        
+
     @staticmethod
     def eqir(regs, a, b, c):
         if a == regs[b]:
@@ -1219,7 +1219,7 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-        
+
     @staticmethod
     def eqri(regs, a, b, c):
         if regs[a] == b:
@@ -1227,7 +1227,7 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-        
+
     @staticmethod
     def eqrr(regs, a, b, c):
         if regs[a] == regs[b]:
@@ -1235,8 +1235,8 @@ class Inst16:
         else:
             regs[c] = 0
         return regs
-    
-    ops = [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr]
+
+    ops = [addr.__func__, addi.__func__, mulr.__func__, muli.__func__, banr.__func__, bani.__func__, borr.__func__, bori.__func__, setr.__func__, seti.__func__, gtir.__func__, gtri.__func__, gtrr.__func__, eqir.__func__, eqri.__func__, eqrr.__func__]
 
 def day16_parse_input(data):
     samples = []
@@ -1247,23 +1247,23 @@ def day16_parse_input(data):
         # Before: [3, 2, 1, 1]
         # 9 2 1 2
         # After:  [3, 2, 2, 1]
-        before = [ int(x) for x in re.findall(r"Before: \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
-        i+=1
-        inst = [ int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
-        i+=1
-        after = [ int(x) for x in re.findall(r"After:  \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
-        i+=1
-        i+=1
+        before = [int(x) for x in re.findall(r"Before: \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
+        i += 1
+        inst = [int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
+        i += 1
+        after = [int(x) for x in re.findall(r"After:  \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
+        i += 1
+        i += 1
         samples.append((before, inst, after))
-    
+
     program = []
     while i < len(data):
         if data[i] != "":
             # 9 2 1 2
-            inst = [ int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
+            inst = [int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
             program.append(inst)
-        i+=1
-        
+        i += 1
+
     return samples, program
 
 def day16_check_op(fun, before, inst, after):
@@ -1299,7 +1299,7 @@ def day16_calculate_mapping(samples):
     mapping = [Inst16.ops for i in range(len(Inst16.ops))]
     for before, inst, after in samples:
         day16_update_mapping(mapping, before, inst, after)
-    
+
     while True:
         for i in range(len(mapping)):
             if len(mapping[i]) == 1:
@@ -1315,7 +1315,7 @@ def day16_calculate_mapping(samples):
 def day16_solve2(samples, program):
     mapping = day16_calculate_mapping(samples)
 
-    regs = [0,0,0,0]
+    regs = [0, 0, 0, 0]
     for line in program:
         op = mapping[line[0]]
         regs = op(regs, line[1], line[2], line[3])
@@ -1378,7 +1378,7 @@ class Bitmap():
                          self._bcBitCount)) # Writing BITMAPINFO
             for px in self._graphics:
                 f.write(pack('<BBB', *px))
-            for _ in range (0, (self._bcWidth*3) % 4):
+            for _ in range(0, (self._bcWidth*3) % 4):
                 f.write(pack('B', 0))
 
 class Day17_Type:
@@ -1449,7 +1449,7 @@ def day17_parse_input(data):
     for line in data:
         if line[0] == "x":
             # x=501, y=3..7
-            ground_slice = [ int(x) for x in re.findall(r"x=(\d+), y=(\d+)..(\d+)", line)[0]]
+            ground_slice = [int(x) for x in re.findall(r"x=(\d+), y=(\d+)..(\d+)", line)[0]]
             slices.append(ground_slice)
             if ground_slice[1] < min_y:
                 min_y = ground_slice[1]
@@ -1457,7 +1457,7 @@ def day17_parse_input(data):
                 max_y = ground_slice[2]
         else:
             # y=501, x=3..7
-            ground_slice = [ int(x) for x in re.findall(r"y=(\d+), x=(\d+)..(\d+)",line)[0]]
+            ground_slice = [int(x) for x in re.findall(r"y=(\d+), x=(\d+)..(\d+)", line)[0]]
             for i in range(ground_slice[1], ground_slice[2]+1):
                 ground_slice2 = (i, ground_slice[0], ground_slice[0])
                 slices.append(ground_slice2)
@@ -1470,7 +1470,7 @@ def day17_parse_input(data):
     min_x = slices[0][0] - 2
     max_x = slices[-1][0] + 2
 
-    ground = [[ Day17_Type.sand for j in range(min_x, max_x)] for i in range(max_y + 2)]
+    ground = [[Day17_Type.sand for j in range(min_x, max_x)] for i in range(max_y + 2)]
     for s in slices:
         for i in range(s[1], s[2]+1):
             ground[i][s[0] - min_x] = Day17_Type.clay
@@ -1479,9 +1479,9 @@ def day17_parse_input(data):
 
 def day17_flow_water(ground, y, x):
     stack = deque([(y, x)])
-    while(len(stack) > 0):
+    while stack:
         i, j = stack.popleft()
-        
+
         if i+1 >= len(ground) or i < 0 or j+1 >= len(ground[0]) or j-1 < 0:
             continue
         if ground[i][j] == Day17_Type.clay or ground[i][j] == Day17_Type.settled:
@@ -1489,11 +1489,11 @@ def day17_flow_water(ground, y, x):
 
         if ground[i][j] == Day17_Type.sand:
             ground[i][j] = Day17_Type.water
-        
+
         k = j-1
         left_wall = False
         right_wall = False
-        while(k > 0):
+        while k > 0:
             if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
                 left_wall = True
                 break
@@ -1502,7 +1502,7 @@ def day17_flow_water(ground, y, x):
             k -= 1
 
         k = j+1
-        while(k < len(ground[i])):
+        while k < len(ground[i]):
             if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
                 right_wall = True
                 break
@@ -1622,7 +1622,7 @@ def day18_process(area, minutes):
             j = 0
             while j < itera:
                 history.popleft()
-                j +=1
+                j += 1
             pos = (minutes-(t+1))%len(history)
             prev_area = history[pos]
             break
@@ -1663,7 +1663,7 @@ class Inst19(Inst16):
            "gtrr": Inst16.gtrr, \
            "eqir": Inst16.eqir, \
            "eqri": Inst16.eqri, \
-           "eqrr": Inst16.eqrr }
+           "eqrr": Inst16.eqrr}
 
 def day19_parse_input(data):
     pointer = int(data[0][-1])
@@ -1772,7 +1772,7 @@ def day20_alternatives(index, path, locations, distances):
             day20_update_locations(path[index], current_locations, distances)
         index += 1
     new_locations.extend(current_locations)
-    
+
     # Remove redundant paths
     result = {}
     for l in new_locations:
@@ -1788,7 +1788,7 @@ def day20_get_rooms_distances(path):
     path = path[1:]
     index = 0
     distances = {}
-    current_locations = [PathNode((0,0),0, "")]
+    current_locations = [PathNode((0, 0), 0, "")]
     while path[index] != "$":
         if path[index] == "(":
             current_locations, index = day20_alternatives(index+1, path, current_locations, distances)
@@ -1881,7 +1881,7 @@ def day23_space(bots):
             min_z = z - z
         if z + r > max_z:
             max_z = z + r
-    
+
     space = [[[0 for k in range(min_x, max_x+1)] for j in range(min_y, max_y+1)] for i in range(min_z, max_z+1)]
 
     for x, y, z, r in bots:
@@ -1890,7 +1890,7 @@ def day23_space(bots):
                 for k in range(-r, r+1):
                     if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and day23_check_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
                         space[z+i-min_z][y+j-min_y][x+k-min_x] += 1
-    
+
     return (space, min_x, min_y, min_z)
 
 def day23_space_paralel(bots):
@@ -1911,7 +1911,7 @@ def day23_space_paralel(bots):
         counters.update(res)
         #for key, value in res.most_common(None):
         #    counters[key] += value
-    
+
     print(counters.most_common(10))
     return counters
 
@@ -1944,7 +1944,7 @@ def day23_space_paralel2(bots, best_bot):
         counters.update(res)
         #for key, value in res.most_common(None):
         #    counters[key] += value
-    
+
     print(counters.most_common(10))
     return counters
 
@@ -1999,7 +1999,7 @@ def day23_bounds(bots):
             min_z = z - z
         if z + r > max_z:
             max_z = z + r
-    
+
     return (min_x, max_x, min_y, max_y, min_z, max_z)
 
 def day23_space3(bots, min_x, max_x, min_y, max_y, z2):
@@ -2056,7 +2056,7 @@ def day23_2(data):
     return
     space, min_x, min_y, min_z = day23_space(bots)
     counter = 0
-    coord = (0,0,0)
+    coord = (0, 0, 0)
     for z in range(len(space)):
         for y in range(len(space[z])):
             for x in range(len(space[z][y])):
@@ -2083,7 +2083,7 @@ def day24_parse_group(line, id_):
     return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id_)
 
 def day24_parse_input(data):
-    groups = [[],[]]
+    groups = [[], []]
     current_army = 0
     id_counter = 0
 
@@ -2109,12 +2109,12 @@ def day24_debug_armies(armies):
     print("Infection:")
     day24_debug_army(armies[1])
     print()
- 
+
 def day24_debug_army(army):
     for group in army:
         if group[P_24.Units] > 0:
             print("Group {0} contains {1} units".format(group[P_24.Id], group[P_24.Units]))
- 
+
 def day24_debug_target(attack_id, defend_id, damage):
     print("Group {0} would deal defending group {1} {2} damage".format(attack_id, defend_id, damage))
 
@@ -2147,12 +2147,12 @@ def day24_selection_criteria(group):
 def day24_select_target(group, opposing_army, targeted, include_zero):
     available = [enemy for enemy in opposing_army if enemy[P_24.Units] > 0 and enemy[P_24.Id] not in targeted]
     targets = sorted(available, reverse=True, key=lambda g: day24_target_criteria(group, g))
-    if len(targets) == 0:
+    if not targets:
         return None
     elif len(targets) > 1 and day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
         # Can't decide
         return None
-    
+
     if day24_damage(group, targets[0]) == 0 and not include_zero:
         return None
 
@@ -2167,15 +2167,15 @@ def day24_target_selection_phase(armies):
         for group in army:
             if group[P_24.Units] > 0:
                 target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=False)
-                if target != None:
+                if not target is None:
                     targeting_map[group[P_24.Id]] = target
     for current_army in range(2):
         opposing_army = (current_army+1)%2
         army = sorted(armies[current_army], reverse=True, key=lambda g: day24_selection_criteria(g))
         for group in army:
-            if group[P_24.Units] > 0 and not (group[P_24.Id] in targeting_map.keys()):
+            if group[P_24.Units] > 0 and not group[P_24.Id] in targeting_map.keys():
                 target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=True)
-                if target != None:
+                if not target is None:
                     targeting_map[group[P_24.Id]] = target
     #print()
     return targeting_map
@@ -2235,7 +2235,7 @@ def day24_test_boost(armies, boost):
     new_armies = day24_fight(new_armies)
     remaining = sum([group[P_24.Units] for group in new_armies[0]])
     other = sum([group[P_24.Units] for group in new_armies[1]])
-    
+
     return (boost, remaining, other)
 
 def day24_boost_immune(armies):
@@ -2250,7 +2250,7 @@ def day24_boost_immune(armies):
         results = pool.map(functools.partial(day24_test_boost, armies), process)
         success = [result for result in results if result[2] == 0]
         success = sorted(success, key=lambda x: x[0])
-        if len(success) > 0:
+        if success:
             remaining = success[0][1]
             break
     pool.close()
@@ -2291,18 +2291,18 @@ def day25_constellations(points):
             if belongs:
                 belonging.append(i)
 
-        if len(belonging) == 0:
+        if not belonging:
             constellations.append(deque([point]))
         else:
             i = 0
             c = constellations[belonging[i]]
             c.append(point)
-            i+=1
+            i += 1
             while i < len(belonging):
                 c.extend(constellations[belonging[i]])
                 constellations[belonging[i]].clear()
-                i+=1
-    
+                i += 1
+
     return [c for c in constellations if len(c) > 0]
 
 def day25_parse_input(data):
@@ -2320,10 +2320,10 @@ def day25_1(data):
     points = day25_parse_input(data)
     return len(day25_constellations(points))
 
-START_DAY = 19
+START_DAY = 1
 """ MAIN FUNCTION """
 def main():
-    for day in range(START_DAY, 22):
+    for day in range(START_DAY, 26):
         execute_day(globals(), 2018, day, 1)
         execute_day(globals(), 2018, day, 2)
 
