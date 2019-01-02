@@ -1,24 +1,20 @@
-import re
-re = re
-import string
-string = string
-import sys
 import functools
-functools = functools
-import os
-os = os
-file_dir = os.path.dirname(os.path.realpath(__file__))
-import sys
-sys.path.insert(0, file_dir + "\\..\\")
-from common.utils import execute_day, read_input
-from collections import deque
-from collections import Counter
-import multiprocessing as mp
-mp = mp
 import math
+import multiprocessing as mp
+import os
+import re
+import string
+import sys
 import time
+from collections import Counter, deque
+from enum import Enum
+from struct import pack
 
-start_day = 1
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, FILE_DIR + "\\..\\")
+from common.utils import execute_day, read_input
+
+START_DAY = 1
 
 """ DAY 1 """
 
@@ -48,7 +44,7 @@ def day1_2(data):
             return frequency
         else:
             found_frequencies[key] = True
-        i+=1
+        i += 1
         i = i % len(data)
 
 """ DAY 2 """
@@ -112,14 +108,14 @@ def day2_2(data):
 """ DAY 3 """
 
 def day3_build_fabric(size):
-    return [[ 0 for y in range( size ) ] for x in range( size ) ]
+    return [[0 for y in range(size)] for x in range(size)]
 
 def day3_process_claim(line):
     # #1 @ 1,3: 4x4
-    return tuple([ int(x) for x in re.findall("#(\d+) @ (\d+),(\d+): (\d+)x(\d+)",line)[0]])
+    return tuple([int(x) for x in re.findall(r"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)", line)[0]])
 
-def day3_fill_claim(claim, fabric, size):
-    (id_, left, top, width, height) = claim
+def day3_fill_claim(claim, fabric):
+    (_, left, top, width, height) = claim
     for i in range(width):
         for j in range(height):
             fabric[top + j][left + i] += 1
@@ -137,7 +133,7 @@ def day3_1(data):
     #data, size = (read_input(2018, 301), 8)
     fabric = day3_build_fabric(size)
     for claim in data:
-        day3_fill_claim(day3_process_claim(claim), fabric, size)
+        day3_fill_claim(day3_process_claim(claim), fabric)
     return functools.reduce(day3_process_row, fabric, 0)
 
 def day3_check_prestine(claim, fabric):
@@ -153,7 +149,7 @@ def day3_2(data):
     #data, size = (read_input(2018, 301), 8)
     fabric = day3_build_fabric(size)
     for claim in data:
-        day3_fill_claim(day3_process_claim(claim), fabric, size)
+        day3_fill_claim(day3_process_claim(claim), fabric)
     for claim in data:
         res = day3_check_prestine(day3_process_claim(claim), fabric)
         if res != "":
@@ -162,13 +158,13 @@ def day3_2(data):
 """ DAY 4 """
 
 def day4_process_log(log):
-    shift = re.findall("Guard #(\d+) begins shift",log)
+    shift = re.findall(r"Guard #(\d+) begins shift", log)
     if len(shift) > 0:
         return ("shift", int(shift[0]))
-    wake = re.findall("(wakes up)",log)
+    wake = re.findall(r"(wakes up)", log)
     if len(wake) > 0:
         return ("wake", 0)
-    asleep = re.findall("(falls asleep)",log)
+    asleep = re.findall(r"(falls asleep)", log)
     if len(asleep) > 0:
         return ("asleep", 0)
 
@@ -176,9 +172,17 @@ def day4_parse_and_sort(data):
     # [1518-07-18 23:57] Guard #157 begins shift
     # [1518-04-18 00:44] wakes up
     # [1518-10-26 00:20] falls asleep
-    parsed_data = [re.findall("\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (.+)",line)[0] for line in data]
-    parsed_data.sort(key=lambda elem : str(elem[1]) + str(elem[2] + str(elem[3]) + str(elem[4])))
-    parsed_data = [tuple([int(log[0]), int(log[1]), int(log[2]), int(log[3]), int(log[4]), day4_process_log(log[5])]) for log in parsed_data]
+    parsed_data = [re.findall(r"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (.+)", line)[0] for line in data]
+    parsed_data.sort(key=lambda elem: str(elem[1]) + str(elem[2] + str(elem[3]) + str(elem[4])))
+    parsed_data = [ \
+                    tuple([
+                        int(log[0]),
+                        int(log[1]),
+                        int(log[2]),
+                        int(log[3]),
+                        int(log[4]),
+                        day4_process_log(log[5])]) \
+                    for log in parsed_data]
     return parsed_data
 
 def day4_process(data):
@@ -187,8 +191,7 @@ def day4_process(data):
     last_guard = -1
     last_asleep = -1
     sleeping = False
-    curr_date = (0,0,0,0)
-    for (year, month, day, hour, minute, log) in ordered_log:
+    for (_, _, _, _, minute, log) in ordered_log:
         if log[0] == "shift":
             last_guard = log[1]
             if not last_guard in history:
@@ -201,13 +204,15 @@ def day4_process(data):
         elif log[0] == "asleep":
             sleeping = True
             last_asleep = minute
-        curr_date = (month, day, hour, minute)
     return history
 
 def day4_1(data):
     #data = read_input(2018, 401)
     history = day4_process(data)
-    sleepiest_guard = sorted([(k, sum(v)) for k, v in history.items()], key=lambda elem: elem[1], reverse=True)[0][0]
+    sleepiest_guard = sorted(
+        [(k, sum(v)) for k, v in history.items()],
+        key=lambda elem: elem[1],
+        reverse=True)[0][0]
 
     m = 0
     for i in range(60):
@@ -218,7 +223,10 @@ def day4_1(data):
 def day4_2(data):
     #data = read_input(2018, 401)
     history = day4_process(data)
-    sleepiest_guard = sorted([(k, max(v)) for k, v in history.items()], key=lambda elem: elem[1], reverse=True)[0][0]
+    sleepiest_guard = sorted(
+        [(k, max(v)) for k, v in history.items()],
+        key=lambda elem: elem[1],
+        reverse=True)[0][0]
 
     m = 0
     for i in range(60):
@@ -238,7 +246,7 @@ def day5_colapse(polymer):
         if day5_should_destroy(new_polymer[i], new_polymer[i+1]):
             del new_polymer[i]
             del new_polymer[i]
-            i-=1
+            i -= 1
         else:
             i += 1
     return new_polymer
@@ -282,40 +290,36 @@ def day6_debug_grid(grid):
     print()
 
 def day6_fill_grid(grid, coordinates):
-    for i in range(len(grid)):
-        for j in range(len(grid[i])):
+    for i in enumerate(grid):
+        for j in enumerate(grid[i]):
             dists = [abs(coordinate[1]-i) + abs(coordinate[0]-j) for coordinate in coordinates]
-            min_dist = 9999999999999
+            min_dist = sys.maxsize
             min_id = 0
-            for id in range(len(dists)):
-                if dists[id] < min_dist:
-                    min_id = id
-                    min_dist = dists[id]
-                elif dists[id] == min_dist:
+            for id_ in enumerate(dists):
+                if dists[id_] < min_dist:
+                    min_id = id_
+                    min_dist = dists[id_]
+                elif dists[id_] == min_dist:
                     min_id = "_"
-                    min_dist = dists[id]
+                    min_dist = dists[id_]
             grid[i][j] = (min_id, min_dist)
 
 def day6_1(data):
     #data = read_input(2018, 601)
     coordinates = [(int(entry.split(", ")[0]), int(entry.split(", ")[1])) for entry in data]
 
-    xs = [coordinate[0] for coordinate in coordinates]
-    ys = [coordinate[1] for coordinate in coordinates]
-    max_x = max(xs)
-    max_y = max(ys)
-    min_x = min(xs)
-    min_y = min(ys)
+    max_x = max([coordinate[0] for coordinate in coordinates])
+    max_y = max([coordinate[1] for coordinate in coordinates])
 
-    grid = [[(".", 0) for j in range(max_x + 1) ] for i in range(max_y + 1)]
+    grid = [[(".", 0) for j in range(max_x + 1)] for i in range(max_y + 1)]
 
     day6_fill_grid(grid, coordinates)
     #day6_debug_grid(grid)
 
     ids = [i for i in range(len(coordinates))]
-    for i in range(len(grid)):
-        if i == 0 or i == len(grid) - 1:
-            for j in range(len(grid[i])):
+    for i in enumerate(grid):
+        if i in (0, len(grid) - 1):
+            for j in enumerate(grid[i]):
                 value = grid[i][j][0]
                 if value in ids:
                     ids.remove(value)
@@ -328,16 +332,14 @@ def day6_1(data):
                 ids.remove(value)
 
     max_val = 0
-    max_id = 0
-    for id in ids:
+    for id_ in ids:
         temp_count = 0
-        for i in range(len(grid)):
-            for j in range(len(grid[i])):
-                if grid[i][j][0] == id:
+        for i in enumerate(grid):
+            for j in enumerate(grid[i]):
+                if grid[i][j][0] == id_:
                     temp_count += 1
         if temp_count > max_val:
             max_val = temp_count
-            max_id = id
 
     return max_val
 
@@ -346,17 +348,16 @@ def day6_2(data):
     #data, size = (read_input(2018, 601), 32)
     coordinates = [(int(entry.split(", ")[0]), int(entry.split(", ")[1])) for entry in data]
 
-    xs = [coordinate[0] for coordinate in coordinates]
-    ys = [coordinate[1] for coordinate in coordinates]
-    max_x = max(xs)
-    max_y = max(ys)
+    max_x = max([coordinate[0] for coordinate in coordinates])
+    max_y = max([coordinate[1] for coordinate in coordinates])
 
-    max_val = 0
-    max_id = 0
     counter = 0
     for i in range(max_y + 1):
         for j in range(max_x + 1):
-            dists = functools.reduce(lambda acc, coordinate: acc + abs(coordinate[1]-i) + abs(coordinate[0]-j), coordinates, 0)
+            dists = functools.reduce(
+                lambda acc, coordinate: acc + abs(coordinate[1]-i) + abs(coordinate[0]-j),
+                coordinates,
+                0)
             if dists < size:
                 counter += 1
     return counter
@@ -365,7 +366,9 @@ def day6_2(data):
 
 def day7_parse_inst(data):
     # Step C must be finished before step A can begin.
-    parsed_data = [re.findall("Step ([A-Z]) must be finished before step ([A-Z]) can begin.",line)[0] for line in data]
+    parsed_data = [
+        re.findall(r"Step ([A-Z]) must be finished before step ([A-Z]) can begin.", line)[0]
+        for line in data]
     dependencies = {}
     letters = []
     for (req, step) in parsed_data:
@@ -391,18 +394,20 @@ def day7_inst_order(dependencies, letters):
         next_letter = stack.pop(0)
         completed.append(next_letter)
         for step, deps in dependencies.items():
-            if not step in completed and not step in stack and all([dep in completed for dep in deps]):
+            if not step in completed and \
+               not step in stack and \
+               all([dep in completed for dep in deps]):
                 stack.append(step)
         stack.sort()
     return completed
 
 def day7_1(data):
     #data = read_input(2018, 701)
-    (dependencies, letters) = day7_parse_inst(data)
+    (dependencies, _) = day7_parse_inst(data)
     return ''.join(day7_inst_order(dependencies, list(string.ascii_uppercase)))
 
 def day7_worker(worker, completed):
-    if not worker == None:
+    if not worker is None:
         (step, duration) = worker
         duration -= 1
         worker = (step, duration)
@@ -419,7 +424,6 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
     stack.sort(key=lambda e: (e[1], e[0]))
     completed = []
     workers = [None for i in range(workers)]
-    second = 0
     counter = 0
     while len(stack) > 0 or any([w != None for w in workers]):
         counter += 1
@@ -430,7 +434,10 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
             workers[i] = worker
 
         for step, deps in dependencies.items():
-            if not step in completed and all([let[0] != step for let in stack]) and all([dep in completed for dep in deps]) and not any([w != None and w[0] == step for w in workers]):
+            if not step in completed and \
+               all([let[0] != step for let in stack]) and \
+               all([dep in completed for dep in deps]) and \
+               not any([w != None and w[0] == step for w in workers]):
                 stack.append((step, (ord(step)-ord("A") + 1) + step_duration))
         stack.sort()
     return counter
@@ -439,13 +446,13 @@ def day7_2(data):
     step_duration = 60
     workers = 5
     letters = list(string.ascii_uppercase)
-    #data, step_duration, letters, workers = (read_input(2018, 701), 0, ["A", "B", "C", "D", "E", "F"], 2)
+    # data, step_duration, letters, workers = \
+    #     (read_input(2018, 701), 0, ["A", "B", "C", "D", "E", "F"], 2)
     (dependencies, letters) = day7_parse_inst(data)
     return day7_inst_order2(dependencies, letters, step_duration, workers)
 
 """ DAY 8 """
 
-from enum import Enum
 class PropertyDescription:
     Header = 1
     Metadata_Definition = 3
@@ -456,9 +463,9 @@ def day8_process_operation(data, operation, curr_node, nodes, operations):
         nodes = data.pop(0)
         metadata = data.pop(0)
         operations.insert(0, PropertyDescription.Nodes_End)
-        for i in range(metadata):
+        for _ in range(metadata):
             operations.insert(0, PropertyDescription.Metadata_Definition)
-        for i in range(nodes):
+        for _ in range(nodes):
             operations.insert(0, PropertyDescription.Header)
         new_node = ([], [], curr_node)
         curr_node[1].append(new_node)
@@ -473,14 +480,14 @@ def day8_process_operation(data, operation, curr_node, nodes, operations):
         return (data, curr_node[2], operations)
 
 def day8_parse_tree(data):
-    i = 0
     nodes = []
     # Metadata, children, parent
     curr_node = ([], [], None)
     operations = [PropertyDescription.Header]
     while len(operations) > 0:
         operation = operations.pop(0)
-        data, curr_node, operations = day8_process_operation(data, operation, curr_node, nodes, operations)
+        data, curr_node, operations = \
+            day8_process_operation(data, operation, curr_node, nodes, operations)
     return curr_node[1][0]
 
 def day8_sum_meta(node):
@@ -497,7 +504,7 @@ def day8_1(data):
     return total
 
 def day8_node_value(node):
-    metadata, children, parent = node
+    metadata, children, _ = node
     if len(children) == 0:
         return sum(metadata)
 
@@ -565,18 +572,18 @@ def day9_play_game_mine(players, highest_marble):
     current_marble = ListNode(0)
     current_marble.previous = current_marble
     current_marble.next = current_marble
-    marble_0 = current_marble
+    #marble_0 = current_marble
     next_marble = 1
     player = 0
-    while(next_marble <= highest_marble):
+    while next_marble <= highest_marble:
         #day9_debug_marbles(marble_0, current_marble)
         if next_marble % 23 != 0:
-            for i in range(2):
+            for _ in range(2):
                 current_marble = current_marble.next
             current_marble = day9_add_marble_before(current_marble, next_marble)
         else:
             scores[player] += next_marble
-            for i in range(7):
+            for _ in range(7):
                 current_marble = current_marble.previous
             scores[player] += current_marble.data
             current_marble = day9_remove_marble(current_marble)
@@ -589,7 +596,7 @@ def day9_play_game_optimized(players, highest_marble):
     marbles = deque([0])
     next_marble = 1
     player = 0
-    while(next_marble <= highest_marble):
+    while next_marble <= highest_marble:
         #day9_debug_marbles2(marble_0, current_marble)
         if next_marble % 23 != 0:
             marbles.rotate(-2)
@@ -604,7 +611,9 @@ def day9_play_game_optimized(players, highest_marble):
 
 def day9_parse_input(data):
     # 9 players; last marble is worth 25 points
-    return tuple([int(a) for a in re.findall("(\d+) players; last marble is worth (\d+) points",data)[0]])
+    return tuple([int(a)
+                  for a in
+                  re.findall(r"(\d+) players; last marble is worth (\d+) points", data)[0]])
 
 def day9_1(data):
     line = data[0]
@@ -634,7 +643,7 @@ class I:
 
 def day10_parse_line(line):
     # position=< 32923,  43870> velocity=<-3, -4>
-    return tuple([int(a) for a in re.findall("position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>",line)[0]])
+    return tuple([int(a) for a in re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>",line)[0]])
 
 def day10_parse_input(data):
     return [day10_parse_line(line) for line in data]
@@ -691,12 +700,12 @@ def day10_resolve(particles):
 
 def day10_1(data):
     #data = read_input(2018, 1001)
-    particles, counter = day10_resolve(day10_parse_input(data))
+    particles, _ = day10_resolve(day10_parse_input(data))
     day10_print_particles(particles)
 
 def day10_2(data):
     #data = read_input(2018, 1001)
-    particles, counter = day10_resolve(day10_parse_input(data))
+    _, counter = day10_resolve(day10_parse_input(data))
     return counter
 
 """ DAY 11 """
@@ -745,14 +754,14 @@ def day11_solve_exact_size(memoization, grid, size):
             else:
                 around_size = 0
                 for i in range(size-1):
-                   around_size += grid[y+i][x+size-1]
-                   around_size += grid[y+size-1][x+i]
+                    around_size += grid[y+i][x+size-1]
+                    around_size += grid[y+size-1][x+i]
                 around_size += grid[y + size - 1][x + size -1]
                 if around_size > 0:
                     current_total = day11_solve_exact_size_aux(memoization, grid, x, y, size)
                 else:
-                   x+=1
-                   continue
+                    x += 1
+                    continue
             if current_total > max_total:
                 max_total = current_total
                 coordinate = (x+1, y+1)
@@ -774,11 +783,11 @@ def day11_solve_range(grid, min_size, max_size):
     return (coordinate, max_size_total)
 
 def day11_1(data):
-     #data = read_input(2018, 1101)
-     memoization = {}
-     serial = int(data[0])
-     grid = day11_grid(serial)
-     return day11_solve_exact_size(memoization, grid, 3)[0]
+    #data = read_input(2018, 1101)
+    memoization = {}
+    serial = int(data[0])
+    grid = day11_grid(serial)
+    return day11_solve_exact_size(memoization, grid, 3)[0]
 
 def day11_2(data):
     #data = read_input(2018, 1101)
@@ -789,7 +798,7 @@ def day11_2(data):
 """ DAY 12 """
 
 def day12_parse_input(data):
-    initial_state = deque(re.findall("initial state: ([\.|#]*)",data[0])[0])
+    initial_state = deque(re.findall(r"initial state: ([\.|#]*)",data[0])[0])
     rules = deque([])
     for rule in data[2:]:
         parts = rule.split(" => ")
@@ -892,20 +901,20 @@ class Direction:
     Right = 2
     Down = 3
 
-def day13_print_direction(dir):
-    if dir == Direction.Up:
+def day13_print_direction(dir_):
+    if dir_ == Direction.Up:
         return "^"
-    elif dir == Direction.Down:
+    elif dir_ == Direction.Down:
         return "v"
-    elif dir == Direction.Left:
+    elif dir_ == Direction.Left:
         return "<"
-    elif dir == Direction.Right:
+    elif dir_ == Direction.Right:
         return ">"
 
-def day13_debug_map(map, positions):
-    for y in range(len(map)):
+def day13_debug_map(map_, positions):
+    for y in range(len(map_)):
         line = ""
-        for x in range(len(map[y])):
+        for x in range(len(map_[y])):
             cart = [positions[k] for k in range(len(positions)) if positions[k][0] == x and positions[k][1] == y]
             if len(cart) == 1:
                 cart = cart[0]
@@ -913,7 +922,7 @@ def day13_debug_map(map, positions):
                 cart = None
 
             if cart == None:
-                line += map[y][x]
+                line += map_[y][x]
             else:
                 line += day13_print_direction(cart[2])
         print(line)
@@ -932,7 +941,7 @@ def day13_get_cart_direction(pos):
     return None
 
 def day13_parse_input(data):
-    map = []
+    map_ = []
     positions = []
     for row in range(len(data)):
         new_row = []
@@ -946,8 +955,8 @@ def day13_parse_input(data):
                     new_row.append("-")
                 else:
                     new_row.append("|")
-        map.append(new_row)
-    return map, sorted(positions, key=lambda v: (v[0], v[1]))
+        map_.append(new_row)
+    return map_, sorted(positions, key=lambda v: (v[0], v[1]))
 
 def day13_direction_on_turn(direction, turn):
     if turn == Turn.Straight:
@@ -991,39 +1000,38 @@ def day13_get_direction_delta(direction):
     elif direction == Direction.Right:
         return (1, 0)
 
-def day13_move_cart(map, positions, cart):
+def day13_move_cart(map_, positions, cart):
     x = positions[cart][0]
     y = positions[cart][1]
     direction = positions[cart][2]
     last_turn = positions[cart][3]
-    location = map[y][x]
-    
+
     delta_x, delta_y = day13_get_direction_delta(direction)
     new_x, new_y = x + delta_x, y + delta_y
     for i in range(len(positions)):
         if i != cart and positions[i][0] == new_x and positions[i][1] == new_y:
             return "X", new_x, new_y, i
-    
-    new_direction, new_turn = day13_next_turn(map[new_y][new_x], direction, last_turn)
+
+    new_direction, new_turn = day13_next_turn(map_[new_y][new_x], direction, last_turn)
 
     return (new_x, new_y, new_direction, new_turn)
 
-def day13_solve(map, positions):
+def day13_solve(map_, positions):
     while True:
         #day13_debug_map(map, positions)
         for i in range(len(positions)):
-            new_position = day13_move_cart(map, positions, i)
+            new_position = day13_move_cart(map_, positions, i)
             if new_position[0] == "X":
                 return new_position[1], new_position[2]
             positions[i] = new_position
         positions = sorted(positions, key=lambda v: (v[0], v[1]))
 
-def day13_solve2(map, positions):
+def day13_solve2(map_, positions):
     while True:
         #day13_debug_map(map, positions)
         crashing_carts = []
         for i in range(len(positions)):
-            new_position = day13_move_cart(map, positions, i)
+            new_position = day13_move_cart(map_, positions, i)
             if new_position[0] == "X":
                 crashing_carts.append(new_position[3])
                 crashing_carts.append(i)
@@ -1036,13 +1044,13 @@ def day13_solve2(map, positions):
 
 def day13_1(data):
     #data = read_input(2018, 1301)
-    map, positions = day13_parse_input(data)
-    return day13_solve(map, positions)
+    map_, positions = day13_parse_input(data)
+    return day13_solve(map_, positions)
 
 def day13_2(data):
     #data = read_input(2018, 1302)
-    map, positions = day13_parse_input(data)
-    return day13_solve2(map, positions)
+    map_, positions = day13_parse_input(data)
+    return day13_solve2(map_, positions)
 
 """ DAY 14 """
 
@@ -1067,7 +1075,7 @@ def day14_solve(nr_recipes):
     recipes = [3, 7]
     elves = [0, 1]
     recipes_len = len(recipes)
-    for i in range(nr_recipes+10):
+    for _ in range(nr_recipes+10):
         #day14_debug_recipes(recipes, elves)
         recipe_0 = recipes[elves[0]]
         recipe_1 = recipes[elves[1]]
@@ -1130,46 +1138,57 @@ def day14_2(data):
 """ DAY 16 """
 
 class Inst16:
+    @staticmethod
     def addr(regs, a, b, c):
         regs[c] = regs[a] + regs[b]
         return regs
-        
+
+    @staticmethod
     def addi(regs, a, b, c):
         regs[c] = regs[a] + b
         return regs
 
+    @staticmethod
     def mulr(regs, a, b, c):
         regs[c] = regs[a] * regs[b]
         return regs
-        
+
+    @staticmethod
     def muli(regs, a, b, c):
         regs[c] = regs[a] * b
         return regs
 
+    @staticmethod
     def banr(regs, a, b, c):
         regs[c] = regs[a] & regs[b]
         return regs
-        
+
+    @staticmethod
     def bani(regs, a, b, c):
         regs[c] = regs[a] & b
         return regs
 
+    @staticmethod
     def borr(regs, a, b, c):
         regs[c] = regs[a] | regs[b]
         return regs
-        
+
+    @staticmethod
     def bori(regs, a, b, c):
         regs[c] = regs[a] | b
         return regs
 
-    def setr(regs, a, b, c):
+    @staticmethod
+    def setr(regs, a, _, c):
         regs[c] = regs[a]
         return regs
         
-    def seti(regs, a, b, c):
+    @staticmethod
+    def seti(regs, a, _, c):
         regs[c] = a
         return regs
         
+    @staticmethod
     def gtir(regs, a, b, c):
         if a > regs[b]:
             regs[c] = 1
@@ -1177,6 +1196,7 @@ class Inst16:
             regs[c] = 0
         return regs
         
+    @staticmethod
     def gtri(regs, a, b, c):
         if regs[a] > b:
             regs[c] = 1
@@ -1184,6 +1204,7 @@ class Inst16:
             regs[c] = 0
         return regs
         
+    @staticmethod
     def gtrr(regs, a, b, c):
         if regs[a] > regs[b]:
             regs[c] = 1
@@ -1191,6 +1212,7 @@ class Inst16:
             regs[c] = 0
         return regs
         
+    @staticmethod
     def eqir(regs, a, b, c):
         if a == regs[b]:
             regs[c] = 1
@@ -1198,6 +1220,7 @@ class Inst16:
             regs[c] = 0
         return regs
         
+    @staticmethod
     def eqri(regs, a, b, c):
         if regs[a] == b:
             regs[c] = 1
@@ -1205,6 +1228,7 @@ class Inst16:
             regs[c] = 0
         return regs
         
+    @staticmethod
     def eqrr(regs, a, b, c):
         if regs[a] == regs[b]:
             regs[c] = 1
@@ -1223,11 +1247,11 @@ def day16_parse_input(data):
         # Before: [3, 2, 1, 1]
         # 9 2 1 2
         # After:  [3, 2, 2, 1]
-        before = [ int(x) for x in re.findall("Before: \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
+        before = [ int(x) for x in re.findall(r"Before: \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
         i+=1
-        inst = [ int(x) for x in re.findall("(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
+        inst = [ int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
         i+=1
-        after = [ int(x) for x in re.findall("After:  \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
+        after = [ int(x) for x in re.findall(r"After:  \[(\d+), (\d+), (\d+), (\d+)\]",data[i])[0]]
         i+=1
         i+=1
         samples.append((before, inst, after))
@@ -1236,7 +1260,7 @@ def day16_parse_input(data):
     while i < len(data):
         if data[i] != "":
             # 9 2 1 2
-            inst = [ int(x) for x in re.findall("(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
+            inst = [ int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)",data[i])[0]]
             program.append(inst)
         i+=1
         
@@ -1256,7 +1280,6 @@ def day16_check_sample(before, inst, after):
 
 def day16_update_mapping(mapping, before, inst, after):
     ops = Inst16.ops
-    counter = 0
     matched = []
     for op in ops:
         if day16_check_op(op, before, inst, after):
@@ -1300,7 +1323,7 @@ def day16_solve2(samples, program):
 
 def day16_1(data):
     #data = read_input(2018, 1601)
-    samples, program = day16_parse_input(data)
+    samples, _ = day16_parse_input(data)
     return day16_solve1(samples)
 
 def day16_2(data):
@@ -1311,53 +1334,52 @@ def day16_2(data):
 
 """ DAY 17 """
 
-from struct import pack
-
 class Bitmap():
-  def __init__(s, width, height):
-    s._bfType = 19778 # Bitmap signature
-    s._bfReserved1 = 0
-    s._bfReserved2 = 0
-    s._bcPlanes = 1
-    s._bcSize = 12
-    s._bcBitCount = 24
-    s._bfOffBits = 26
-    s._bcWidth = width
-    s._bcHeight = height
-    s._bfSize = 26+s._bcWidth*3*s._bcHeight
-    s.clear()
 
-  def clear(s):
-    s._graphics = [(0,0,0)]*s._bcWidth*s._bcHeight
+    def __init__(self, width, height):
+        self._bfType = 19778 # Bitmap signature
+        self._bfReserved1 = 0
+        self._bfReserved2 = 0
+        self._bcPlanes = 1
+        self._bcSize = 12
+        self._bcBitCount = 24
+        self._bfOffBits = 26
+        self._bcWidth = width
+        self._bcHeight = height
+        self._bfSize = 26+self._bcWidth*3*self._bcHeight
+        self.clear()
 
-  def setPixel(s, x, y, color):
-    if isinstance(color, tuple):
-      if x<0 or y<0 or x>s._bcWidth-1 or y>s._bcHeight-1:
-        raise ValueError('Coords out of range')
-      if len(color) != 3:
-        raise ValueError('Color must be a tuple of 3 elems')
-      s._graphics[y*s._bcWidth+x] = (color[2], color[1], color[0])
-    else:
-      raise ValueError('Color must be a tuple of 3 elems')
+    def clear(self):
+        self._graphics = [(0, 0, 0)]*self._bcWidth*self._bcHeight
 
-  def write(s, file):
-    with open(file, 'wb') as f:
-      f.write(pack('<HLHHL', 
-                   s._bfType, 
-                   s._bfSize, 
-                   s._bfReserved1, 
-                   s._bfReserved2, 
-                   s._bfOffBits)) # Writing BITMAPFILEHEADER
-      f.write(pack('<LHHHH', 
-                   s._bcSize, 
-                   s._bcWidth, 
-                   s._bcHeight, 
-                   s._bcPlanes, 
-                   s._bcBitCount)) # Writing BITMAPINFO
-      for px in s._graphics:
-        f.write(pack('<BBB', *px))
-      for i in range (0, (s._bcWidth*3) % 4):
-        f.write(pack('B', 0))
+    def setPixel(self, x, y, color):
+        if isinstance(color, tuple):
+            if x < 0 or y < 0 or x > self._bcWidth-1 or y > self._bcHeight-1:
+                raise ValueError('Coords out of range')
+            if len(color) != 3:
+                raise ValueError('Color must be a tuple of 3 elems')
+            self._graphics[y*self._bcWidth+x] = (color[2], color[1], color[0])
+        else:
+            raise ValueError('Color must be a tuple of 3 elems')
+
+    def write(self, file):
+        with open(file, 'wb') as f:
+            f.write(pack('<HLHHL',
+                         self._bfType,
+                         self._bfSize,
+                         self._bfReserved1,
+                         self._bfReserved2,
+                         self._bfOffBits)) # Writing BITMAPFILEHEADER
+            f.write(pack('<LHHHH',
+                         self._bcSize,
+                         self._bcWidth,
+                         self._bcHeight,
+                         self._bcPlanes,
+                         self._bcBitCount)) # Writing BITMAPINFO
+            for px in self._graphics:
+                f.write(pack('<BBB', *px))
+            for _ in range (0, (self._bcWidth*3) % 4):
+                f.write(pack('B', 0))
 
 class Day17_Type:
     clay = 0
@@ -1391,7 +1413,6 @@ bitmap_counter = 0
 def day17_debug_ground_bmp(ground, y):
     global bitmap_counter
 
-    height = 100
     half = int(100/2)
     lower = max(y - half, 0)
     size = (y + half + 1) - lower
@@ -1413,7 +1434,6 @@ def day17_debug_ground_ascii(ground, y):
 
 def day17_debug_full_ground_bmp(ground):
     size = len(ground)
-    half = int(size / 2)
     b = Bitmap(436, size)
     b.clear()
     for i in range(len(ground)):
@@ -1429,7 +1449,7 @@ def day17_parse_input(data):
     for line in data:
         if line[0] == "x":
             # x=501, y=3..7
-            ground_slice = [ int(x) for x in re.findall("x=(\d+), y=(\d+)..(\d+)",line)[0]]
+            ground_slice = [ int(x) for x in re.findall(r"x=(\d+), y=(\d+)..(\d+)", line)[0]]
             slices.append(ground_slice)
             if ground_slice[1] < min_y:
                 min_y = ground_slice[1]
@@ -1437,7 +1457,7 @@ def day17_parse_input(data):
                 max_y = ground_slice[2]
         else:
             # y=501, x=3..7
-            ground_slice = [ int(x) for x in re.findall("y=(\d+), x=(\d+)..(\d+)",line)[0]]
+            ground_slice = [ int(x) for x in re.findall(r"y=(\d+), x=(\d+)..(\d+)",line)[0]]
             for i in range(ground_slice[1], ground_slice[2]+1):
                 ground_slice2 = (i, ground_slice[0], ground_slice[0])
                 slices.append(ground_slice2)
@@ -1445,7 +1465,7 @@ def day17_parse_input(data):
                     min_y = ground_slice2[1]
                 if ground_slice2[2] > max_y:
                     max_y = ground_slice2[2]
-    
+
     slices = sorted(slices, key=lambda s: s[0])
     min_x = slices[0][0] - 2
     max_x = slices[-1][0] + 2
@@ -1454,7 +1474,7 @@ def day17_parse_input(data):
     for s in slices:
         for i in range(s[1], s[2]+1):
             ground[i][s[0] - min_x] = Day17_Type.clay
-    
+
     return ground, min_x, min_y
 
 def day17_flow_water(ground, y, x):
@@ -1473,31 +1493,28 @@ def day17_flow_water(ground, y, x):
         k = j-1
         left_wall = False
         right_wall = False
-        keep_going = False
         while(k > 0):
             if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
                 left_wall = True
                 break
             if ground[i][k] == Day17_Type.sand:
-                keep_going = True
                 break
             k -= 1
-        
+
         k = j+1
         while(k < len(ground[i])):
             if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
                 right_wall = True
                 break
             if ground[i][k] == Day17_Type.sand:
-                keep_going = True
                 break
             k += 1
 
         if left_wall and right_wall:
             ground[i][j] = Day17_Type.settled
-        
+
         #day17_debug_ground_bmp(ground, i)
-        
+
         if ground[i+1][j] == Day17_Type.clay or ground[i+1][j] == Day17_Type.settled:
             if ground[i][j-1] != ground[i][j]:
                 stack.append((i, j-1))
@@ -1505,7 +1522,7 @@ def day17_flow_water(ground, y, x):
                 stack.append((i, j+1))
 
         if ground[i][j] == Day17_Type.settled and ground[i-1][j] == Day17_Type.water:
-                stack.append((i-1, j))
+            stack.append((i-1, j))
 
         if ground[i+1][j] != ground[i][j]:
             stack.append((i+1, j))
@@ -1514,7 +1531,7 @@ def day17_solve(ground, min_x, min_y):
     day17_flow_water(ground, 0, 500 - min_x)
 
     #day17_debug_full_ground_bmp(ground)
-    
+
     counter_water = 0
     counter_retained = 0
     for i in range(len(ground)):
@@ -1558,7 +1575,8 @@ class AcreContents:
             if AcreContents.count_states(AcreContents.lumberyard, adjacents) >= 3:
                 return AcreContents.lumberyard
         elif current == AcreContents.lumberyard:
-            if AcreContents.count_states(AcreContents.lumberyard, adjacents) == 0 or AcreContents.count_states(AcreContents.trees, adjacents) == 0:
+            if AcreContents.count_states(AcreContents.lumberyard, adjacents) == 0 or \
+               AcreContents.count_states(AcreContents.trees, adjacents) == 0:
                 return AcreContents.open
         return current
 
@@ -1571,11 +1589,11 @@ def day18_debug_area(area):
     print()
 
 def day18_get_adjacent_cells(area, i_coord, j_coord):
-    adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)] #the adjacency matrix
+    # the adjacency matrix
+    adjacency = [(i, j) for i in (-1, 0, 1) for j in (-1, 0, 1) if not i == j == 0]
     result = []
     for di, dj in adjacency:
         if 0 <= (i_coord + di) < len(area) and 0 <= j_coord + dj < len(area[0]): #boundaries check
-            #yielding is usually faster than constructing a list and returning it if you're just using it once
             result.append(area[i_coord + di][j_coord + dj])
     return result
 
@@ -1591,19 +1609,18 @@ def day18_process(area, minutes):
         #day18_debug_area(prev_area)
         history.append(prev_area)
         memoization["".join(prev_area)] = t
-        #print(t)
         new_area = []
         for i in range(len(prev_area)):
             new_area.append("")
             for j in range(len(prev_area[i])):
                 new_state = day18_compute_change(prev_area, i, j)
                 new_area[i] += new_state
-        
+
         new_area_key = "".join(new_area)
         if new_area_key in memoization:
             itera = memoization[new_area_key]
             j = 0
-            while(j < itera):
+            while j < itera:
                 history.popleft()
                 j +=1
             pos = (minutes-(t+1))%len(history)
@@ -1650,10 +1667,10 @@ class Inst19(Inst16):
 
 def day19_parse_input(data):
     pointer = int(data[0][-1])
-    
+
     program = []
     for line in data[1:]:
-        inst = [x for x in re.findall("(\w+) (\d+) (\d+) (\d+)", line)[0]]
+        inst = [x for x in re.findall(r"(\w+) (\d+) (\d+) (\d+)", line)[0]]
         inst[0] = Inst19.ops[inst[0]]
         inst[1] = int(inst[1])
         inst[2] = int(inst[2])
@@ -1662,18 +1679,30 @@ def day19_parse_input(data):
 
     return pointer, program
 
-def day19_run_program(pointer, program, start_0):
+def day19_run_program(pointer, program, start_0, day, part):
     regs = [start_0, 0, 0, 0, 0, 0]
     inst = regs[pointer]
+    counter = Counter()
+    last = 0
     while inst >= 0 and inst < len(program):
         # Make register 1 have the value of 2 * 5 right away (first loop)
-        if inst == 4 and regs[1]/regs[2] == regs[5] and regs[2] < regs[3]/regs[5]:
+        if day == 19 and inst == 4 and regs[1]/regs[2] == regs[5] and regs[2] < regs[3]/regs[5]:
             regs[2] = int(regs[3]/regs[5])
             regs[1] = regs[2]*regs[5]
-        
+
         # Make register 2 have the value of 3 (second loop)
-        if inst == 9 and regs[2] < regs[3]:
+        if day == 19 and inst == 9 and regs[2] < regs[3]:
             regs[2] = regs[3]
+
+        if day == 21 and inst == 28:
+            if part == 1:
+                return regs[5]
+            value = regs[5]
+            if counter[value] == 0:
+                counter[value] = 1
+                last = value
+            else:
+                return last
 
         regs[pointer] = inst
         f, a, b, c = program[inst]
@@ -1685,12 +1714,12 @@ def day19_run_program(pointer, program, start_0):
 def day19_1(data):
     #data = read_input(2018, 1901)
     pointer, program = day19_parse_input(data)
-    return day19_run_program(pointer, program, 0)
+    return day19_run_program(pointer, program, 0, 19, 1)[0]
 
 def day19_2(data):
     #data = read_input(2018, 1901)
     pointer, program = day19_parse_input(data)
-    return day19_run_program(pointer, program, 1)
+    return day19_run_program(pointer, program, 1, 19, 2)[0]
 
 """ DAY 20 """
 
@@ -1702,21 +1731,19 @@ class PathNode:
         self.pos = pos
         self.dist = dist
         self.path = path
-    
-        return
 
     def __repr__(self):
         return "({0},{1}) - {2} - {3}".format(self.pos[0], self.pos[1], self.dist, self.path)
 
-def day20_move(pos, dir):
+def day20_move(pos, direction):
     x, y = pos
-    if dir == "N":
+    if direction == "N":
         return (x, y + 1)
-    if dir == "S":
+    if direction == "S":
         return (x, y - 1)
-    if dir == "W":
+    if direction == "W":
         return (x - 1, y)
-    if dir == "E":
+    if direction == "E":
         return (x + 1, y)
     raise ValueError
 
@@ -1787,7 +1814,11 @@ def day20_2(data):
 
 def day21_1(data):
     pointer, program = day19_parse_input(data)
-    return day19_run_program(pointer, program, 1)
+    return day19_run_program(pointer, program, 1, 21, 1)
+
+def day21_2(data):
+    pointer, program = day19_parse_input(data)
+    return day19_run_program(pointer, program, 1, 21, 2)
 
 """ DAY 23 """
 
@@ -1795,17 +1826,15 @@ def day23_parse_input(data):
     # pos=<-5920414,66954528,45418976>, r=94041555
     bots = []
     for line in data:
-        bot = [int(x) for x in re.findall("pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(\d+)", line)[0]]
+        bot = [int(x) for x in re.findall(r"pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(\d+)", line)[0]]
         bots.append((bot[0], bot[1], bot[2], bot[3]))
     return sorted(bots, reverse=True, key=lambda b: b[3])
 
 def day23_manhattan(x, y, z, other_x, other_y, other_z):
     return abs(x - other_x) + abs(y - other_y) + abs(z - other_z)
-    
+
 def day23_debug_space_bmp(area):
     size = len(area[0])
-    size2 = len(area[0][0])
-    half = int(size / 2)
     b = Bitmap(500, 500)
     b.clear()
     for i in range(len(area[0])):
@@ -1823,12 +1852,12 @@ def day23_bots_in_range(bots, bot):
     in_range = []
     x, y, z, signal = bot
     for other_bot in bots:
-        other_x, other_y, other_z, other_signal = other_bot
+        other_x, other_y, other_z, _ = other_bot
         if day23_manhattan(x, y, z, other_x, other_y, other_z) <= signal:
             in_range.append(other_bot)
     return in_range
 
-def day23_bounds(area, i, j, k):
+def day23_check_bounds(area, i, j, k):
     return i >= 0 and i < len(area) and j >= 0 and j < len(area[i]) and k >= 0 and k < len(area[i][j])
 
 def day23_space(bots):
@@ -1859,7 +1888,7 @@ def day23_space(bots):
         for i in range(-r, r+1):
             for j in range(-r, r+1):
                 for k in range(-r, r+1):
-                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and day23_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
+                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and day23_check_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
                         space[z+i-min_z][y+j-min_y][x+k-min_x] += 1
     
     return (space, min_x, min_y, min_z)
@@ -2048,10 +2077,10 @@ class P_24:
     Initiative = 6
     Id = 7
 
-def day24_parse_group(line, id):
+def day24_parse_group(line, id_):
     # 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
-    units, hit_points, immunity, weakness, attack_power, attack_type, initiative = re.findall("(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
-    return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id)
+    units, hit_points, immunity, weakness, attack_power, attack_type, initiative = re.findall(r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
+    return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id_)
 
 def day24_parse_input(data):
     groups = [[],[]]
@@ -2089,8 +2118,8 @@ def day24_debug_army(army):
 def day24_debug_target(attack_id, defend_id, damage):
     print("Group {0} would deal defending group {1} {2} damage".format(attack_id, defend_id, damage))
 
-def day24_parse_id(id):
-    parts = id.split("_")
+def day24_parse_id(id_):
+    parts = id_.split("_")
     return (int(parts[0]), int(parts[1]))
 
 def day24_effective_power(group):
@@ -2211,7 +2240,6 @@ def day24_test_boost(armies, boost):
 
 def day24_boost_immune(armies):
     remaining = 0
-    other = 1
     boost = 1
     threads = 16
     pool = mp.Pool(processes=threads)
@@ -2232,7 +2260,7 @@ def day24_boost_immune(armies):
 def day24_1(data):
     #data = read_input(2018, 2401)
     armies = day24_parse_input(data)
-    result = day24_fight(armies)
+    armies = day24_fight(armies)
     total1 = sum([group[P_24.Units] for group in armies[0]])
     total2 = sum([group[P_24.Units] for group in armies[1]])
     return max(total1, total2)
@@ -2282,7 +2310,7 @@ def day25_parse_input(data):
 
     points = deque([])
     for line in data:
-        point = tuple([int(x) for x in re.findall("(-?\d+),(-?\d+),(-?\d+),(-?\d+)", line)[0]])
+        point = tuple([int(x) for x in re.findall(r"(-?\d+),(-?\d+),(-?\d+),(-?\d+)", line)[0]])
         points.append(point)
 
     return points
@@ -2292,9 +2320,12 @@ def day25_1(data):
     points = day25_parse_input(data)
     return len(day25_constellations(points))
 
-start_day = 20
+START_DAY = 19
 """ MAIN FUNCTION """
+def main():
+    for day in range(START_DAY, 22):
+        execute_day(globals(), 2018, day, 1)
+        execute_day(globals(), 2018, day, 2)
+
 if __name__ == "__main__":
-    for i in range(start_day,21):
-        execute_day(globals(), 2018, i, 1)
-        execute_day(globals(), 2018, i, 2)
+    main()
