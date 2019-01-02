@@ -7,7 +7,7 @@ class SignalCatchingError(Exception):
     """ Base class for exceptions in this module. """
 
 HEAVY_EXERCISE = "nil (too computationally heavy)"
-EXERCISE_TIMEOUT = 4000000 #secs
+EXERCISE_TIMEOUT = 120 #secs
 
 def timeout(seconds_before_timeout):
     def deco(func):
