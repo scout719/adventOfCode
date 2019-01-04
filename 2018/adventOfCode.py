@@ -7,6 +7,7 @@ import string
 import sys
 import time
 from collections import Counter, deque
+import heapq
 from enum import Enum
 from struct import pack
 
@@ -1777,7 +1778,7 @@ def day20_alternatives(index, path, locations, distances):
     result = {}
     for l in new_locations:
         key = "{0}_{1}".format(l.pos[0], l.pos[1])
-        if not key in result:
+        if key not in result:
             result[key] = l
         elif l.dist < result[key].dist:
             result[key] = l
@@ -1819,6 +1820,232 @@ def day21_1(data):
 def day21_2(data):
     pointer, program = day19_parse_input(data)
     return day19_run_program(pointer, program, 1, 21, 2)
+
+""" DAY 22 """
+
+class Day22_Type:
+    rocky = 0
+    wet = 1
+    narrow = 2
+
+    @staticmethod
+    def get_type(erosion_level):
+        return erosion_level % 3
+
+    @staticmethod
+    def repr(tool):
+        if tool == Day22_Type.rocky:
+            return "."
+        if tool == Day22_Type.wet:
+            return "="
+        if tool == Day22_Type.narrow:
+            return "|"
+        return None
+
+class Day22_Tools:
+    gear = 0
+    torch = 1
+    neither = 2
+
+    @staticmethod
+    def allowed_tool(region_type, tool):
+        if region_type == Day22_Type.rocky:
+            return tool in (Day22_Tools.gear, Day22_Tools.torch)
+        if  region_type == Day22_Type.wet:
+            return tool in (Day22_Tools.gear, Day22_Tools.neither)
+        if  region_type == Day22_Type.narrow:
+            return tool in (Day22_Tools.torch, Day22_Tools.neither)
+        raise ValueError
+
+    @staticmethod
+    def repr(tool):
+        if tool == Day22_Tools.torch:
+            return "torch"
+        if tool == Day22_Tools.gear:
+            return "gear"
+        if tool == Day22_Tools.neither:
+            return "neither"
+        return None
+
+    tools = [gear, torch, neither]
+
+class Day22_Path_Node:
+    def __init__(self, x, y, delta_x, delta_y, tool, minutes, path):
+        self.pos = (x, y)
+        self.delta_x = delta_x
+        self.delta_y = delta_y
+        self.tool = tool
+        self.minutes = minutes
+        self.path = path
+
+    def __lt__(self, other): # For x < y
+        return (self.minutes  + abs(self.delta_x)  + abs(self.delta_y)) < \
+               (other.minutes + abs(other.delta_x) + abs(other.delta_y))
+
+    def __eq__(self, other): # For x == y
+        return self.pos == other.pos and \
+               self.delta_x == other.delta_x and \
+               self.delta_y == other.delta_y and \
+               self.tool == other.tool and \
+               self.minutes == other.minutes
+
+    def __gt__(self, other): # For x > y
+        return not self == other and not self < other
+
+    def __le__(self, other): # For x <= y
+        return self == other or self < other
+
+    def __ne__(self, other): # For x != y OR x <> y
+        return not self == other
+
+    def __ge__(self, other): # For x >= y
+        return self == other or self > other
+
+    def __repr__(self):
+        return "[{4}] ({0},{1}) - with {2} in {3} minutes".format(
+            self.pos[0], 
+            self.pos[1], 
+            Day22_Tools.repr(self.tool), 
+            self.minutes, 
+            self.minutes + abs(self.delta_x) + abs(self.delta_y))
+
+def day22_parse_input(data):
+    depth = int(data[0].split(" ")[1])
+    target = data[1].split(" ")[1]
+    target_coords = tuple([int(x) for x in target.split(",")])
+    return depth, target_coords
+
+def day22_geologic_index(pos, target, depth, memory):
+    if memory[pos] != 0:
+        return memory[pos]
+    x, y = pos
+    value = 0
+    if x == y == 0 or pos == target:
+        value = 0
+    elif x == 0:
+        value = y * 48271
+    elif y == 0:
+        value = x * 16807
+    else:
+        left = day22_erosion_level((x-1, y), target, depth, memory)
+        up = day22_erosion_level((x, y-1), target, depth, memory)
+        value = left * up
+    memory[pos] = value
+    return value
+    
+def day22_erosion_level(pos, target, depth, memory):
+    index = day22_geologic_index(pos, target, depth, memory)
+    return (index + depth) % 20183
+
+def day22_get_terrain(depth, target):
+    total = 0
+    terrain = {}
+    memory = Counter()
+    for x in range(0, target[0] + 1):
+        for y in range(0, target[1] + 1):
+            pos = (x, y)
+            erosion = day22_erosion_level(pos, target, depth, memory)
+            region_type = Day22_Type.get_type(erosion)
+            total += region_type
+            terrain[pos] = region_type
+    return total, (terrain, memory)
+
+def day22_debug_map(terrain, depth, target, node):
+    for y in range(0, target[1] + 5):
+        line = ""
+        for x in range(0, target[0] + 5):
+            erosion = day22_erosion_level((x, y), target, depth, terrain[1])
+            terrain[0][(x, y)] = Day22_Type.get_type(erosion)
+            if node.x == x and node.y == y:
+                line += Day22_Tools.repr(node.tool)[0]
+            elif x == target[0] and y == target[1]:
+                line += "T"
+            else:
+                line += Day22_Type.repr(terrain[(x, y)])
+        print(line)
+    print()
+    time.sleep(.5)
+
+def day22_total_risk(depth, target):
+    total, _ = day22_get_terrain(depth, target)
+    return total
+
+def day22_new_nodes(node, terrain, depth, target, delta_x, delta_y):
+    node_x, node_y = node.pos
+    new_x, new_y = node_x + delta_x, node_y + delta_y
+    if new_x < 0 or new_y < 0:
+        return []
+    if (new_x, new_y) not in terrain[0]:
+        erosion = day22_erosion_level((new_x, new_y), target, depth, terrain[1])
+        terrain[0][(new_x, new_y)] = Day22_Type.get_type(erosion)
+    new_terrain = terrain[0][(new_x, new_y)]
+    alternatives = []
+    for tool in Day22_Tools.tools:
+        if Day22_Tools.allowed_tool(new_terrain, tool):
+            if tool == node.tool:
+                alternatives = [
+                    Day22_Path_Node(new_x,
+                                    new_y,
+                                    target[0] - new_x,
+                                    target[1] - new_y,
+                                    tool,
+                                    node.minutes + 1,
+                                    node.path + [node])
+                                ]
+                break
+            elif Day22_Tools.allowed_tool(terrain[0][node.pos], tool):
+                alternatives.append(
+                    Day22_Path_Node(
+                        node_x,
+                        node_y,
+                        target[0] - node_x,
+                        target[1] - node_y,
+                        tool,
+                        node.minutes + 7,
+                        node.path + [node])
+                    )
+    return alternatives
+
+def day22_manhattan_adjacency():
+    return [(i, j) for i in (-1, 0, 1) for j in (-1, 0, 1) if not i == j and (i == 0 or j == 0)]
+
+def day22_find_path(depth, target):
+    _, terrain = day22_get_terrain(depth, target)
+
+    heap = [
+        Day22_Path_Node(0, 0, target[0], target[1], Day22_Tools.torch, 0, [])
+    ]
+    heapq.heapify(heap)
+    visited = {}
+    while heap:
+        node = heapq.heappop(heap)
+        if node.pos == target and node.tool == Day22_Tools.torch:
+            return node
+
+        for delta_x, delta_y in day22_manhattan_adjacency():
+            for new_node in day22_new_nodes(node, terrain, depth, target, delta_x, delta_y):
+                new_node_x, new_node_y = new_node.pos
+                key = (new_node_x, new_node_y, new_node.tool)
+                if key not in visited or (visited[key] > new_node.minutes):
+                    visited[key] = new_node.minutes
+                    heapq.heappush(heap, new_node)
+
+    raise ValueError
+
+def day22_1(data):
+    #data = read_input(2018, 2201)
+    depth, target = day22_parse_input(data)
+    return day22_total_risk(depth, target)
+
+def day22_2(data):
+    #data = read_input(2018, 2201)
+    depth, target = day22_parse_input(data)
+    node = day22_find_path(depth, target)
+
+    # _, terrain = day22_get_terrain(depth, target)
+    # for n in node.path:
+    #     day22_debug_map(terrain, depth, target, n)
+    return node.minutes
 
 """ DAY 23 """
 
