@@ -92,7 +92,7 @@ def day2_letter_difference(box1, box2):
         raise ValueError("Boxes with different lengths: {0} & {1}".format(box1, box2))
     counter_diff = 0
     common_letters = ""
-    for i in range(0, len(box1)):
+    for i, _ in enumerate(box1):
         if box1[i] != box2[i]:
             counter_diff += 1
         else:
@@ -356,7 +356,8 @@ def day6_2(data):
     for i in range(max_y + 1):
         for j in range(max_x + 1):
             dists = functools.reduce(
-                lambda acc, coordinate: acc + abs(coordinate[1]-i) + abs(coordinate[0]-j),
+                lambda acc, coordinate, i_=i, j_=j:
+                acc + abs(coordinate[1]-i_) + abs(coordinate[0]-j_),
                 coordinates,
                 0)
             if dists < size:
@@ -428,7 +429,7 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
     counter = 0
     while stack or any([not w is None for w in workers]):
         counter += 1
-        for i in range(len(workers)):
+        for i, _ in enumerate(workers):
             if workers[i] is None and stack:
                 workers[i] = stack.pop(0)
             completed, worker = day7_worker(workers[i], completed)
@@ -644,7 +645,8 @@ class I:
 
 def day10_parse_line(line):
     # position=< 32923,  43870> velocity=<-3, -4>
-    return tuple([int(a) for a in re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>", line)[0]])
+    res = re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>", line)[0]
+    return tuple([int(a) for a in res])
 
 def day10_parse_input(data):
     return [day10_parse_line(line) for line in data]
@@ -810,7 +812,7 @@ def day12_get_rule(pots, rules, position):
     for rule in rules:
         prev = rule[0]
         match = True
-        for i in range(len(prev)):
+        for i, _ in enumerate(prev):
             match &= prev[i] == pots[position + i - 2]
         if match:
             return rule[1]
@@ -873,7 +875,7 @@ def day12_solve(pots, rules, generations):
             break
 
     total = 0
-    for i in range(len(pots)):
+    for i, _ in enumerate(pots):
         if pots[i] == "#":
             total += start + i
 
@@ -913,10 +915,12 @@ def day13_print_direction(dir_):
         return ">"
 
 def day13_debug_map(map_, positions):
-    for y in range(len(map_)):
+    for y, _ in enumerate(map_):
         line = ""
-        for x in range(len(map_[y])):
-            cart = [positions[k] for k in range(len(positions)) if positions[k][0] == x and positions[k][1] == y]
+        for x, _ in enumerate(map_[y]):
+            cart = [positions[k]
+                    for k in range(len(positions))
+                    if positions[k][0] == x and positions[k][1] == y]
             if len(cart) == 1:
                 cart = cart[0]
             else:
@@ -944,9 +948,9 @@ def day13_get_cart_direction(pos):
 def day13_parse_input(data):
     map_ = []
     positions = []
-    for row in range(len(data)):
+    for row, _ in enumerate(data):
         new_row = []
-        for column in range(len(data[row])):
+        for column, _ in enumerate(data[row]):
             direction = day13_get_cart_direction(data[row][column])
             if direction is None:
                 new_row.append(data[row][column])
@@ -1009,7 +1013,7 @@ def day13_move_cart(map_, positions, cart):
 
     delta_x, delta_y = day13_get_direction_delta(direction)
     new_x, new_y = x + delta_x, y + delta_y
-    for i in range(len(positions)):
+    for i, _ in enumerate(positions):
         if i != cart and positions[i][0] == new_x and positions[i][1] == new_y:
             return "X", new_x, new_y, i
 
@@ -1020,7 +1024,7 @@ def day13_move_cart(map_, positions, cart):
 def day13_solve(map_, positions):
     while True:
         #day13_debug_map(map, positions)
-        for i in range(len(positions)):
+        for i, _ in enumerate(positions):
             new_position = day13_move_cart(map_, positions, i)
             if new_position[0] == "X":
                 return new_position[1], new_position[2]
@@ -1031,7 +1035,7 @@ def day13_solve2(map_, positions):
     while True:
         #day13_debug_map(map, positions)
         crashing_carts = []
-        for i in range(len(positions)):
+        for i, _ in enumerate(positions):
             new_position = day13_move_cart(map_, positions, i)
             if new_position[0] == "X":
                 crashing_carts.append(new_position[3])
@@ -1057,7 +1061,7 @@ def day13_2(data):
 
 def day14_debug_recipes(recipes, elves):
     out = ""
-    for i in range(len(recipes)):
+    for i, _ in enumerate(recipes):
         recipe = recipes[i]
         if elves[0] == i:
             recipe = "({0})".format(recipe)
@@ -1237,7 +1241,24 @@ class Inst16:
             regs[c] = 0
         return regs
 
-    ops = [addr.__func__, addi.__func__, mulr.__func__, muli.__func__, banr.__func__, bani.__func__, borr.__func__, bori.__func__, setr.__func__, seti.__func__, gtir.__func__, gtri.__func__, gtrr.__func__, eqir.__func__, eqri.__func__, eqrr.__func__]
+    ops = [
+        addr.__func__,
+        addi.__func__,
+        mulr.__func__,
+        muli.__func__,
+        banr.__func__,
+        bani.__func__,
+        borr.__func__,
+        bori.__func__,
+        setr.__func__,
+        seti.__func__,
+        gtir.__func__,
+        gtri.__func__,
+        gtrr.__func__,
+        eqir.__func__,
+        eqri.__func__,
+        eqrr.__func__
+        ]
 
 def day16_parse_input(data):
     samples = []
@@ -1302,10 +1323,10 @@ def day16_calculate_mapping(samples):
         day16_update_mapping(mapping, before, inst, after)
 
     while True:
-        for i in range(len(mapping)):
+        for i, _ in enumerate(mapping):
             if len(mapping[i]) == 1:
                 op = mapping[i][0]
-                for j in range(len(mapping)):
+                for j, _ in enumerate(mapping):
                     if i != j:
                         mapping[j] = [op2 for op2 in mapping[j] if op2 != op]
         if all([len(mapping[i]) == 1 for i in range(len(mapping))]):
@@ -1437,8 +1458,8 @@ def day17_debug_full_ground_bmp(ground):
     size = len(ground)
     b = Bitmap(436, size)
     b.clear()
-    for i in range(len(ground)):
-        for j in range(len(ground[i])):
+    for i, _ in enumerate(ground):
+        for j, _ in enumerate(ground[i]):
             coord = (size-1) - i
             b.setPixel(j, coord, Day17_Type.render_square_rgb(ground[i][j]))
     b.write('test/a_full_ground.bmp')
@@ -1535,8 +1556,8 @@ def day17_solve(ground, min_x, min_y):
 
     counter_water = 0
     counter_retained = 0
-    for i in range(len(ground)):
-        for j in range(len(ground[i])):
+    for i, _ in enumerate(ground):
+        for j, _ in enumerate(ground[i]):
             if i >= min_y:
                 if ground[i][j] == Day17_Type.settled:
                     counter_water += 1
@@ -1582,9 +1603,9 @@ class AcreContents:
         return current
 
 def day18_debug_area(area):
-    for i in range(len(area)):
+    for i, _ in enumerate(area):
         out = ""
-        for j in range(len(area[i])):
+        for j, _ in enumerate(area[i]):
             out += area[i][j]
         print(out)
     print()
@@ -1611,9 +1632,9 @@ def day18_process(area, minutes):
         history.append(prev_area)
         memoization["".join(prev_area)] = t
         new_area = []
-        for i in range(len(prev_area)):
+        for i, _ in enumerate(prev_area):
             new_area.append("")
-            for j in range(len(prev_area[i])):
+            for j, _ in enumerate(prev_area[i]):
                 new_state = day18_compute_change(prev_area, i, j)
                 new_area[i] += new_state
 
@@ -1765,7 +1786,8 @@ def day20_alternatives(index, path, locations, distances):
     current_locations = [PathNode(n.pos, n.dist, n.path) for n in locations]
     while path[index] != ")":
         if path[index] == "(":
-            current_locations, index = day20_alternatives(index+1, path, current_locations, distances)
+            current_locations, index = \
+                day20_alternatives(index+1, path, current_locations, distances)
         elif path[index] == "|":
             new_locations.extend(current_locations)
             current_locations = [PathNode(n.pos, n.dist, n.path) for n in locations]
@@ -1792,7 +1814,8 @@ def day20_get_rooms_distances(path):
     current_locations = [PathNode((0, 0), 0, "")]
     while path[index] != "$":
         if path[index] == "(":
-            current_locations, index = day20_alternatives(index+1, path, current_locations, distances)
+            current_locations, index = \
+                day20_alternatives(index+1, path, current_locations, distances)
         elif path[index] != ")":
             day20_update_locations(path[index], current_locations, distances)
         index += 1
@@ -1903,10 +1926,10 @@ class Day22_Path_Node:
 
     def __repr__(self):
         return "[{4}] ({0},{1}) - with {2} in {3} minutes".format(
-            self.pos[0], 
-            self.pos[1], 
-            Day22_Tools.repr(self.tool), 
-            self.minutes, 
+            self.pos[0],
+            self.pos[1],
+            Day22_Tools.repr(self.tool),
+            self.minutes,
             self.minutes + abs(self.delta_x) + abs(self.delta_y))
 
 def day22_parse_input(data):
@@ -1932,7 +1955,7 @@ def day22_geologic_index(pos, target, depth, memory):
         value = left * up
     memory[pos] = value
     return value
-    
+
 def day22_erosion_level(pos, target, depth, memory):
     index = day22_geologic_index(pos, target, depth, memory)
     return (index + depth) % 20183
@@ -2085,7 +2108,7 @@ def day23_bots_in_range(bots, bot):
     return in_range
 
 def day23_check_bounds(area, i, j, k):
-    return i >= 0 and i < len(area) and j >= 0 and j < len(area[i]) and k >= 0 and k < len(area[i][j])
+    return 0 <= i < len(area) and 0 <= j < len(area[i]) and 0 <= k < len(area[i][j])
 
 def day23_space(bots):
     min_x = sys.maxsize
@@ -2109,13 +2132,17 @@ def day23_space(bots):
         if z + r > max_z:
             max_z = z + r
 
-    space = [[[0 for k in range(min_x, max_x+1)] for j in range(min_y, max_y+1)] for i in range(min_z, max_z+1)]
+    space = \
+        [[[0 for k in range(min_x, max_x+1)]
+          for j in range(min_y, max_y+1)]
+         for i in range(min_z, max_z+1)]
 
     for x, y, z, r in bots:
         for i in range(-r, r+1):
             for j in range(-r, r+1):
                 for k in range(-r, r+1):
-                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and day23_check_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
+                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and \
+                       day23_check_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
                         space[z+i-min_z][y+j-min_y][x+k-min_x] += 1
 
     return (space, min_x, min_y, min_z)
@@ -2284,9 +2311,9 @@ def day23_2(data):
     space, min_x, min_y, min_z = day23_space(bots)
     counter = 0
     coord = (0, 0, 0)
-    for z in range(len(space)):
-        for y in range(len(space[z])):
-            for x in range(len(space[z][y])):
+    for z, _ in enumerate(space):
+        for y, _ in enumerate(space[z]):
+            for x, _ in enumerate(space[z][y]):
                 if space[z][y][x] > counter:
                     counter = space[z][y][x]
                     coord = (x + min_x, y + min_y, z + min_z)
@@ -2306,7 +2333,8 @@ class P_24:
 
 def day24_parse_group(line, id_):
     # 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
-    units, hit_points, immunity, weakness, attack_power, attack_type, initiative = re.findall(r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
+    units, hit_points, immunity, weakness, attack_power, attack_type, initiative = \
+        re.findall(r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
     return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id_)
 
 def day24_parse_input(data):
@@ -2343,7 +2371,8 @@ def day24_debug_army(army):
             print("Group {0} contains {1} units".format(group[P_24.Id], group[P_24.Units]))
 
 def day24_debug_target(attack_id, defend_id, damage):
-    print("Group {0} would deal defending group {1} {2} damage".format(attack_id, defend_id, damage))
+    print("Group {0} would deal defending group {1} {2} damage"
+          .format(attack_id, defend_id, damage))
 
 def day24_parse_id(id_):
     parts = id_.split("_")
@@ -2366,45 +2395,44 @@ def day24_damage(attack_group, defend_group):
     return damage
 
 def day24_target_criteria(attack_group, defend_group):
-    return (day24_damage(attack_group, defend_group), day24_effective_power(defend_group), defend_group[P_24.Initiative])
+    return (day24_damage(attack_group, defend_group),
+            day24_effective_power(defend_group),
+            defend_group[P_24.Initiative])
 
 def day24_selection_criteria(group):
     return (day24_effective_power(group), group[P_24.Initiative])
 
 def day24_select_target(group, opposing_army, targeted, include_zero):
-    available = [enemy for enemy in opposing_army if enemy[P_24.Units] > 0 and enemy[P_24.Id] not in targeted]
+    available = [enemy
+                 for enemy in opposing_army
+                 if enemy[P_24.Units] > 0 and enemy[P_24.Id] not in targeted]
     targets = sorted(available, reverse=True, key=lambda g: day24_target_criteria(group, g))
     if not targets:
         return None
-    elif len(targets) > 1 and day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
+    elif len(targets) > 1 and \
+         day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
         # Can't decide
         return None
 
     if day24_damage(group, targets[0]) == 0 and not include_zero:
         return None
 
-    #day24_debug_target(group[P_24.Id], targets[0][P_24.Id], day24_damage(group, targets[0]))
     return targets[0][P_24.Id]
 
 def day24_target_selection_phase(armies):
     targeting_map = {}
-    for current_army in range(2):
-        opposing_army = (current_army+1)%2
-        army = sorted(armies[current_army], reverse=True, key=lambda g: day24_selection_criteria(g))
-        for group in army:
-            if group[P_24.Units] > 0:
-                target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=False)
-                if not target is None:
-                    targeting_map[group[P_24.Id]] = target
-    for current_army in range(2):
-        opposing_army = (current_army+1)%2
-        army = sorted(armies[current_army], reverse=True, key=lambda g: day24_selection_criteria(g))
-        for group in army:
-            if group[P_24.Units] > 0 and not group[P_24.Id] in targeting_map.keys():
-                target = day24_select_target(group, armies[opposing_army], targeting_map.values(), include_zero=True)
-                if not target is None:
-                    targeting_map[group[P_24.Id]] = target
-    #print()
+    for include_zero in (False, True):
+        for current_army in range(2):
+            opposing_army = (current_army+1)%2
+            army = sorted(armies[current_army], reverse=True, key=day24_selection_criteria)
+            for group in army:
+                if group[P_24.Units] > 0 and not group[P_24.Id] in targeting_map.keys():
+                    target = day24_select_target(group,
+                                                 armies[opposing_army],
+                                                 targeting_map.values(),
+                                                 include_zero=include_zero)
+                    if not target is None:
+                        targeting_map[group[P_24.Id]] = target
     return targeting_map
 
 def day24_attack_phase(groups_by_initiative, armies, targeting_map):
@@ -2418,16 +2446,29 @@ def day24_attack_phase(groups_by_initiative, armies, targeting_map):
             target_group = armies[target_army_id][target_group_id]
             if target_group[P_24.Units] > 0:
                 damage = day24_damage(attack_group, target_group)
-                dead_units = min(math.floor(damage/(target_group[P_24.Hit_points])), target_group[P_24.Units])
+                max_units = math.floor(damage/(target_group[P_24.Hit_points]))
+                dead_units = min(max_units, target_group[P_24.Units])
                 kills += dead_units
-                #print("Group {0} attacks defending group {1}, killing {2} units".format(group_id, target_id, dead_units))
-                armies[target_army_id][target_group_id] = (target_group[P_24.Units] - dead_units, target_group[P_24.Hit_points], target_group[P_24.Immunity], target_group[P_24.Weakness], target_group[P_24.Attack_Power], target_group[P_24.Attack_Type], target_group[P_24.Initiative], target_group[P_24.Id])
-        #print()
+                armies[target_army_id][target_group_id] = \
+                    (target_group[P_24.Units] - dead_units,
+                     target_group[P_24.Hit_points],
+                     target_group[P_24.Immunity],
+                     target_group[P_24.Weakness],
+                     target_group[P_24.Attack_Power],
+                     target_group[P_24.Attack_Type],
+                     target_group[P_24.Initiative],
+                     target_group[P_24.Id])
     return kills == 0
 
 def day24_fight(armies):
-    groups_by_initiative = [group[P_24.Id] for group in sorted([group for army in armies for group in army], reverse=True, key=lambda g: g[P_24.Initiative])]
-    while any([group[P_24.Units] > 0 for group in armies[0]]) and any([group[P_24.Units] > 0 for group in armies[1]]):
+    groups_by_initiative = \
+        [group[P_24.Id]
+         for group in
+         sorted([group for army in armies for group in army],
+                reverse=True,
+                key=lambda g: g[P_24.Initiative])]
+    while any([group[P_24.Units] > 0 for group in armies[0]]) and \
+          any([group[P_24.Units] > 0 for group in armies[1]]):
         #day24_debug_armies(armies)
         targeting_map = day24_target_selection_phase(armies)
         stalemate = day24_attack_phase(groups_by_initiative, armies, targeting_map)
@@ -2508,7 +2549,7 @@ def day25_constellations(points):
 
     for point in points:
         belonging = []
-        for i in range(len(constellations)):
+        for i, _ in enumerate(constellations):
             constellation = constellations[i]
             belongs = False
             for other in constellation:
