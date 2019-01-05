@@ -11,9 +11,13 @@ import heapq
 from enum import Enum
 from struct import pack
 
+# pylint: disable=W0611
+# pylint: disable=C0413
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "\\..\\")
 from common.utils import execute_day, read_input
+# pylint: enable=W0611
+# pylint: enable=C0413
 
 START_DAY = 1
 
@@ -105,6 +109,7 @@ def day2_2(data):
             (diff, letters) = day2_letter_difference(box_id1, box_id2)
             if diff == 1:
                 return letters
+    raise ValueError
 
 """ DAY 3 """
 
@@ -156,6 +161,8 @@ def day3_2(data):
         if res != "":
             return res
 
+    raise ValueError
+
 """ DAY 4 """
 
 def day4_process_log(log):
@@ -168,6 +175,8 @@ def day4_process_log(log):
     asleep = re.findall(r"(falls asleep)", log)
     if asleep:
         return ("asleep", 0)
+
+    raise ValueError
 
 def day4_parse_and_sort(data):
     # [1518-07-18 23:57] Guard #157 begins shift
@@ -455,7 +464,7 @@ def day7_2(data):
 
 """ DAY 8 """
 
-class PropertyDescription:
+class PropertyDescription(Enum):
     Header = 1
     Metadata_Definition = 3
     Nodes_End = 2
@@ -480,6 +489,8 @@ def day8_process_operation(data, operation, curr_node, nodes, operations):
 
     if operation == PropertyDescription.Nodes_End:
         return (data, curr_node[2], operations)
+
+    raise ValueError
 
 def day8_parse_tree(data):
     nodes = []
@@ -513,7 +524,7 @@ def day8_node_value(node):
     total = 0
     for meta in metadata:
         idx = meta - 1
-        if idx >= 0 and idx < len(children):
+        if 0 <= idx < len(children):
             total += day8_node_value(children[idx])
 
     return total
@@ -539,7 +550,6 @@ class ListNode:
 
         # store reference (previous item)
         self.previous = None
-        return
 
 def day9_debug_marbles(marble_0, current_marble):
     curr = marble_0
@@ -634,14 +644,6 @@ def day9_2(data):
     return max(scores)
 
 """ DAY 10 """
-
-class I:
-    px = 0
-    py = 1
-    vx = 3
-    vy = 4
-    ax = 6
-    ay = 7
 
 def day10_parse_line(line):
     # position=< 32923,  43870> velocity=<-3, -4>
@@ -893,12 +895,12 @@ def day12_2(data):
 
 """ Day 13 """
 
-class Turn:
+class Turn(Enum):
     Left = 0
     Straight = 1
     Right = 2
 
-class Direction:
+class Direction(Enum):
     Left = 0
     Up = 1
     Right = 2
@@ -913,6 +915,8 @@ def day13_print_direction(dir_):
         return "<"
     elif dir_ == Direction.Right:
         return ">"
+
+    raise ValueError
 
 def day13_debug_map(map_, positions):
     for y, _ in enumerate(map_):
@@ -956,7 +960,7 @@ def day13_parse_input(data):
                 new_row.append(data[row][column])
             else:
                 positions.append((column, row, direction, Turn.Right))
-                if direction == Direction.Left or direction == Direction.Right:
+                if direction in (Direction.Left, Direction.Right):
                     new_row.append("-")
                 else:
                     new_row.append("|")
@@ -1004,6 +1008,8 @@ def day13_get_direction_delta(direction):
         return (-1, 0)
     elif direction == Direction.Right:
         return (1, 0)
+
+    return ValueError
 
 def day13_move_cart(map_, positions, cart):
     x = positions[cart][0]
@@ -1419,6 +1425,7 @@ class Day17_Type:
             return "|"
         elif square == Day17_Type.settled:
             return "~"
+        raise ValueError
 
     @staticmethod
     def render_square_rgb(square):
@@ -1431,9 +1438,13 @@ class Day17_Type:
         elif square == Day17_Type.settled:
             return (0, 0, 255)
 
+        raise ValueError
+
 bitmap_counter = 0
 def day17_debug_ground_bmp(ground, y):
+# pylint: disable=W0603
     global bitmap_counter
+# pylint: enable=W0603
 
     half = int(100/2)
     lower = max(y - half, 0)
@@ -1706,7 +1717,7 @@ def day19_run_program(pointer, program, start_0, day, part):
     inst = regs[pointer]
     counter = Counter()
     last = 0
-    while inst >= 0 and inst < len(program):
+    while 0 <= inst < len(program):
         # Make register 1 have the value of 2 * 5 right away (first loop)
         if day == 19 and inst == 4 and regs[1]/regs[2] == regs[5] and regs[2] < regs[3]/regs[5]:
             regs[2] = int(regs[3]/regs[5])
@@ -2117,18 +2128,21 @@ def day23_intersect(zone, coord, r):
     x, y, z = coord
     dist_squared = r * r
 
-    if (x < min_x):
+    if x < min_x:
         dist_squared -= day23_squared(x - min_x)
-    elif (x > max_x):
+    elif x > max_x:
         dist_squared -= day23_squared(x - max_x)
-    if (y < min_y):
+
+    if y < min_y:
         dist_squared -= day23_squared(y - min_y)
-    elif (y > max_y):
+    elif y > max_y:
         dist_squared -= day23_squared(y - max_y)
-    if (z < min_z):
+
+    if z < min_z:
         dist_squared -= day23_squared(z - min_z)
-    elif (z > max_z):
+    elif z > max_z:
         dist_squared -= day23_squared(z - max_z)
+
     return dist_squared > 0
 
 def day23_corners(zone):
@@ -2141,7 +2155,7 @@ def day23_corners(zone):
 def day23_bots_in_reach(bots, zone):
     if zone is None:
         return []
-    
+
     min_x, max_x, min_y, max_y, min_z, max_z = zone
 
     in_reach = deque([])
@@ -2153,9 +2167,9 @@ def day23_bots_in_reach(bots, zone):
         if min_x <= x <= max_x and \
            min_y <= y <= max_y and \
            min_z <= z <= max_z:
-           in_reach.append(bot)
-           continue
-        
+            in_reach.append(bot)
+            continue
+
         # Sphere of bot's signal doesn't intersect zone
         if not day23_intersect(zone, coord, r):
             continue
@@ -2180,14 +2194,14 @@ def day23_get_subzones(zone):
     if len_x == 0 or len_y == 0 or len_z == 0:
         return [None]
 
-    zone_1 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z, min_z + half_x)
-    zone_2 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z + half_x + 1, max_z)
-    zone_3 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z, min_z + half_x)
-    zone_4 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z + half_x + 1, max_z)
-    zone_5 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z, min_z + half_x)
-    zone_6 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z + half_x + 1, max_z)
-    zone_7 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z, min_z + half_x)
-    zone_8 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z + half_x + 1, max_z)
+    zone_1 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z, min_z + half_z)
+    zone_2 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z + half_z + 1, max_z)
+    zone_3 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z, min_z + half_z)
+    zone_4 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z + half_z + 1, max_z)
+    zone_5 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z, min_z + half_z)
+    zone_6 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z + half_z + 1, max_z)
+    zone_7 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z, min_z + half_z)
+    zone_8 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z + half_z + 1, max_z)
 
     return (zone_1, zone_2, zone_3, zone_4, zone_5, zone_6, zone_7, zone_8)
 
@@ -2197,7 +2211,7 @@ def day23_thread_worker(bots, zone):
 def day23_bot_count_in_subzones(bots, zone, pool):
     zones_to_process = day23_get_subzones(zone)
     results = pool.map(functools.partial(day23_thread_worker, bots), zones_to_process)
-    
+
     most_bots_count = max([len(r[1]) for r in results])
 
     if most_bots_count == 0:
@@ -2215,7 +2229,7 @@ def day23_zone_dimensions(zone):
 
 def day23_get_locations_counts(bots, best_zones):
     locations = deque([])
-    for zone, bot_count in best_zones:
+    for zone, _ in best_zones:
         min_x, max_x, min_y, max_y, min_z, max_z = zone
         for x2 in range(min_x, max_x+1):
             for y2 in range(min_y, max_y+1):
@@ -2255,9 +2269,9 @@ def day23_best_location(bots, zone):
         if bot_count < max_bot_count:
             continue
 
-        dim_x, dim_y, dim_z  = day23_zone_dimensions(zone)
+        dim_x, dim_y, dim_z = day23_zone_dimensions(zone)
         min_dim = 2
-        if dim_x == min_dim or dim_y == min_dim or dim_z == min_dim:
+        if min_dim in (dim_x, dim_y, dim_z):
             if bot_count > max_bot_count:
                 max_bot_count = bot_count
             best_zones.append((zone, bot_count))
@@ -2293,7 +2307,7 @@ def day23_2(data):
 
 """ DAY 24 """
 
-class P_24:
+class P_24(Enum):
     Units = 0
     Hit_points = 1
     Immunity = 2
@@ -2304,10 +2318,12 @@ class P_24:
     Id = 7
 
 def day24_parse_group(line, id_):
+# pylint: disable=C0301
     # 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
     units, hit_points, immunity, weakness, attack_power, attack_type, initiative = \
         re.findall(r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
     return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id_)
+# pylint: enable=C0301
 
 def day24_parse_input(data):
     groups = [[], []]
