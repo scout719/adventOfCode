@@ -2077,209 +2077,208 @@ def day23_parse_input(data):
     bots = []
     for line in data:
         bot = [int(x) for x in re.findall(r"pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(\d+)", line)[0]]
-        bots.append((bot[0], bot[1], bot[2], bot[3]))
-    return sorted(bots, reverse=True, key=lambda b: b[3])
+        bots.append(((bot[0], bot[1], bot[2]), bot[3]))
+    return sorted(bots, reverse=True, key=lambda b: b[1])
 
-def day23_manhattan(x, y, z, other_x, other_y, other_z):
+def day23_manhattan(bot, other_bot):
+    x, y, z = bot
+    other_x, other_y, other_z = other_bot
     return abs(x - other_x) + abs(y - other_y) + abs(z - other_z)
-
-def day23_debug_space_bmp(area):
-    size = len(area[0])
-    b = Bitmap(500, 500)
-    b.clear()
-    for i in range(len(area[0])):
-        for j in range(len(area[0][i])):
-            coord = (size-1) - i
-            c = area[0][i][j]
-            if c == 0:
-                color = (255, 255, 255)
-            else:
-                color = (0, 0, 255)
-            b.setPixel(j, coord, color)
-    b.write('test/a_full_area.bmp')
 
 def day23_bots_in_range(bots, bot):
     in_range = []
-    x, y, z, signal = bot
+    bot_coord, signal = bot
     for other_bot in bots:
-        other_x, other_y, other_z, _ = other_bot
-        if day23_manhattan(x, y, z, other_x, other_y, other_z) <= signal:
+        other_bot_coord, _ = other_bot
+        if day23_manhattan(bot_coord, other_bot_coord) <= signal:
             in_range.append(other_bot)
     return in_range
 
-def day23_check_bounds(area, i, j, k):
-    return 0 <= i < len(area) and 0 <= j < len(area[i]) and 0 <= k < len(area[i][j])
-
-def day23_space(bots):
-    min_x = sys.maxsize
-    max_x = 0
-    min_y = sys.maxsize
-    max_y = 0
-    min_z = sys.maxsize
-    max_z = 0
-
-    for x, y, z, r in bots:
-        if x - r < min_x:
-            min_x = x - r
-        if x + r > max_x:
-            max_x = x + r
-        if y - r < min_y:
-            min_y = y - r
-        if y + r > max_y:
-            max_y = y + r
-        if z - r < min_z:
-            min_z = z - z
-        if z + r > max_z:
-            max_z = z + r
-
-    space = \
-        [[[0 for k in range(min_x, max_x+1)]
-          for j in range(min_y, max_y+1)]
-         for i in range(min_z, max_z+1)]
-
-    for x, y, z, r in bots:
-        for i in range(-r, r+1):
-            for j in range(-r, r+1):
-                for k in range(-r, r+1):
-                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r and \
-                       day23_check_bounds(space, z+i-min_z, y+j-min_y, x+k-min_x):
-                        space[z+i-min_z][y+j-min_y][x+k-min_x] += 1
-
-    return (space, min_x, min_y, min_z)
-
-def day23_space_paralel(bots):
-    threads = 32
-    pool = mp.Pool(processes=threads)
-    min_x, max_x, min_y, max_y, min_z, max_z = day23_bounds(bots)
-    #per_thread = max(math.floor(len(bots)/threads), 1)
-    #last = len(bots) - (per_thread * (threads-1))
-    #partial(multiply,2)
-    process = range(min_z, max_z+1)#[bots[per_thread*i: per_thread*i+per_thread] for i in range(threads)]
-    #print(process)
-    results = pool.map(functools.partial(day23_space3, bots, min_x, max_x, min_y, max_y), process)
-    pool.close()
-    pool.join()
-    #print(results)
-    counters = Counter()
-    for res in results:
-        counters.update(res)
-        #for key, value in res.most_common(None):
-        #    counters[key] += value
-
-    print(counters.most_common(10))
-    return counters
-
-def day23_expand_bots(bots):
-    new_bots = deque([])
-    for x, y, z, r in bots:
-        for i in range(-r, r+1):
-            for j in range(-r, r+1):
-                for k in range(-r, r+1):
-                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r:
-                        new_bots.append((x+k, y+j, z+i))
-    return new_bots
-
-def day23_space_paralel2(bots, best_bot):
-    min_x, max_x, min_y, max_y, min_z, max_z = day23_bounds([best_bot])
-
-    threads = 32
-    pool = mp.Pool(processes=threads)
-    #per_thread = max(math.floor(len(bots)/threads), 1)
-    #last = len(bots) - (per_thread * (threads-1))
-    #partial(multiply,2)
-    process = range(min_z, max_z+1)#[bots[per_thread*i: per_thread*i+per_thread] for i in range(threads)]
-    #print(process)
-    results = pool.map(functools.partial(day23_new_bew, bots, min_x, max_x, min_y, max_y), process)
-    pool.close()
-    pool.join()
-    #print(results)
-    counters = Counter()
-    for res in results:
-        counters.update(res)
-        #for key, value in res.most_common(None):
-        #    counters[key] += value
-
-    print(counters.most_common(10))
-    return counters
-
-def day23_space2(bots):
-    counters = Counter()
-    for x, y, z, r in bots:
-        for i in range(-r, r+1):
-            for j in range(-r, r+1):
-                for k in range(-r, r+1):
-                    if day23_manhattan(x, y, z, x+k, y+j, z+i) <= r:
-                        key = "{0},{1},{2}".format(x+k, y+j, z+i)
-                        #if key in counters:
-                        counters[key] += 1
-                        #else:
-                        #    counters[key] = 1
-    #sorted_counters = sorted(counters.items(), key=lambda kv: kv[1], reverse=True)
-    #print(sorted_counters[0])
-    print(counters.most_common(10))
-    return counters
-
-def day23_space2_new(bots):
-    counters = Counter()
-    for x, y, z in bots:
-        key = "{0},{1},{2}".format(x, y, z)
-        #if key in counters:
-        counters[key] += 1
-        #else:
-        #    counters[key] = 1
-    #sorted_counters = sorted(counters.items(), key=lambda kv: kv[1], reverse=True)
-    #print(sorted_counters[0])
-    #print(counters.most_common(10))
-    return counters
-
 def day23_bounds(bots):
-    min_x = sys.maxsize
-    max_x = 0
-    min_y = sys.maxsize
-    max_y = 0
-    min_z = sys.maxsize
-    max_z = 0
+    min_x = min_y = min_z = sys.maxsize
+    max_x = max_y = max_z = 0
 
-    for x, y, z, r in bots:
-        if x - r < min_x:
-            min_x = x - r
-        if x + r > max_x:
-            max_x = x + r
-        if y - r < min_y:
-            min_y = y - r
-        if y + r > max_y:
-            max_y = y + r
-        if z - r < min_z:
-            min_z = z - z
-        if z + r > max_z:
-            max_z = z + r
+    for coord, r in bots:
+        x, y, z = coord
+        min_x = min(x - r, min_x)
+        max_x = max(x + r, max_x)
+        min_y = min(y - r, min_y)
+        max_y = max(y + r, max_y)
+        min_z = min(z - r, min_z)
+        max_z = max(z + r, max_z)
 
     return (min_x, max_x, min_y, max_y, min_z, max_z)
 
-def day23_space3(bots, min_x, max_x, min_y, max_y, z2):
-    counters = Counter()
-    for j in range(min_y, max_y+1):
-        for k in range(min_x, max_x+1):
-            for x, y, z, r in bots:
-                if day23_manhattan(x, y, z, k, j, z2) <= r:
-                    key = "{0},{1},{2}".format(k, j, z2)
-                    counters[key] += 1
-    #print(counters.most_common(10))
-    #print(z2)
-    return counters
+def day23_squared(v):
+    return v*v
 
+def day23_intersect(zone, coord, r):
+    min_x, max_x, min_y, max_y, min_z, max_z = zone
+    x, y, z = coord
+    dist_squared = r * r
 
-def day23_new_bew(bots, min_x, max_x, min_y, max_y, z2):
-    counters = Counter()
-    for j in range(min_y, max_y+1):
-        for k in range(min_x, max_x+1):
-            for x, y, z, r in bots:
-                if day23_manhattan(x, y, z, k, j, z2) <= r:
-                    key = "{0},{1},{2}".format(k, j, z2)
-                    counters[key] += 1
-    #print(counters.most_common(10))
-    #print(z2)
-    return counters
+    if (x < min_x):
+        dist_squared -= day23_squared(x - min_x)
+    elif (x > max_x):
+        dist_squared -= day23_squared(x - max_x)
+    if (y < min_y):
+        dist_squared -= day23_squared(y - min_y)
+    elif (y > max_y):
+        dist_squared -= day23_squared(y - max_y)
+    if (z < min_z):
+        dist_squared -= day23_squared(z - min_z)
+    elif (z > max_z):
+        dist_squared -= day23_squared(z - max_z)
+    return dist_squared > 0
+
+def day23_corners(zone):
+    min_x, max_x, min_y, max_y, min_z, max_z = zone
+    for x in (min_x, max_x):
+        for y in (min_y, max_y):
+            for z in (min_z, max_z):
+                yield (x, y, z)
+
+def day23_bots_in_reach(bots, zone):
+    if zone is None:
+        return []
+    
+    min_x, max_x, min_y, max_y, min_z, max_z = zone
+
+    in_reach = deque([])
+    for bot in bots:
+        coord, r = bot
+        x, y, z = coord
+
+        # Bot is inside zone
+        if min_x <= x <= max_x and \
+           min_y <= y <= max_y and \
+           min_z <= z <= max_z:
+           in_reach.append(bot)
+           continue
+        
+        # Sphere of bot's signal doesn't intersect zone
+        if not day23_intersect(zone, coord, r):
+            continue
+
+        # Is any corner of the zone within the bot's signal?
+        for corner in day23_corners(zone):
+            if day23_manhattan(coord, corner) <= r:
+                in_reach.append(bot)
+                break
+
+    return in_reach
+
+def day23_get_subzones(zone):
+    min_x, max_x, min_y, max_y, min_z, max_z = zone
+    len_x = max_x - min_x
+    half_x = math.floor(len_x / 2)
+    len_y = max_y - min_y
+    half_y = math.floor(len_y / 2)
+    len_z = max_z - min_z
+    half_z = math.floor(len_z / 2)
+
+    if len_x == 0 or len_y == 0 or len_z == 0:
+        return [None]
+
+    zone_1 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z, min_z + half_x)
+    zone_2 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z + half_x + 1, max_z)
+    zone_3 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z, min_z + half_x)
+    zone_4 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z + half_x + 1, max_z)
+    zone_5 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z, min_z + half_x)
+    zone_6 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z + half_x + 1, max_z)
+    zone_7 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z, min_z + half_x)
+    zone_8 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z + half_x + 1, max_z)
+
+    return (zone_1, zone_2, zone_3, zone_4, zone_5, zone_6, zone_7, zone_8)
+
+def day23_thread_worker(bots, zone):
+    return (zone, day23_bots_in_reach(bots, zone))
+
+def day23_bot_count_in_subzones(bots, zone, pool):
+    zones_to_process = day23_get_subzones(zone)
+    results = pool.map(functools.partial(day23_thread_worker, bots), zones_to_process)
+    
+    most_bots_count = max([len(r[1]) for r in results])
+
+    if most_bots_count == 0:
+        return []
+
+    # Negative count to be used on heapq
+    return [(-most_bots_count, r[0])
+            for r in results
+            if len(r[1]) == most_bots_count
+           ]
+
+def day23_zone_dimensions(zone):
+    min_x, max_x, min_y, max_y, min_z, max_z = zone
+    return (max_x - min_x, max_y - min_y, max_z - min_z)
+
+def day23_get_locations_counts(bots, best_zones):
+    locations = deque([])
+    for zone, bot_count in best_zones:
+        min_x, max_x, min_y, max_y, min_z, max_z = zone
+        for x2 in range(min_x, max_x+1):
+            for y2 in range(min_y, max_y+1):
+                for z2 in range(min_z, max_z+1):
+                    test_coord = (x2, y2, z2)
+                    counter = 0
+                    for coord, r in bots:
+                        if day23_manhattan(coord, test_coord) <= r:
+                            counter += 1
+                    locations.append((test_coord, counter))
+    return locations
+
+def day23_calculate_best_distance(best_locations):
+    locations_distances = []
+    for location in best_locations:
+        locations_distances.append(day23_manhattan(location, (0, 0, 0)))
+
+    return sorted(locations_distances, reverse=True)[0]
+
+def day23_best_location(bots, zone):
+    heap = [(0, zone)]
+    heapq.heapify(heap)
+    best_zones = []
+    max_bot_count = 0
+
+    # Create pool for parallel work
+    threads = 4
+    pool = mp.Pool(processes=threads)
+
+    while heap:
+        bot_count, zone = heapq.heappop(heap)
+
+        # Count is negative because of heapq
+        bot_count = -bot_count
+
+        # Skip if this count is worst than what we've already encoutered
+        if bot_count < max_bot_count:
+            continue
+
+        dim_x, dim_y, dim_z  = day23_zone_dimensions(zone)
+        min_dim = 2
+        if dim_x == min_dim or dim_y == min_dim or dim_z == min_dim:
+            if bot_count > max_bot_count:
+                max_bot_count = bot_count
+            best_zones.append((zone, bot_count))
+        else:
+            for new_zone in day23_bot_count_in_subzones(bots, zone, pool):
+                heapq.heappush(heap, new_zone)
+
+    # End thread pool
+    pool.close()
+    pool.join()
+
+    max_bot_count = max([z[1] for z in best_zones])
+    # Keep only the best zones
+    best_zones = [z for z in best_zones if z[1] == max_bot_count]
+
+    locations = day23_get_locations_counts(bots, best_zones)
+
+    max_bot_count = max([l[1] for l in locations])
+    # Keep only the best locations
+    locations = [l[0] for l in locations if l[1] == max_bot_count]
+    return day23_calculate_best_distance(locations)
 
 def day23_1(data):
     #data = read_input(2018, 2301)
@@ -2287,37 +2286,10 @@ def day23_1(data):
     return len(day23_bots_in_range(bots, bots[0]))
 
 def day23_2(data):
-    return
-    # data = read_input(2018, 2302)
+    #data = read_input(2018, 2302)
     bots = day23_parse_input(data)
-    # min_x, max_x, min_y, max_y, min_z, max_z = day23_bounds(bots)
-    # for i in range(min_z, max_z+1):
-    #     for j in range(min_y, max_y+1):
-    #         for k in range(min_x, max_x+1):
-    #             m = 0
-    # return
-
-    # ranges = [(i, 0) for i in range(len(bots))]
-    # for i in range(len(bots)):
-    #     ranges[i] = (i, day23_bots_in_range(bots, bots[i]))
-    # ranges = sorted(ranges, reverse=True, key=lambda e: e[1])
-    # best_bot = bots[ranges[0][0]]
-    #return day23_new_bew(bots, best_bot)
-
-
-    day23_space_paralel(bots)
-    #day23_space2(bots)
-    return
-    space, min_x, min_y, min_z = day23_space(bots)
-    counter = 0
-    coord = (0, 0, 0)
-    for z, _ in enumerate(space):
-        for y, _ in enumerate(space[z]):
-            for x, _ in enumerate(space[z][y]):
-                if space[z][y][x] > counter:
-                    counter = space[z][y][x]
-                    coord = (x + min_x, y + min_y, z + min_z)
-    return counter, coord
+    starting_zone = day23_bounds(bots)
+    return day23_best_location(bots, starting_zone)
 
 """ DAY 24 """
 
