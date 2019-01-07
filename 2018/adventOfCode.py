@@ -19,8 +19,6 @@ from common.utils import execute_day, read_input
 # pylint: enable=W0611
 # pylint: enable=C0413
 
-START_DAY = 1
-
 """ DAY 1 """
 
 def day1_split_change(change):
@@ -895,12 +893,12 @@ def day12_2(data):
 
 """ Day 13 """
 
-class Turn(Enum):
+class Turn:
     Left = 0
     Straight = 1
     Right = 2
 
-class Direction(Enum):
+class Direction:
     Left = 0
     Up = 1
     Right = 2
@@ -2576,12 +2574,26 @@ def day25_1(data):
     points = day25_parse_input(data)
     return len(day25_constellations(points))
 
-START_DAY = 1
 """ MAIN FUNCTION """
-def main():
-    for day in range(START_DAY, 26):
+def main(specific_day):
+    initial_day = 1
+    end_day = 25
+    if specific_day is not None:
+        initial_day = specific_day
+        end_day = specific_day
+
+    for day in range(initial_day, end_day + 1):
         execute_day(globals(), 2018, day, 1)
         execute_day(globals(), 2018, day, 2)
 
 if __name__ == "__main__":
-    main()
+    start_day = None
+    if len(sys.argv) > 1:
+        try:
+            if len(sys.argv) > 2:
+                raise ValueError
+            start_day = int(sys.argv[1])
+        except ValueError:
+            print("Usage: adventOfCode.py [<day>]")
+            sys.exit(1)
+    main(start_day)
