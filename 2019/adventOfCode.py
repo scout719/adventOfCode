@@ -85,67 +85,70 @@ def day2_2(data):
             if result[0] == 19690720:
                 return 100 * result[1] + result[2]
 
-def day3_get_dir(dir):
-    ori = dir[0]
-    amount = int(dir[1:])
-    if ori == 'L':
+""" DAY 2 """
+
+def day3_get_delta(move):
+    orientation = move[0]
+    amount = int(move[1:])
+    if orientation == 'L':
         return (-1, 0, amount)
-    elif ori == 'R':
+    elif orientation == 'R':
         return (1, 0, amount)
-    elif ori == 'U':
+    elif orientation == 'U':
         return (0, -1, amount)
     else:
         return (0, 1, amount)
 
-def day3_solve_wire(map, path, char):
+def day3_solve_wire(wires_map, path, char):
     x, y = (0, 0)
     steps = 0
-    for dir in path:
-        dx, dy, amount = day3_get_dir(dir)
-        for i in range(0, amount):
+    for move in path:
+        dx, dy, amount = day3_get_delta(move)
+        for _ in range(0, amount):
             steps += 1
-            newx = x + dx
-            newy = y + dy
+            newx, newy = (x + dx, y + dy)
             coord = str(newx) + "," + str(newy)
-            if coord in map:
-                v = map[coord]
-                if char == 'A':
-                    v = (v[0], steps, v[2])
-                else:
-                    v = (v[0], v[1], steps)
-                if v[0] != char:
-                    map[coord] = ('X', v[1], v[2])
+            value = (char, 0, 0)
+            if coord in wires_map:
+                value = wires_map[coord]
+                if value[0] != char:
+                    value = ('X', value[1], value[2])
+            if char == 'A':
+                value = (value[0], steps, value[2])
             else:
-                v = (char, 0, 0)
-                if char == 'A':
-                    v = (v[0], steps, v[2])
-                else:
-                    v = (v[0], v[1], steps)
-                map[coord] = v 
+                value = (value[0], value[1], steps)
+            wires_map[coord] = value
             x, y = (newx, newy)
-            #print(dir)
-            #print(coord)
 
-def day3_1(data):
+def day3_fill_map(data, wires_map):
     #data = read_input(2019, 301)
     data1 = data[0].split(",")
     data2 = data[1].split(",")
-    map = {}
-    day3_solve_wire(map, data1, 'A')
-    day3_solve_wire(map, data2, 'B')
-    m = -1
-    for k in map:
-        if map[k][0] == 'X':
-            parts = k.split(',')
-            t = abs(int(parts[0])) + abs(int(parts[1]))
-            print(t)
-            print("---")
-            v = map[k][1] + map[k][2]
-            if v < m or m == -1:
-                m = v
-    print(m)
+    day3_solve_wire(wires_map, data1, 'A')
+    day3_solve_wire(wires_map, data2, 'B')
 
-    return 0
+def day3_1(data):
+    wires_map = {}
+    day3_fill_map(data, wires_map)
+    min_dist = -1
+    for k in wires_map:
+        if wires_map[k][0] == 'X':
+            parts = k.split(',')
+            curr_dist = abs(int(parts[0])) + abs(int(parts[1]))
+            if curr_dist < min_dist or min_dist == -1:
+                min_dist = curr_dist
+    return min_dist
+
+def day3_2(data):
+    wires_map = {}
+    day3_fill_map(data, wires_map)
+    min_steps = -1
+    for k in wires_map:
+        if wires_map[k][0] == 'X':
+            curr_steps = wires_map[k][1] + wires_map[k][2]
+            if curr_steps < min_steps or min_steps == -1:
+                min_steps = curr_steps
+    return min_steps
 
 """ MAIN FUNCTION """
 
