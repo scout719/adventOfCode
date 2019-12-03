@@ -99,17 +99,29 @@ def day3_get_dir(dir):
 
 def day3_solve_wire(map, path, char):
     x, y = (0, 0)
+    steps = 0
     for dir in path:
         dx, dy, amount = day3_get_dir(dir)
         for i in range(0, amount):
+            steps += 1
             newx = x + dx
             newy = y + dy
             coord = str(newx) + "," + str(newy)
             if coord in map:
-                if map[coord] != char:
-                    map[coord] = 'X'
+                v = map[coord]
+                if char == 'A':
+                    v = (v[0], steps, v[2])
+                else:
+                    v = (v[0], v[1], steps)
+                if v[0] != char:
+                    map[coord] = ('X', v[1], v[2])
             else:
-                map[coord] = char
+                v = (char, 0, 0)
+                if char == 'A':
+                    v = (v[0], steps, v[2])
+                else:
+                    v = (v[0], v[1], steps)
+                map[coord] = v 
             x, y = (newx, newy)
             #print(dir)
             #print(coord)
@@ -121,11 +133,18 @@ def day3_1(data):
     map = {}
     day3_solve_wire(map, data1, 'A')
     day3_solve_wire(map, data2, 'B')
+    m = -1
     for k in map:
-        if map[k] == 'X':
+        if map[k][0] == 'X':
             parts = k.split(',')
             t = abs(int(parts[0])) + abs(int(parts[1]))
             print(t)
+            print("---")
+            v = map[k][1] + map[k][2]
+            if v < m or m == -1:
+                m = v
+    print(m)
+
     return 0
 
 """ MAIN FUNCTION """
