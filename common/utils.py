@@ -1,6 +1,10 @@
+# pylint: disable=import-error
 from threading import Thread
 import functools
 from timeit import default_timer as timer
+import sys
+import os
+# pylint: enable=import-error
 
 """ AUX FUNCTIONS """
 class SignalCatchingError(Exception):
@@ -49,7 +53,26 @@ def execute_day(_globals, year, day, part):
         print("Day {0}, part {1}: {2} ({3:.3f} secs)".format(day, part, result, end - start))
 
 def read_input(year, day):
-    import os
     file_dir = os.path.dirname(os.path.realpath(__file__))
     with open("{0}/../{1}/input/day{2}".format(file_dir, year, day), "r") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
+
+def main(argv_,globals_, year):
+    start_day = None
+    if len(argv_) > 1:
+        try:
+            if len(argv_) > 2:
+                raise ValueError
+            start_day = int(argv_[1])
+        except ValueError:
+            print("Usage: adventOfCode.py [<day>]")
+            sys.exit(1)
+    initial_day = 1
+    end_day = 25
+    if start_day is not None:
+        initial_day = start_day
+        end_day = start_day
+
+    for day in range(initial_day, end_day + 1):
+        execute_day(globals_, year, day, 1)
+        execute_day(globals_, year, day, 2)
