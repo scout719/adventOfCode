@@ -15,8 +15,9 @@ from enum import Enum
 from struct import pack
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, FILE_DIR + "\\..\\")
-sys.path.insert(0, FILE_DIR + "\\..\\..\\")
+print(FILE_DIR)
+sys.path.insert(0, FILE_DIR + "/../")
+sys.path.insert(0, FILE_DIR + "/../../")
 from common.utils import execute_day, read_input  # NOQA: E402
 # pylint: enable=unused-import
 # pylint: enable=import-error
@@ -83,6 +84,49 @@ def day2_2(data):
             result = day2_run_program(data)
             if result[0] == 19690720:
                 return 100 * result[1] + result[2]
+
+def day3_get_dir(dir):
+    ori = dir[0]
+    amount = int(dir[1:])
+    if ori == 'L':
+        return (-1, 0, amount)
+    elif ori == 'R':
+        return (1, 0, amount)
+    elif ori == 'U':
+        return (0, -1, amount)
+    else:
+        return (0, 1, amount)
+
+def day3_solve_wire(map, path, char):
+    x, y = (0, 0)
+    for dir in path:
+        dx, dy, amount = day3_get_dir(dir)
+        for i in range(0, amount):
+            newx = x + dx
+            newy = y + dy
+            coord = str(newx) + "," + str(newy)
+            if coord in map:
+                if map[coord] != char:
+                    map[coord] = 'X'
+            else:
+                map[coord] = char
+            x, y = (newx, newy)
+            #print(dir)
+            #print(coord)
+
+def day3_1(data):
+    #data = read_input(2019, 301)
+    data1 = data[0].split(",")
+    data2 = data[1].split(",")
+    map = {}
+    day3_solve_wire(map, data1, 'A')
+    day3_solve_wire(map, data2, 'B')
+    for k in map:
+        if map[k] == 'X':
+            parts = k.split(',')
+            t = abs(int(parts[0])) + abs(int(parts[1]))
+            print(t)
+    return 0
 
 """ MAIN FUNCTION """
 
