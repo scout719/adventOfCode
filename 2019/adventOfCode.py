@@ -11,14 +11,14 @@ import sys
 import time
 from collections import Counter, deque
 import heapq
-from enum import Enum
+from enum import IntEnum
 from struct import pack
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
-from common.utils import execute_day, read_input  # NOQA: E402
+from common.utils import execute_day, read_input, main  # NOQA: E402
 # pylint: enable=unused-import
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
@@ -152,25 +152,5 @@ def day3_2(data):
 
 """ MAIN FUNCTION """
 
-def main(specific_day):
-    initial_day = 1
-    end_day = 25
-    if specific_day is not None:
-        initial_day = specific_day
-        end_day = specific_day
-
-    for day in range(initial_day, end_day + 1):
-        execute_day(globals(), 2019, day, 1)
-        execute_day(globals(), 2019, day, 2)
-
 if __name__ == "__main__":
-    start_day = None
-    if len(sys.argv) > 1:
-        try:
-            if len(sys.argv) > 2:
-                raise ValueError
-            start_day = int(sys.argv[1])
-        except ValueError:
-            print("Usage: adventOfCode.py [<day>]")
-            sys.exit(1)
-    main(start_day)
+    main(sys.argv, globals(), 2019)

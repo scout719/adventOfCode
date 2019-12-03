@@ -1,3 +1,6 @@
+# pylint: disable=unused-import
+# pylint: disable=import-error
+# pylint: disable=wrong-import-position
 import functools
 import math
 import multiprocessing as mp
@@ -8,16 +11,17 @@ import sys
 import time
 from collections import Counter, deque
 import heapq
-from enum import Enum
+from enum import IntEnum
 from struct import pack
 
-# pylint: disable=W0611
-# pylint: disable=C0413
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, FILE_DIR + "\\..\\")
-from common.utils import execute_day, read_input
-# pylint: enable=W0611
-# pylint: enable=C0413
+print(FILE_DIR)
+sys.path.insert(0, FILE_DIR + "/../")
+sys.path.insert(0, FILE_DIR + "/../../")
+from common.utils import execute_day, read_input, main  # NOQA: E402
+# pylint: enable=unused-import
+# pylint: enable=import-error
+# pylint: enable=wrong-import-position
 
 """ DAY 1 """
 
@@ -462,7 +466,7 @@ def day7_2(data):
 
 """ DAY 8 """
 
-class PropertyDescription(Enum):
+class PropertyDescription(IntEnum):
     Header = 1
     Metadata_Definition = 3
     Nodes_End = 2
@@ -2305,7 +2309,7 @@ def day23_2(data):
 
 """ DAY 24 """
 
-class P_24(Enum):
+class P_24(IntEnum):
     Units = 0
     Hit_points = 1
     Immunity = 2
@@ -2575,25 +2579,6 @@ def day25_1(data):
     return len(day25_constellations(points))
 
 """ MAIN FUNCTION """
-def main(specific_day):
-    initial_day = 1
-    end_day = 25
-    if specific_day is not None:
-        initial_day = specific_day
-        end_day = specific_day
-
-    for day in range(initial_day, end_day + 1):
-        execute_day(globals(), 2018, day, 1)
-        execute_day(globals(), 2018, day, 2)
 
 if __name__ == "__main__":
-    start_day = None
-    if len(sys.argv) > 1:
-        try:
-            if len(sys.argv) > 2:
-                raise ValueError
-            start_day = int(sys.argv[1])
-        except ValueError:
-            print("Usage: adventOfCode.py [<day>]")
-            sys.exit(1)
-    main(start_day)
+    main(sys.argv, globals(), 2018)
