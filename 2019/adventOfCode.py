@@ -150,6 +150,69 @@ def day3_2(data):
                 min_steps = curr_steps
     return min_steps
 
+""" DAY 4 """
+
+def day4_meet(password):
+    p = password
+    prev = password % 10
+    p = password // 10
+    Double = False
+    Dec = True
+    while p > 0:
+        d = p % 10
+        if d == prev:
+            Double = True
+        elif d > prev:
+            Dec = False
+            break
+        prev = d
+        p = p // 10
+    return Double and Dec
+
+def day4_meet2(password, part2=False):
+    leftfover = password
+    prev_digit = password % 10
+    leftfover = password // 10
+    has_double = False
+    repeat_count = 1
+    is_decreasing = True
+    while leftfover > 0:
+        digit = leftfover % 10
+        if digit == prev_digit:
+            repeat_count += 1
+            if not part2:
+                has_double = True
+        elif digit > prev_digit:
+            is_decreasing = False
+            break
+        else:
+            if repeat_count == 2:
+                has_double = True
+            repeat_count = 1
+        prev_digit = digit
+        leftfover = leftfover // 10
+    if repeat_count == 2:
+        has_double = True
+    return has_double and is_decreasing
+
+def day4_1(data):
+    low = int(data[0].split('-')[0])
+    high = int(data[0].split('-')[1])
+    count = 0
+    for i in range(low, high):
+        if day4_meet2(i):
+            count += 1
+    return count
+
+def day4_2(data):
+    low = int(data[0].split('-')[0])
+    high = int(data[0].split('-')[1])
+    count = 0
+    for i in range(low, high):
+        if day4_meet2(i, part2=True):
+            count += 1
+    return count
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
