@@ -152,24 +152,7 @@ def day3_2(data):
 
 """ DAY 4 """
 
-def day4_meet(password):
-    p = password
-    prev = password % 10
-    p = password // 10
-    Double = False
-    Dec = True
-    while p > 0:
-        d = p % 10
-        if d == prev:
-            Double = True
-        elif d > prev:
-            Dec = False
-            break
-        prev = d
-        p = p // 10
-    return Double and Dec
-
-def day4_meet2(password, part2=False):
+def day4_is_valid(password, part2=False):
     leftfover = password
     prev_digit = password % 10
     leftfover = password // 10
@@ -195,22 +178,60 @@ def day4_meet2(password, part2=False):
         has_double = True
     return has_double and is_decreasing
 
+def day4_next_value(curr):
+    value = str(curr)
+    size = len(value)
+    new_value = [int(value[i]) for i in range(0, size)]
+    pos = 1
+    has_increased = False
+    should_increase = False
+    while pos < size:
+        if should_increase:
+            new_value[pos] = (new_value[pos] + 1) % 10
+            if pos != size-1:
+                new_value[pos+1] = new_value[pos]
+            if new_value[pos] == 0:
+                should_increase = True
+                pos -= 1
+            else:
+                should_increase = False
+            continue
+
+        if pos == 0:
+            pos += 1
+            continue
+
+        if new_value[pos] >= new_value[pos-1]:
+            if pos == size -1 and not has_increased:
+                has_increased = True
+                should_increase = True
+            else:
+                pos += 1
+        else:
+            has_increased = True
+            should_increase = True
+    return int("".join([str(i) for i in new_value]))
+
 def day4_1(data):
     low = int(data[0].split('-')[0])
     high = int(data[0].split('-')[1])
     count = 0
-    for i in range(low, high):
-        if day4_meet2(i):
+    curr = low
+    while curr <= high:
+        if day4_is_valid(curr):
             count += 1
+        curr = day4_next_value(curr)
     return count
 
 def day4_2(data):
     low = int(data[0].split('-')[0])
     high = int(data[0].split('-')[1])
     count = 0
-    for i in range(low, high):
-        if day4_meet2(i, part2=True):
+    curr = low
+    while curr <= high:
+        if day4_is_valid(curr, part2=True):
             count += 1
+        curr = day4_next_value(curr)
     return count
 
 """ MAIN FUNCTION """
