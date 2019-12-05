@@ -95,7 +95,8 @@ def day2_1(data):
 
 def day2_letter_difference(box1, box2):
     if len(box1) != len(box2):
-        raise ValueError("Boxes with different lengths: {0} & {1}".format(box1, box2))
+        raise ValueError(
+            "Boxes with different lengths: {0} & {1}".format(box1, box2))
     counter_diff = 0
     common_letters = ""
     for i, _ in enumerate(box1):
@@ -184,17 +185,19 @@ def day4_parse_and_sort(data):
     # [1518-07-18 23:57] Guard #157 begins shift
     # [1518-04-18 00:44] wakes up
     # [1518-10-26 00:20] falls asleep
-    parsed_data = [re.findall(r"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (.+)", line)[0] for line in data]
-    parsed_data.sort(key=lambda elem: str(elem[1]) + str(elem[2] + str(elem[3]) + str(elem[4])))
-    parsed_data = [ \
-                    tuple([
-                        int(log[0]),
-                        int(log[1]),
-                        int(log[2]),
-                        int(log[3]),
-                        int(log[4]),
-                        day4_process_log(log[5])]) \
-                    for log in parsed_data]
+    parsed_data = [re.findall(
+        r"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (.+)", line)[0] for line in data]
+    parsed_data.sort(key=lambda elem: str(
+        elem[1]) + str(elem[2] + str(elem[3]) + str(elem[4])))
+    parsed_data = [
+        tuple([
+            int(log[0]),
+            int(log[1]),
+            int(log[2]),
+            int(log[3]),
+            int(log[4]),
+            day4_process_log(log[5])])
+        for log in parsed_data]
     return parsed_data
 
 def day4_process(data):
@@ -249,13 +252,13 @@ def day4_2(data):
 """ DAY 5 """
 
 def day5_should_destroy(first, second):
-    return  first.lower() == second.lower() and first != second
+    return first.lower() == second.lower() and first != second
 
 def day5_colapse(polymer):
     new_polymer = list(polymer[:])
     i = 0
     while i < len(new_polymer) - 1:
-        if day5_should_destroy(new_polymer[i], new_polymer[i+1]):
+        if day5_should_destroy(new_polymer[i], new_polymer[i + 1]):
             del new_polymer[i]
             del new_polymer[i]
             i -= 1
@@ -304,7 +307,8 @@ def day6_debug_grid(grid):
 def day6_fill_grid(grid, coordinates):
     for i, _ in enumerate(grid):
         for j, _ in enumerate(grid[i]):
-            dists = [abs(coordinate[1]-i) + abs(coordinate[0]-j) for coordinate in coordinates]
+            dists = [abs(coordinate[1] - i) + abs(coordinate[0] - j)
+                     for coordinate in coordinates]
             min_dist = sys.maxsize
             min_id = 0
             for id_, _ in enumerate(dists):
@@ -318,7 +322,8 @@ def day6_fill_grid(grid, coordinates):
 
 def day6_1(data):
     #data = read_input(2018, 601)
-    coordinates = [(int(entry.split(", ")[0]), int(entry.split(", ")[1])) for entry in data]
+    coordinates = [(int(entry.split(", ")[0]), int(
+        entry.split(", ")[1])) for entry in data]
 
     max_x = max([coordinate[0] for coordinate in coordinates])
     max_y = max([coordinate[1] for coordinate in coordinates])
@@ -326,7 +331,7 @@ def day6_1(data):
     grid = [[(".", 0) for j in range(max_x + 1)] for i in range(max_y + 1)]
 
     day6_fill_grid(grid, coordinates)
-    #day6_debug_grid(grid)
+    # day6_debug_grid(grid)
 
     ids = [i for i in range(len(coordinates))]
     for i, _ in enumerate(grid):
@@ -339,7 +344,7 @@ def day6_1(data):
             value = grid[i][0][0]
             if value in ids:
                 ids.remove(value)
-            value = grid[i][len(grid[i])-1][0]
+            value = grid[i][len(grid[i]) - 1][0]
             if value in ids:
                 ids.remove(value)
 
@@ -358,7 +363,8 @@ def day6_1(data):
 def day6_2(data):
     size = 10000
     #data, size = (read_input(2018, 601), 32)
-    coordinates = [(int(entry.split(", ")[0]), int(entry.split(", ")[1])) for entry in data]
+    coordinates = [(int(entry.split(", ")[0]), int(
+        entry.split(", ")[1])) for entry in data]
 
     max_x = max([coordinate[0] for coordinate in coordinates])
     max_y = max([coordinate[1] for coordinate in coordinates])
@@ -368,7 +374,7 @@ def day6_2(data):
         for j in range(max_x + 1):
             dists = functools.reduce(
                 lambda acc, coordinate, i_=i, j_=j:
-                acc + abs(coordinate[1]-i_) + abs(coordinate[0]-j_),
+                acc + abs(coordinate[1] - i_) + abs(coordinate[0] - j_),
                 coordinates,
                 0)
             if dists < size:
@@ -380,7 +386,8 @@ def day6_2(data):
 def day7_parse_inst(data):
     # Step C must be finished before step A can begin.
     parsed_data = [
-        re.findall(r"Step ([A-Z]) must be finished before step ([A-Z]) can begin.", line)[0]
+        re.findall(
+            r"Step ([A-Z]) must be finished before step ([A-Z]) can begin.", line)[0]
         for line in data]
     dependencies = {}
     letters = []
@@ -433,7 +440,8 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
     stack = []
     for letter in letters:
         if not letter in dependencies.keys():
-            stack.append((letter, (ord(letter)-ord("A") + 1) + step_duration))
+            stack.append(
+                (letter, (ord(letter) - ord("A") + 1) + step_duration))
     stack.sort(key=lambda e: (e[1], e[0]))
     completed = []
     workers = [None for i in range(workers)]
@@ -451,7 +459,8 @@ def day7_inst_order2(dependencies, letters, step_duration, workers):
                all([let[0] != step for let in stack]) and \
                all([dep in completed for dep in deps]) and \
                not any([not w is None and w[0] == step for w in workers]):
-                stack.append((step, (ord(step)-ord("A") + 1) + step_duration))
+                stack.append(
+                    (step, (ord(step) - ord("A") + 1) + step_duration))
         stack.sort()
     return counter
 
@@ -502,7 +511,8 @@ def day8_parse_tree(data):
     while operations:
         operation = operations.pop(0)
         data, curr_node, operations = \
-            day8_process_operation(data, operation, curr_node, nodes, operations)
+            day8_process_operation(
+                data, operation, curr_node, nodes, operations)
     return curr_node[1][0]
 
 def day8_sum_meta(node):
@@ -594,7 +604,8 @@ def day9_play_game_mine(players, highest_marble):
         if next_marble % 23 != 0:
             for _ in range(2):
                 current_marble = current_marble.next
-            current_marble = day9_add_marble_before(current_marble, next_marble)
+            current_marble = day9_add_marble_before(
+                current_marble, next_marble)
         else:
             scores[player] += next_marble
             for _ in range(7):
@@ -602,7 +613,7 @@ def day9_play_game_mine(players, highest_marble):
             scores[player] += current_marble.data
             current_marble = day9_remove_marble(current_marble)
         next_marble += 1
-        player = (player+1) % players
+        player = (player + 1) % players
     return scores
 
 def day9_play_game_optimized(players, highest_marble):
@@ -620,7 +631,7 @@ def day9_play_game_optimized(players, highest_marble):
             marbles.rotate(7)
             scores[player] += marbles.popleft()
         next_marble += 1
-        player = (player+1) % players
+        player = (player + 1) % players
     return scores
 
 def day9_parse_input(data):
@@ -649,7 +660,8 @@ def day9_2(data):
 
 def day10_parse_line(line):
     # position=< 32923,  43870> velocity=<-3, -4>
-    res = re.findall(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>", line)[0]
+    res = re.findall(
+        r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>", line)[0]
     return tuple([int(a) for a in res])
 
 def day10_parse_input(data):
@@ -674,9 +686,9 @@ def day10_print_particles(particles):
     max_x = max([pos[0] for pos in particles])
     max_y = max([pos[1] for pos in particles])
 
-    for i in range(max_y - min_y +1):
+    for i in range(max_y - min_y + 1):
         line = ""
-        for j in range(max_x - min_x+1):
+        for j in range(max_x - min_x + 1):
             found = False
             for particle in particles:
                 if particle[0] == (j + min_x) and particle[1] == (min_y + i):
@@ -694,7 +706,8 @@ def day10_resolve(particles):
     size_x, size_y = day10_board_size(particles)
     counter = 0
     while True:
-        new_particles = [day10_update_particle(particle) for particle in particles]
+        new_particles = [day10_update_particle(
+            particle) for particle in particles]
         new_size_x, new_size_y = day10_board_size(new_particles)
 
         if(new_size_x > size_x and new_size_y > size_y):
@@ -727,7 +740,7 @@ def day11_cell_value(serial, x, y):
     return level
 
 def day11_grid(serial):
-    return [[day11_cell_value(serial, x+1, y+1)  for x in range(300)] for y in range(300)]
+    return [[day11_cell_value(serial, x + 1, y + 1) for x in range(300)] for y in range(300)]
 
 def day11_solve_exact_size_aux(memoization, grid, x, y, size):
     if size == 1:
@@ -737,15 +750,16 @@ def day11_solve_exact_size_aux(memoization, grid, x, y, size):
     if key in memoization:
         return memoization[key]
     around_size = 0
-    for i in range(size-1):
-        around_size += grid[y+i][x+size-1]
-        around_size += grid[y+size-1][x+i]
-    around_size += grid[y + size - 1][x + size -1]
-    #if around_size > 0:
-    value = day11_solve_exact_size_aux(memoization, grid, x, y, size-1) + around_size
+    for i in range(size - 1):
+        around_size += grid[y + i][x + size - 1]
+        around_size += grid[y + size - 1][x + i]
+    around_size += grid[y + size - 1][x + size - 1]
+    # if around_size > 0:
+    value = day11_solve_exact_size_aux(
+        memoization, grid, x, y, size - 1) + around_size
     memoization[key] = value
     return value
-    #else:
+    # else:
     #    return -99999999999999
 
 def day11_solve_exact_size(memoization, grid, size):
@@ -760,18 +774,19 @@ def day11_solve_exact_size(memoization, grid, size):
                 current_total = memoization[key]
             else:
                 around_size = 0
-                for i in range(size-1):
-                    around_size += grid[y+i][x+size-1]
-                    around_size += grid[y+size-1][x+i]
-                around_size += grid[y + size - 1][x + size -1]
+                for i in range(size - 1):
+                    around_size += grid[y + i][x + size - 1]
+                    around_size += grid[y + size - 1][x + i]
+                around_size += grid[y + size - 1][x + size - 1]
                 if around_size > 0:
-                    current_total = day11_solve_exact_size_aux(memoization, grid, x, y, size)
+                    current_total = day11_solve_exact_size_aux(
+                        memoization, grid, x, y, size)
                 else:
                     x += 1
                     continue
             if current_total > max_total:
                 max_total = current_total
-                coordinate = (x+1, y+1)
+                coordinate = (x + 1, y + 1)
             x += 1
         y += 1
     return (coordinate, max_total)
@@ -781,8 +796,9 @@ def day11_solve_range(grid, min_size, max_size):
     coordinate = (1, 1)
     max_size_total = min_size
     memoization = {}
-    for size in range(min_size, max_size+1):
-        current_coordinate, current_total = day11_solve_exact_size(memoization, grid, size)
+    for size in range(min_size, max_size + 1):
+        current_coordinate, current_total = day11_solve_exact_size(
+            memoization, grid, size)
         if current_total > max_total:
             max_total = current_total
             coordinate = current_coordinate
@@ -832,14 +848,14 @@ def day12_process_generation(pots, rules, start):
     pots.append(".")
     pots.append(".")
     pots.append(".")
-    for i in range(2, len(pots)-2):
+    for i in range(2, len(pots) - 2):
         result = day12_get_rule(pots, rules, i)
         if result is None:
             new_pots.append(pots[i])
         else:
             new_pots.append(result)
 
-    start = start-2
+    start = start - 2
     curr = new_pots[0]
     while curr == ".":
         new_pots.popleft()
@@ -860,8 +876,8 @@ def day12_solve(pots, rules, generations):
     for i in range(generations):
         history.append(("".join(pots), start))
         memoization["".join(pots)] = i
-        #print("".join(pots))
-        #print(start)
+        # print("".join(pots))
+        # print(start)
         pots, start = day12_process_generation(pots, rules, start)
         new_pots = "".join(pots)
         if new_pots in memoization:
@@ -870,12 +886,12 @@ def day12_solve(pots, rules, generations):
             while j < itera:
                 history.popleft()
                 j += 1
-            pos = (generations-(i+1))%len(history)
+            pos = (generations - (i + 1)) % len(history)
             pos_shift = start - history[pos][1]
 
-            iterations = math.floor((generations-(i+1))/len(history))
+            iterations = math.floor((generations - (i + 1)) / len(history))
             pots = history[pos][0]
-            start += pos_shift*iterations
+            start += pos_shift * iterations
             break
 
     total = 0
@@ -1025,7 +1041,8 @@ def day13_move_cart(map_, positions, cart):
         if i != cart and positions[i][0] == new_x and positions[i][1] == new_y:
             return "X", new_x, new_y, i
 
-    new_direction, new_turn = day13_next_turn(map_[new_y][new_x], direction, last_turn)
+    new_direction, new_turn = day13_next_turn(
+        map_[new_y][new_x], direction, last_turn)
 
     return (new_x, new_y, new_direction, new_turn)
 
@@ -1050,7 +1067,8 @@ def day13_solve2(map_, positions):
                 crashing_carts.append(i)
             else:
                 positions[i] = new_position
-        positions = [positions[i] for i in range(len(positions)) if not i in crashing_carts]
+        positions = [positions[i]
+                     for i in range(len(positions)) if not i in crashing_carts]
         if len(positions) == 1:
             return positions[0][0], positions[0][1]
         positions = sorted(positions, key=lambda v: (v[0], v[1]))
@@ -1088,7 +1106,7 @@ def day14_solve(nr_recipes):
     recipes = [3, 7]
     elves = [0, 1]
     recipes_len = len(recipes)
-    for _ in range(nr_recipes+10):
+    for _ in range(nr_recipes + 10):
         #day14_debug_recipes(recipes, elves)
         recipe_0 = recipes[elves[0]]
         recipe_1 = recipes[elves[1]]
@@ -1099,7 +1117,7 @@ def day14_solve(nr_recipes):
         elves[0] = (elves[0] + recipe_0 + 1) % recipes_len
         elves[1] = (elves[1] + recipe_1 + 1) % recipes_len
 
-    return recipes[nr_recipes:nr_recipes+10]
+    return recipes[nr_recipes:nr_recipes + 10]
 
 def day14_solve2(nr_recipes, value):
     recipes = [3, 7]
@@ -1122,12 +1140,13 @@ def day14_solve2(nr_recipes, value):
             #day14_debug_recipes(recipes, [start, -1])
             while start < recipes_len - size:
                 if str(recipes[start]) == value[0]:
-                    tmp_value = "".join([str(r) for r in recipes[start:start + size]])
+                    tmp_value = "".join([str(r)
+                                         for r in recipes[start:start + size]])
                     if tmp_value == value:
                         return start
                 start += 1
 
-    return recipes[nr_recipes:nr_recipes+10]
+    return recipes[nr_recipes:nr_recipes + 10]
 
 def day14_1(data):
     #data = ["9"]
@@ -1266,7 +1285,7 @@ class Inst16:
         eqir.__func__,
         eqri.__func__,
         eqrr.__func__
-        ]
+    ]
 
 def day16_parse_input(data):
     samples = []
@@ -1277,11 +1296,14 @@ def day16_parse_input(data):
         # Before: [3, 2, 1, 1]
         # 9 2 1 2
         # After:  [3, 2, 2, 1]
-        before = [int(x) for x in re.findall(r"Before: \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
+        before = [int(x) for x in re.findall(
+            r"Before: \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
         i += 1
-        inst = [int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
+        inst = [int(x) for x in re.findall(
+            r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
         i += 1
-        after = [int(x) for x in re.findall(r"After:  \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
+        after = [int(x) for x in re.findall(
+            r"After:  \[(\d+), (\d+), (\d+), (\d+)\]", data[i])[0]]
         i += 1
         i += 1
         samples.append((before, inst, after))
@@ -1290,7 +1312,8 @@ def day16_parse_input(data):
     while i < len(data):
         if data[i] != "":
             # 9 2 1 2
-            inst = [int(x) for x in re.findall(r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
+            inst = [int(x) for x in re.findall(
+                r"(\d+) (\d+) (\d+) (\d+)", data[i])[0]]
             program.append(inst)
         i += 1
 
@@ -1367,7 +1390,7 @@ def day16_2(data):
 class Bitmap():
 
     def __init__(self, width, height):
-        self._bfType = 19778 # Bitmap signature
+        self._bfType = 19778  # Bitmap signature
         self._bfReserved1 = 0
         self._bfReserved2 = 0
         self._bcPlanes = 1
@@ -1376,19 +1399,20 @@ class Bitmap():
         self._bfOffBits = 26
         self._bcWidth = width
         self._bcHeight = height
-        self._bfSize = 26+self._bcWidth*3*self._bcHeight
+        self._bfSize = 26 + self._bcWidth * 3 * self._bcHeight
         self.clear()
 
     def clear(self):
-        self._graphics = [(0, 0, 0)]*self._bcWidth*self._bcHeight
+        self._graphics = [(0, 0, 0)] * self._bcWidth * self._bcHeight
 
     def setPixel(self, x, y, color):
         if isinstance(color, tuple):
-            if x < 0 or y < 0 or x > self._bcWidth-1 or y > self._bcHeight-1:
+            if x < 0 or y < 0 or x > self._bcWidth - 1 or y > self._bcHeight - 1:
                 raise ValueError('Coords out of range')
             if len(color) != 3:
                 raise ValueError('Color must be a tuple of 3 elems')
-            self._graphics[y*self._bcWidth+x] = (color[2], color[1], color[0])
+            self._graphics[y * self._bcWidth +
+                           x] = (color[2], color[1], color[0])
         else:
             raise ValueError('Color must be a tuple of 3 elems')
 
@@ -1399,16 +1423,16 @@ class Bitmap():
                          self._bfSize,
                          self._bfReserved1,
                          self._bfReserved2,
-                         self._bfOffBits)) # Writing BITMAPFILEHEADER
+                         self._bfOffBits))  # Writing BITMAPFILEHEADER
             f.write(pack('<LHHHH',
                          self._bcSize,
                          self._bcWidth,
                          self._bcHeight,
                          self._bcPlanes,
-                         self._bcBitCount)) # Writing BITMAPINFO
+                         self._bcBitCount))  # Writing BITMAPINFO
             for px in self._graphics:
                 f.write(pack('<BBB', *px))
-            for _ in range(0, (self._bcWidth*3) % 4):
+            for _ in range(0, (self._bcWidth * 3) % 4):
                 f.write(pack('B', 0))
 
 class Day17_Type:
@@ -1444,18 +1468,18 @@ class Day17_Type:
 
 bitmap_counter = 0
 def day17_debug_ground_bmp(ground, y):
-# pylint: disable=W0603
+    # pylint: disable=W0603
     global bitmap_counter
 # pylint: enable=W0603
 
-    half = int(100/2)
+    half = int(100 / 2)
     lower = max(y - half, 0)
     size = (y + half + 1) - lower
     b = Bitmap(436, size)
     b.clear()
     for i in range(lower, y + half + 1):
         for j in range(len(ground[i])):
-            coord = y + half     - i
+            coord = y + half - i
             b.setPixel(j, coord, Day17_Type.render_square_rgb(ground[i][j]))
     b.write('test/file{:09d}.bmp'.format(bitmap_counter))
     bitmap_counter += 1
@@ -1473,7 +1497,7 @@ def day17_debug_full_ground_bmp(ground):
     b.clear()
     for i, _ in enumerate(ground):
         for j, _ in enumerate(ground[i]):
-            coord = (size-1) - i
+            coord = (size - 1) - i
             b.setPixel(j, coord, Day17_Type.render_square_rgb(ground[i][j]))
     b.write('test/a_full_ground.bmp')
 
@@ -1484,7 +1508,8 @@ def day17_parse_input(data):
     for line in data:
         if line[0] == "x":
             # x=501, y=3..7
-            ground_slice = [int(x) for x in re.findall(r"x=(\d+), y=(\d+)..(\d+)", line)[0]]
+            ground_slice = [int(x) for x in re.findall(
+                r"x=(\d+), y=(\d+)..(\d+)", line)[0]]
             slices.append(ground_slice)
             if ground_slice[1] < min_y:
                 min_y = ground_slice[1]
@@ -1492,8 +1517,9 @@ def day17_parse_input(data):
                 max_y = ground_slice[2]
         else:
             # y=501, x=3..7
-            ground_slice = [int(x) for x in re.findall(r"y=(\d+), x=(\d+)..(\d+)", line)[0]]
-            for i in range(ground_slice[1], ground_slice[2]+1):
+            ground_slice = [int(x) for x in re.findall(
+                r"y=(\d+), x=(\d+)..(\d+)", line)[0]]
+            for i in range(ground_slice[1], ground_slice[2] + 1):
                 ground_slice2 = (i, ground_slice[0], ground_slice[0])
                 slices.append(ground_slice2)
                 if ground_slice2[1] < min_y:
@@ -1505,9 +1531,10 @@ def day17_parse_input(data):
     min_x = slices[0][0] - 2
     max_x = slices[-1][0] + 2
 
-    ground = [[Day17_Type.sand for j in range(min_x, max_x)] for i in range(max_y + 2)]
+    ground = [[Day17_Type.sand for j in range(
+        min_x, max_x)] for i in range(max_y + 2)]
     for s in slices:
-        for i in range(s[1], s[2]+1):
+        for i in range(s[1], s[2] + 1):
             ground[i][s[0] - min_x] = Day17_Type.clay
 
     return ground, min_x, min_y
@@ -1517,7 +1544,7 @@ def day17_flow_water(ground, y, x):
     while stack:
         i, j = stack.popleft()
 
-        if i+1 >= len(ground) or i < 0 or j+1 >= len(ground[0]) or j-1 < 0:
+        if i + 1 >= len(ground) or i < 0 or j + 1 >= len(ground[0]) or j - 1 < 0:
             continue
         if ground[i][j] == Day17_Type.clay or ground[i][j] == Day17_Type.settled:
             continue
@@ -1525,7 +1552,7 @@ def day17_flow_water(ground, y, x):
         if ground[i][j] == Day17_Type.sand:
             ground[i][j] = Day17_Type.water
 
-        k = j-1
+        k = j - 1
         left_wall = False
         right_wall = False
         while k > 0:
@@ -1536,7 +1563,7 @@ def day17_flow_water(ground, y, x):
                 break
             k -= 1
 
-        k = j+1
+        k = j + 1
         while k < len(ground[i]):
             if ground[i][k] == Day17_Type.clay or ground[i][k] == Day17_Type.settled:
                 right_wall = True
@@ -1550,22 +1577,22 @@ def day17_flow_water(ground, y, x):
 
         #day17_debug_ground_bmp(ground, i)
 
-        if ground[i+1][j] == Day17_Type.clay or ground[i+1][j] == Day17_Type.settled:
-            if ground[i][j-1] != ground[i][j]:
-                stack.append((i, j-1))
-            if ground[i][j+1] != ground[i][j]:
-                stack.append((i, j+1))
+        if ground[i + 1][j] == Day17_Type.clay or ground[i + 1][j] == Day17_Type.settled:
+            if ground[i][j - 1] != ground[i][j]:
+                stack.append((i, j - 1))
+            if ground[i][j + 1] != ground[i][j]:
+                stack.append((i, j + 1))
 
-        if ground[i][j] == Day17_Type.settled and ground[i-1][j] == Day17_Type.water:
-            stack.append((i-1, j))
+        if ground[i][j] == Day17_Type.settled and ground[i - 1][j] == Day17_Type.water:
+            stack.append((i - 1, j))
 
-        if ground[i+1][j] != ground[i][j]:
-            stack.append((i+1, j))
+        if ground[i + 1][j] != ground[i][j]:
+            stack.append((i + 1, j))
 
 def day17_solve(ground, min_x, min_y):
     day17_flow_water(ground, 0, 500 - min_x)
 
-    #day17_debug_full_ground_bmp(ground)
+    # day17_debug_full_ground_bmp(ground)
 
     counter_water = 0
     counter_retained = 0
@@ -1625,10 +1652,12 @@ def day18_debug_area(area):
 
 def day18_get_adjacent_cells(area, i_coord, j_coord):
     # the adjacency matrix
-    adjacency = [(i, j) for i in (-1, 0, 1) for j in (-1, 0, 1) if not i == j == 0]
+    adjacency = [(i, j) for i in (-1, 0, 1)
+                 for j in (-1, 0, 1) if not i == j == 0]
     result = []
     for di, dj in adjacency:
-        if 0 <= (i_coord + di) < len(area) and 0 <= j_coord + dj < len(area[0]): #boundaries check
+        # boundaries check
+        if 0 <= (i_coord + di) < len(area) and 0 <= j_coord + dj < len(area[0]):
             result.append(area[i_coord + di][j_coord + dj])
     return result
 
@@ -1641,7 +1670,7 @@ def day18_process(area, minutes):
     history = deque([])
     memoization = {}
     for t in range(minutes):
-        #day18_debug_area(prev_area)
+        # day18_debug_area(prev_area)
         history.append(prev_area)
         memoization["".join(prev_area)] = t
         new_area = []
@@ -1658,7 +1687,7 @@ def day18_process(area, minutes):
             while j < itera:
                 history.popleft()
                 j += 1
-            pos = (minutes-(t+1))%len(history)
+            pos = (minutes - (t + 1)) % len(history)
             prev_area = history[pos]
             break
         prev_area = new_area
@@ -1668,36 +1697,40 @@ def day18_1(data):
     #data = read_input(2018, 1801)
     area = data
     new_area = day18_process(area, 10)
-    trees = len([True for line in new_area for s in line if s == AcreContents.trees])
-    lumberyards = len([True for line in new_area for s in line if s == AcreContents.lumberyard])
+    trees = len(
+        [True for line in new_area for s in line if s == AcreContents.trees])
+    lumberyards = len(
+        [True for line in new_area for s in line if s == AcreContents.lumberyard])
     return trees * lumberyards
 
 def day18_2(data):
     #data = read_input(2018, 1801)
     area = data
     new_area = day18_process(area, 1000000000)
-    trees = len([True for line in new_area for s in line if s == AcreContents.trees])
-    lumberyards = len([True for line in new_area for s in line if s == AcreContents.lumberyard])
+    trees = len(
+        [True for line in new_area for s in line if s == AcreContents.trees])
+    lumberyards = len(
+        [True for line in new_area for s in line if s == AcreContents.lumberyard])
     return trees * lumberyards
 
 """ DAY 19 """
 
 class Inst19(Inst16):
-    ops = {"addr": Inst16.addr, \
-           "addi": Inst16.addi, \
-           "mulr": Inst16.mulr, \
-           "muli": Inst16.muli, \
-           "banr": Inst16.banr, \
-           "bani": Inst16.bani, \
-           "borr": Inst16.borr, \
-           "bori": Inst16.bori, \
-           "setr": Inst16.setr, \
-           "seti": Inst16.seti, \
-           "gtir": Inst16.gtir, \
-           "gtri": Inst16.gtri, \
-           "gtrr": Inst16.gtrr, \
-           "eqir": Inst16.eqir, \
-           "eqri": Inst16.eqri, \
+    ops = {"addr": Inst16.addr,
+           "addi": Inst16.addi,
+           "mulr": Inst16.mulr,
+           "muli": Inst16.muli,
+           "banr": Inst16.banr,
+           "bani": Inst16.bani,
+           "borr": Inst16.borr,
+           "bori": Inst16.bori,
+           "setr": Inst16.setr,
+           "seti": Inst16.seti,
+           "gtir": Inst16.gtir,
+           "gtri": Inst16.gtri,
+           "gtrr": Inst16.gtrr,
+           "eqir": Inst16.eqir,
+           "eqri": Inst16.eqri,
            "eqrr": Inst16.eqrr}
 
 def day19_parse_input(data):
@@ -1721,9 +1754,9 @@ def day19_run_program(pointer, program, start_0, day, part):
     last = 0
     while 0 <= inst < len(program):
         # Make register 1 have the value of 2 * 5 right away (first loop)
-        if day == 19 and inst == 4 and regs[1]/regs[2] == regs[5] and regs[2] < regs[3]/regs[5]:
-            regs[2] = int(regs[3]/regs[5])
-            regs[1] = regs[2]*regs[5]
+        if day == 19 and inst == 4 and regs[1] / regs[2] == regs[5] and regs[2] < regs[3] / regs[5]:
+            regs[2] = int(regs[3] / regs[5])
+            regs[1] = regs[2] * regs[5]
 
         # Make register 2 have the value of 3 (second loop)
         if day == 19 and inst == 9 and regs[2] < regs[3]:
@@ -1800,10 +1833,12 @@ def day20_alternatives(index, path, locations, distances):
     while path[index] != ")":
         if path[index] == "(":
             current_locations, index = \
-                day20_alternatives(index+1, path, current_locations, distances)
+                day20_alternatives(
+                    index + 1, path, current_locations, distances)
         elif path[index] == "|":
             new_locations.extend(current_locations)
-            current_locations = [PathNode(n.pos, n.dist, n.path) for n in locations]
+            current_locations = [PathNode(n.pos, n.dist, n.path)
+                                 for n in locations]
         else:
             day20_update_locations(path[index], current_locations, distances)
         index += 1
@@ -1828,7 +1863,8 @@ def day20_get_rooms_distances(path):
     while path[index] != "$":
         if path[index] == "(":
             current_locations, index = \
-                day20_alternatives(index+1, path, current_locations, distances)
+                day20_alternatives(
+                    index + 1, path, current_locations, distances)
         elif path[index] != ")":
             day20_update_locations(path[index], current_locations, distances)
         index += 1
@@ -1887,9 +1923,9 @@ class Day22_Tools:
     def allowed_tool(region_type, tool):
         if region_type == Day22_Type.rocky:
             return tool in (Day22_Tools.gear, Day22_Tools.torch)
-        if  region_type == Day22_Type.wet:
+        if region_type == Day22_Type.wet:
             return tool in (Day22_Tools.gear, Day22_Tools.neither)
-        if  region_type == Day22_Type.narrow:
+        if region_type == Day22_Type.narrow:
             return tool in (Day22_Tools.torch, Day22_Tools.neither)
         raise ValueError
 
@@ -1914,27 +1950,27 @@ class Day22_Path_Node:
         self.minutes = minutes
         self.path = path
 
-    def __lt__(self, other): # For x < y
-        return (self.minutes  + abs(self.delta_x)  + abs(self.delta_y)) < \
+    def __lt__(self, other):  # For x < y
+        return (self.minutes + abs(self.delta_x) + abs(self.delta_y)) < \
                (other.minutes + abs(other.delta_x) + abs(other.delta_y))
 
-    def __eq__(self, other): # For x == y
+    def __eq__(self, other):  # For x == y
         return self.pos == other.pos and \
-               self.delta_x == other.delta_x and \
-               self.delta_y == other.delta_y and \
-               self.tool == other.tool and \
-               self.minutes == other.minutes
+            self.delta_x == other.delta_x and \
+            self.delta_y == other.delta_y and \
+            self.tool == other.tool and \
+            self.minutes == other.minutes
 
-    def __gt__(self, other): # For x > y
+    def __gt__(self, other):  # For x > y
         return not self == other and not self < other
 
-    def __le__(self, other): # For x <= y
+    def __le__(self, other):  # For x <= y
         return self == other or self < other
 
-    def __ne__(self, other): # For x != y OR x <> y
+    def __ne__(self, other):  # For x != y OR x <> y
         return not self == other
 
-    def __ge__(self, other): # For x >= y
+    def __ge__(self, other):  # For x >= y
         return self == other or self > other
 
     def __repr__(self):
@@ -1963,8 +1999,8 @@ def day22_geologic_index(pos, target, depth, memory):
     elif y == 0:
         value = x * 16807
     else:
-        left = day22_erosion_level((x-1, y), target, depth, memory)
-        up = day22_erosion_level((x, y-1), target, depth, memory)
+        left = day22_erosion_level((x - 1, y), target, depth, memory)
+        up = day22_erosion_level((x, y - 1), target, depth, memory)
         value = left * up
     memory[pos] = value
     return value
@@ -2012,7 +2048,8 @@ def day22_new_nodes(node, terrain, depth, target, delta_x, delta_y):
     if new_x < 0 or new_y < 0:
         return []
     if (new_x, new_y) not in terrain[0]:
-        erosion = day22_erosion_level((new_x, new_y), target, depth, terrain[1])
+        erosion = day22_erosion_level(
+            (new_x, new_y), target, depth, terrain[1])
         terrain[0][(new_x, new_y)] = Day22_Type.get_type(erosion)
     new_terrain = terrain[0][(new_x, new_y)]
     alternatives = []
@@ -2027,7 +2064,7 @@ def day22_new_nodes(node, terrain, depth, target, delta_x, delta_y):
                                     tool,
                                     node.minutes + 1,
                                     node.path + [node])
-                                ]
+                ]
                 break
             elif Day22_Tools.allowed_tool(terrain[0][node.pos], tool):
                 alternatives.append(
@@ -2039,7 +2076,7 @@ def day22_new_nodes(node, terrain, depth, target, delta_x, delta_y):
                         tool,
                         node.minutes + 7,
                         node.path + [node])
-                    )
+                )
     return alternatives
 
 def day22_manhattan_adjacency():
@@ -2089,7 +2126,8 @@ def day23_parse_input(data):
     # pos=<-5920414,66954528,45418976>, r=94041555
     bots = []
     for line in data:
-        bot = [int(x) for x in re.findall(r"pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(\d+)", line)[0]]
+        bot = [int(x) for x in re.findall(
+            r"pos=<(-?\d+),(-?\d+),(-?\d+)>, r=(\d+)", line)[0]]
         bots.append(((bot[0], bot[1], bot[2]), bot[3]))
     return sorted(bots, reverse=True, key=lambda b: b[1])
 
@@ -2123,7 +2161,7 @@ def day23_bounds(bots):
     return (min_x, max_x, min_y, max_y, min_z, max_z)
 
 def day23_squared(v):
-    return v*v
+    return v * v
 
 def day23_intersect(zone, coord, r):
     min_x, max_x, min_y, max_y, min_z, max_z = zone
@@ -2196,14 +2234,22 @@ def day23_get_subzones(zone):
     if len_x == 0 or len_y == 0 or len_z == 0:
         return [None]
 
-    zone_1 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z, min_z + half_z)
-    zone_2 = (min_x, min_x + half_x, min_y, min_y + half_y, min_z + half_z + 1, max_z)
-    zone_3 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z, min_z + half_z)
-    zone_4 = (min_x, min_x + half_x, min_y + half_y + 1, max_y, min_z + half_z + 1, max_z)
-    zone_5 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z, min_z + half_z)
-    zone_6 = (min_x + half_x + 1, max_x, min_y, min_y + half_y, min_z + half_z + 1, max_z)
-    zone_7 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z, min_z + half_z)
-    zone_8 = (min_x + half_x + 1, max_x, min_y + half_y + 1, max_y, min_z + half_z + 1, max_z)
+    zone_1 = (min_x, min_x + half_x, min_y,
+              min_y + half_y, min_z, min_z + half_z)
+    zone_2 = (min_x, min_x + half_x, min_y, min_y +
+              half_y, min_z + half_z + 1, max_z)
+    zone_3 = (min_x, min_x + half_x, min_y +
+              half_y + 1, max_y, min_z, min_z + half_z)
+    zone_4 = (min_x, min_x + half_x, min_y + half_y +
+              1, max_y, min_z + half_z + 1, max_z)
+    zone_5 = (min_x + half_x + 1, max_x, min_y,
+              min_y + half_y, min_z, min_z + half_z)
+    zone_6 = (min_x + half_x + 1, max_x, min_y,
+              min_y + half_y, min_z + half_z + 1, max_z)
+    zone_7 = (min_x + half_x + 1, max_x, min_y +
+              half_y + 1, max_y, min_z, min_z + half_z)
+    zone_8 = (min_x + half_x + 1, max_x, min_y +
+              half_y + 1, max_y, min_z + half_z + 1, max_z)
 
     return (zone_1, zone_2, zone_3, zone_4, zone_5, zone_6, zone_7, zone_8)
 
@@ -2212,7 +2258,8 @@ def day23_thread_worker(bots, zone):
 
 def day23_bot_count_in_subzones(bots, zone, pool):
     zones_to_process = day23_get_subzones(zone)
-    results = pool.map(functools.partial(day23_thread_worker, bots), zones_to_process)
+    results = pool.map(functools.partial(
+        day23_thread_worker, bots), zones_to_process)
 
     most_bots_count = max([len(r[1]) for r in results])
 
@@ -2223,7 +2270,7 @@ def day23_bot_count_in_subzones(bots, zone, pool):
     return [(-most_bots_count, r[0])
             for r in results
             if len(r[1]) == most_bots_count
-           ]
+            ]
 
 def day23_zone_dimensions(zone):
     min_x, max_x, min_y, max_y, min_z, max_z = zone
@@ -2233,9 +2280,9 @@ def day23_get_locations_counts(bots, best_zones):
     locations = deque([])
     for zone, _ in best_zones:
         min_x, max_x, min_y, max_y, min_z, max_z = zone
-        for x2 in range(min_x, max_x+1):
-            for y2 in range(min_y, max_y+1):
-                for z2 in range(min_z, max_z+1):
+        for x2 in range(min_x, max_x + 1):
+            for y2 in range(min_y, max_y + 1):
+                for z2 in range(min_z, max_z + 1):
                     test_coord = (x2, y2, z2)
                     counter = 0
                     for coord, r in bots:
@@ -2320,10 +2367,11 @@ class P_24(IntEnum):
     Id = 7
 
 def day24_parse_group(line, id_):
-# pylint: disable=C0301
+    # pylint: disable=C0301
     # 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4
     units, hit_points, immunity, weakness, attack_power, attack_type, initiative = \
-        re.findall(r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
+        re.findall(
+            r"(\d+) units each with (\d+) hit points (?:\((?:immune to ((?:(?:\w+)(?:, )?)+)(?:; )?)?(?:weak to ((?:(?:\w+)(?:, )?)+))?\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)", line)[0]
     return (int(units), int(hit_points), immunity.split(", "), weakness.split(", "), int(attack_power), attack_type, int(initiative), id_)
 # pylint: enable=C0301
 
@@ -2343,7 +2391,8 @@ def day24_parse_input(data):
             continue
         elif line == "":
             continue
-        group = day24_parse_group(line, "{0}_{1}".format(current_army, id_counter))
+        group = day24_parse_group(
+            line, "{0}_{1}".format(current_army, id_counter))
         id_counter += 1
         groups[current_army].append(group)
     return groups
@@ -2358,7 +2407,8 @@ def day24_debug_armies(armies):
 def day24_debug_army(army):
     for group in army:
         if group[P_24.Units] > 0:
-            print("Group {0} contains {1} units".format(group[P_24.Id], group[P_24.Units]))
+            print("Group {0} contains {1} units".format(
+                group[P_24.Id], group[P_24.Units]))
 
 def day24_debug_target(attack_id, defend_id, damage):
     print("Group {0} would deal defending group {1} {2} damage"
@@ -2380,7 +2430,7 @@ def day24_damage(attack_group, defend_group):
     if attack_type in immunity:
         return 0
     elif attack_type in weakness:
-        return 2*damage
+        return 2 * damage
 
     return damage
 
@@ -2396,11 +2446,12 @@ def day24_select_target(group, opposing_army, targeted, include_zero):
     available = [enemy
                  for enemy in opposing_army
                  if enemy[P_24.Units] > 0 and enemy[P_24.Id] not in targeted]
-    targets = sorted(available, reverse=True, key=lambda g: day24_target_criteria(group, g))
+    targets = sorted(available, reverse=True,
+                     key=lambda g: day24_target_criteria(group, g))
     if not targets:
         return None
     elif len(targets) > 1 and \
-         day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
+            day24_target_criteria(group, targets[0]) == day24_target_criteria(group, targets[1]):
         # Can't decide
         return None
 
@@ -2413,8 +2464,9 @@ def day24_target_selection_phase(armies):
     targeting_map = {}
     for include_zero in (False, True):
         for current_army in range(2):
-            opposing_army = (current_army+1)%2
-            army = sorted(armies[current_army], reverse=True, key=day24_selection_criteria)
+            opposing_army = (current_army + 1) % 2
+            army = sorted(armies[current_army], reverse=True,
+                          key=day24_selection_criteria)
             for group in army:
                 if group[P_24.Units] > 0 and not group[P_24.Id] in targeting_map.keys():
                     target = day24_select_target(group,
@@ -2436,7 +2488,8 @@ def day24_attack_phase(groups_by_initiative, armies, targeting_map):
             target_group = armies[target_army_id][target_group_id]
             if target_group[P_24.Units] > 0:
                 damage = day24_damage(attack_group, target_group)
-                max_units = math.floor(damage/(target_group[P_24.Hit_points]))
+                max_units = math.floor(
+                    damage / (target_group[P_24.Hit_points]))
                 dead_units = min(max_units, target_group[P_24.Units])
                 kills += dead_units
                 armies[target_army_id][target_group_id] = \
@@ -2458,33 +2511,34 @@ def day24_fight(armies):
                 reverse=True,
                 key=lambda g: g[P_24.Initiative])]
     while any([group[P_24.Units] > 0 for group in armies[0]]) and \
-          any([group[P_24.Units] > 0 for group in armies[1]]):
-        #day24_debug_armies(armies)
+            any([group[P_24.Units] > 0 for group in armies[1]]):
+        # day24_debug_armies(armies)
         targeting_map = day24_target_selection_phase(armies)
-        stalemate = day24_attack_phase(groups_by_initiative, armies, targeting_map)
+        stalemate = day24_attack_phase(
+            groups_by_initiative, armies, targeting_map)
         if stalemate:
             break
 
     return armies
 
 def day24_add_boost(army, boost):
-    return [(target_group[P_24.Units], \
-             target_group[P_24.Hit_points], \
-             target_group[P_24.Immunity], \
-             target_group[P_24.Weakness], \
-             target_group[P_24.Attack_Power] + boost, \
-             target_group[P_24.Attack_Type], \
-             target_group[P_24.Initiative], \
+    return [(target_group[P_24.Units],
+             target_group[P_24.Hit_points],
+             target_group[P_24.Immunity],
+             target_group[P_24.Weakness],
+             target_group[P_24.Attack_Power] + boost,
+             target_group[P_24.Attack_Type],
+             target_group[P_24.Initiative],
              target_group[P_24.Id]) for target_group in army]
 
 def day24_clone_army(army):
-    return [(target_group[P_24.Units], \
-             target_group[P_24.Hit_points], \
-             target_group[P_24.Immunity], \
-             target_group[P_24.Weakness], \
-             target_group[P_24.Attack_Power], \
-             target_group[P_24.Attack_Type], \
-             target_group[P_24.Initiative], \
+    return [(target_group[P_24.Units],
+             target_group[P_24.Hit_points],
+             target_group[P_24.Immunity],
+             target_group[P_24.Weakness],
+             target_group[P_24.Attack_Power],
+             target_group[P_24.Attack_Type],
+             target_group[P_24.Initiative],
              target_group[P_24.Id]) for target_group in army]
 
 def day24_test_boost(armies, boost):
@@ -2505,7 +2559,8 @@ def day24_boost_immune(armies):
         process = range(boost, boost + threads + 1)
         boost = boost + threads + 1
 
-        results = pool.map(functools.partial(day24_test_boost, armies), process)
+        results = pool.map(functools.partial(
+            day24_test_boost, armies), process)
         success = [result for result in results if result[2] == 0]
         success = sorted(success, key=lambda x: x[0])
         if success:
@@ -2532,7 +2587,7 @@ def day24_2(data):
 
 def day25_manhattan(point1, point2):
     (a1, b1, c1, d1), (a2, b2, c2, d2) = (point1, point2)
-    return abs(a1-a2) + abs(b1-b2) + abs(c1-c2) + abs(d1-d2)
+    return abs(a1 - a2) + abs(b1 - b2) + abs(c1 - c2) + abs(d1 - d2)
 
 def day25_constellations(points):
     constellations = []
@@ -2568,7 +2623,8 @@ def day25_parse_input(data):
 
     points = deque([])
     for line in data:
-        point = tuple([int(x) for x in re.findall(r"(-?\d+),(-?\d+),(-?\d+),(-?\d+)", line)[0]])
+        point = tuple([int(x) for x in re.findall(
+            r"(-?\d+),(-?\d+),(-?\d+),(-?\d+)", line)[0]])
         points.append(point)
 
     return points

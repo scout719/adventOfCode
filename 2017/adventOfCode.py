@@ -1,12 +1,27 @@
+# pylint: disable=unused-import
+# pylint: disable=import-error
+# pylint: disable=wrong-import-position
+import functools
+import math
+import multiprocessing as mp
+import os
 import re
 import string
 import sys
-import functools
-import os
-file_dir = os.path.dirname(os.path.realpath(__file__))
-import sys
-sys.path.insert(0, file_dir + "\\..\\")
-from common.utils import execute_day, read_input
+import time
+from collections import Counter, deque
+import heapq
+from enum import IntEnum
+from struct import pack
+
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
+print(FILE_DIR)
+sys.path.insert(0, FILE_DIR + "/../")
+sys.path.insert(0, FILE_DIR + "/../../")
+from common.utils import execute_day, read_input, main  # NOQA: E402
+# pylint: enable=unused-import
+# pylint: enable=import-error
+# pylint: enable=wrong-import-position
 
 start_day = 1
 
@@ -25,7 +40,7 @@ class I:
 
 def day20_parse_line(line):
     # p=< 3,0,0>, v=< 2,0,0>, a=<-1,0,0>
-    return tuple([int(a) for a in re.findall("p=<(-?\d+),(-?\d+),(-?\d+)>, v=<(-?\d+),(-?\d+),(-?\d+)>, a=<(-?\d+),(-?\d+),(-?\d+)>",line)[0]])
+    return tuple([int(a) for a in re.findall("p=<(-?\d+),(-?\d+),(-?\d+)>, v=<(-?\d+),(-?\d+),(-?\d+)>, a=<(-?\d+),(-?\d+),(-?\d+)>", line)[0]])
 
 def day20_parse_input(data):
     return [day20_parse_line(line) for line in data]
@@ -41,14 +56,16 @@ def day20_update_particle(particle):
     return (px, py, pz, vx, vy, vz, ax, ay, az)
 
 def day20_closest(particles):
-    distances = [abs(particle[I.px]) + abs(particle[I.py]) + abs(particle[I.pz]) for particle in particles]
+    distances = [abs(particle[I.px]) + abs(particle[I.py]) +
+                 abs(particle[I.pz]) for particle in particles]
     keep_going = True
     counter = 0
     prev_closest = 0
     while keep_going:
         particles = [day20_update_particle(particle) for particle in particles]
         old_distances = distances
-        distances = [abs(particle[I.px]) + abs(particle[I.py]) + abs(particle[I.pz]) for particle in particles]
+        distances = [abs(particle[I.px]) + abs(particle[I.py]) +
+                     abs(particle[I.pz]) for particle in particles]
         minimum = min(distances)
         keep_going = len([x for x in distances if x == minimum]) != 1
         #keep_going = False
@@ -63,10 +80,10 @@ def day20_closest(particles):
             if distances[i] < closest_dist:
                 closest = i
                 closest_dist = distances[closest]
-        
+
         if prev_closest == closest:
             counter += 1
-            
+
         prev_closest = closest
         keep_going = counter < 500
     return closest
@@ -88,7 +105,7 @@ def day20_left(particles):
                         collided.append(i)
         for col in collided:
             alive[col] = False
-        
+
         alive_count = len([True for a in alive if a])
         if prev_alive_count == alive_count:
             counter += 1
@@ -113,6 +130,6 @@ def day20_2(data):
 #start_day = 10
 """ MAIN FUNCTION """
 if __name__ == "__main__":
-    for i in range(start_day,26):
+    for i in range(start_day, 26):
         execute_day(globals(), 2017, i, 1)
         execute_day(globals(), 2017, i, 2)

@@ -32,6 +32,21 @@
                 "clear": false
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Lint",
+            "type": "shell",
+            "command": "${config:python.pythonPath} -m autopep8 -i -r --ignore E302,E305 ${workspaceFolder}",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
         }
     ],
     "inputs": [

@@ -11,15 +11,16 @@ class SignalCatchingError(Exception):
     """ Base class for exceptions in this module. """
 
 HEAVY_EXERCISE = "nil (too computationally heavy)"
-EXERCISE_TIMEOUT = 120 #secs
+EXERCISE_TIMEOUT = 120  # secs
 
 def timeout(seconds_before_timeout):
     def deco(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
-            res = [SignalCatchingError('function [%s] timeout [%s seconds] exceeded!' % \
+            res = [SignalCatchingError('function [%s] timeout [%s seconds] exceeded!' %
                                        (func.__name__, seconds_before_timeout))]
+
             def newFunc():
                 try:
                     res[0] = func(*args, **kwargs)
@@ -45,19 +46,20 @@ def execute_day(_globals, year, day, part):
     if func_name in _globals:
         start = timer()
         try:
-            result = timeout(seconds_before_timeout=EXERCISE_TIMEOUT) \
-                     (_globals[func_name])(read_input(year, day))
+            result = timeout(seconds_before_timeout=EXERCISE_TIMEOUT)(
+                _globals[func_name])(read_input(year, day))
         except SignalCatchingError:
             result = HEAVY_EXERCISE
         end = timer()
-        print("Day {0}, part {1}: {2} ({3:.3f} secs)".format(day, part, result, end - start))
+        print("Day {0}, part {1}: {2} ({3:.3f} secs)".format(
+            day, part, result, end - start))
 
 def read_input(year, day):
     file_dir = os.path.dirname(os.path.realpath(__file__))
     with open("{0}/../{1}/input/day{2}".format(file_dir, year, day), "r") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
 
-def main(argv_,globals_, year):
+def main(argv_, globals_, year):
     start_day = None
     if len(argv_) > 1:
         try:
