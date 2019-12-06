@@ -29,7 +29,7 @@ def day1_calc_fuel(mod):
     return math.floor(mod / 3) - 2
 
 def day1_1(data):
-    return functools.reduce(lambda a, v: a+v, [day1_calc_fuel(int(m)) for m in data])
+    return functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
 
 def day1_2(data):
     total = 0
@@ -53,92 +53,92 @@ def day2_execute(op, pc, insts, inputs=[], outputs=[]):
     modes = op // 100
     op = op % 100
     if op == 1:
-        a = insts[pc+1]
-        b = insts[pc+2]
-        c = insts[pc+3]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
+        c = insts[pc + 3]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        insts[c] = day5_mode(insts,a,a_mode) + day5_mode(insts, b, b_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        insts[c] = day5_mode(insts, a, a_mode) + day5_mode(insts, b, b_mode)
         return (pc + 4, insts)
     elif op == 2:
-        a = insts[pc+1]
-        b = insts[pc+2]
-        c = insts[pc+3]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
+        c = insts[pc + 3]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        insts[c] = day5_mode(insts,a,a_mode) * day5_mode(insts, b, b_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        insts[c] = day5_mode(insts, a, a_mode) * day5_mode(insts, b, b_mode)
         return (pc + 4, insts)
     elif op == 3:
-        a = insts[pc+1]
+        a = insts[pc + 1]
         insts[a] = inputs.pop()
-        return (pc+2, insts)
+        return (pc + 2, insts)
     elif op == 4:
-        a = insts[pc+1]
+        a = insts[pc + 1]
         a_mode = modes % 10
         modes = modes // 10
         outputs.append(day5_mode(insts, a, a_mode))
-        return (pc+2, insts)
+        return (pc + 2, insts)
     elif op == 5:
-        a = insts[pc+1]
-        b = insts[pc+2]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        val = day5_mode(insts,a,a_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        val = day5_mode(insts, a, a_mode)
         if val != 0:
             pc = day5_mode(insts, b, b_mode)
         else:
-            pc = pc +3
+            pc = pc + 3
         return (pc, insts)
     elif op == 6:
-        a = insts[pc+1]
-        b = insts[pc+2]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        val = day5_mode(insts,a,a_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        val = day5_mode(insts, a, a_mode)
         if val == 0:
             pc = day5_mode(insts, b, b_mode)
         else:
-            pc = pc +3
+            pc = pc + 3
         return (pc, insts)
     elif op == 7:
-        a = insts[pc+1]
-        b = insts[pc+2]
-        c = insts[pc+3]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
+        c = insts[pc + 3]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        val1 = day5_mode(insts,a,a_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        val1 = day5_mode(insts, a, a_mode)
         val2 = day5_mode(insts, b, b_mode)
         if val1 < val2:
-            insts[c]= 1
+            insts[c] = 1
         else:
-            insts[c]=0
-        return (pc+4, insts)
+            insts[c] = 0
+        return (pc + 4, insts)
     elif op == 8:
-        a = insts[pc+1]
-        b = insts[pc+2]
-        c = insts[pc+3]
+        a = insts[pc + 1]
+        b = insts[pc + 2]
+        c = insts[pc + 3]
         a_mode = modes % 10
         modes = modes // 10
-        b_mode = modes %10
-        modes = modes //10
-        val1 = day5_mode(insts,a,a_mode)
+        b_mode = modes % 10
+        modes = modes // 10
+        val1 = day5_mode(insts, a, a_mode)
         val2 = day5_mode(insts, b, b_mode)
         if val1 == val2:
-            insts[c]= 1
+            insts[c] = 1
         else:
-            insts[c]=0
-        return (pc+4, insts)
-    
+            insts[c] = 0
+        return (pc + 4, insts)
+
     raise NotImplementedError
 
 def day2_run_program(insts):
@@ -150,7 +150,7 @@ def day2_run_program(insts):
 
 def day2_1(data):
     data = data[0].split(',')
-    #data = read_input(2019, 201)[0].split(',')
+    # data = read_input(2019, 201)[0].split(',')
     data = [int(x) for x in data]
     data[1] = 12
     data[2] = 2
@@ -204,7 +204,7 @@ def day3_solve_wire(wires_map, path, char):
             x, y = (newx, newy)
 
 def day3_fill_map(data, wires_map):
-    #data = read_input(2019, 301)
+    # data = read_input(2019, 301)
     data1 = data[0].split(",")
     data2 = data[1].split(",")
     day3_solve_wire(wires_map, data1, 'A')
@@ -271,8 +271,8 @@ def day4_next_value(curr):
     while pos < size:
         if should_increase:
             new_value[pos] = (new_value[pos] + 1) % 10
-            if pos != size-1:
-                new_value[pos+1] = new_value[pos]
+            if pos != size - 1:
+                new_value[pos + 1] = new_value[pos]
             if new_value[pos] == 0:
                 should_increase = True
                 pos -= 1
@@ -284,8 +284,8 @@ def day4_next_value(curr):
             pos += 1
             continue
 
-        if new_value[pos] >= new_value[pos-1]:
-            if pos == size -1 and not has_increased:
+        if new_value[pos] >= new_value[pos - 1]:
+            if pos == size - 1 and not has_increased:
                 has_increased = True
                 should_increase = True
             else:
@@ -316,97 +316,108 @@ def day4_2(data):
             count += 1
         curr = day4_next_value(curr)
     return count
-    
+
 """ DAY 5 """
 
 def day5_run_program(insts, inputs):
     pc = 0
-    outputs=[]
+    outputs = []
     while insts[pc] != 99:
         op = insts[pc]
         (pc, insts) = day2_execute(op, pc, insts, inputs, outputs)
     return outputs
-    
+
 def day5_1(data):
     data = data[0].split(',')
-    #data = read_input(2019, 501)[0].split(',')
+    # data = read_input(2019, 501)[0].split(',')
     data = [int(x) for x in data]
     return day5_run_program(data, [1])[-1]
-    
+
 def day5_2(data):
     data = data[0].split(',')
-    #data = read_input(2019, 501)[0].split(',')
+    # data = read_input(2019, 501)[0].split(',')
     data = [int(x) for x in data]
     return day5_run_program(data, [5])[0]
 
+""" DAY 6 """
 
+def day6_get_orbits(data):
+    orbits = {}
+    is_orbited_by = {}
+    for line in data:
+        orbited_obj = line[0]
+        orbits_obj = line[1]
+        orbits_val = []
+        if orbits_obj in orbits:
+            orbits_val = orbits[orbits_obj]
+        is_orbited_val = []
+        if orbited_obj in is_orbited_by:
+            is_orbited_val = is_orbited_by[orbited_obj]
+        is_orbited_val.append(orbits_obj)
+        orbits_val.append(orbited_obj)
+        orbits[orbits_obj] = orbits_val
+        is_orbited_by[orbited_obj] = is_orbited_val
+    return (orbits, is_orbited_by)
 
-def calc(data, orbits):
-    is_orb = {}
-    for x in data:
-        a = x[0]
-        b = x[1]
-        n = []
-        if b in orbits:
-            n = orbits[b]
-        m = []
-        if a in is_orb:
-            m = is_orb[a]
-        m.append(b)  
-        n.append(a)
-        orbits[b] = n
-        is_orb[a] = m
-    
-    total = 0
-    for p in orbits.keys():
-        start = [p]
-        visited = []
+def day6_part1(data):
+    orbits, _ = day6_get_orbits(data)
+    total_orbits = 0
+    visited = {obj: False for obj in orbits.keys()}
+    # COM is the only one that doesn't orbit
+    visited["COM"] = False
+    for obj in orbits.keys():
+        for obj_key in visited.keys():
+            visited[obj_key] = False
+        queue = [obj]
         count = 0
-        while len(start) > 0:
-            next = start.pop()
-            visited.append(next)
-            if next in orbits:
-                for i in orbits[next]:
-                    if not i in visited:
-                        start.append(i)
-                        count += 1
-        total += count
-    q =[]
-    start = [("YOU",0)]
-    visited = {}
-    heapq.heappush(q, (0, 'YOU'))
+        while len(queue) > 0:
+            curr = queue.pop()
+            if curr == "COM":
+                # COM is the only one that doesn't orbit
+                continue
+            visited[obj] = True
+            for next_obj in orbits[curr]:
+                if not visited[next_obj]:
+                    queue.append(next_obj)
+                    count += 1
+        total_orbits += count
+    return total_orbits
+
+def day6_part2(data):
+    orbits, is_orbited_by = day6_get_orbits(data)
+    visited = {obj: sys.maxsize for obj in orbits.keys()}
+    # COM is the only one that doesn't orbit
+    visited['COM'] = sys.maxsize
+    queue = []
+    heapq.heappush(queue, (0, 'YOU'))
     count = 0
-    while q:
-        s, next = heapq.heappop(q)
-        #print(str((s, next)))
-        if next == "SAN":
-            count = s
-            break
-        if (not next in visited) or (visited[next] > s):
-            visited[next] = s
-        if next in orbits:
-            for i in orbits[next]:
-                t = (s+1, i)
-                if not i in visited and not t in q and not (i in visited and visited[i] <= s):
-                    heapq.heappush(q, (s+1, i))
-        if next in is_orb:
-            for i in is_orb[next]:
-                t = (s+1, i)
-                if not i in visited and not t in q and not (i in visited and visited[i] <= s):
-                    heapq.heappush(q, (s+1, i))
-                    
-    
-    return (total, count)
-                    
-        
-        
+    while queue:
+        s, curr = heapq.heappop(queue)
+        if curr == "SAN":
+            # Don't count the first and last hops
+            return s - 2
+        if visited[curr] > s:
+            visited[curr] = s
+        if curr in orbits:
+            for next_orb in orbits[curr]:
+                if visited[next_orb] >= s:
+                    heapq.heappush(queue, (s + 1, next_orb))
+        if curr in is_orbited_by:
+            for prev_orb in is_orbited_by[curr]:
+                if visited[prev_orb] >= s:
+                    heapq.heappush(queue, (s + 1, prev_orb))
+    raise AssertionError
 
 def day6_1(data):
-    #data = read_input(2019, 601)
+    # data = read_input(2019, 601)
     data = [l.split(')') for l in data]
-    data.pop()
-    return calc(data, {})
-    
+    return day6_part1(data)
+
+def day6_2(data):
+    # data = read_input(2019, 601)
+    data = [l.split(')') for l in data]
+    return day6_part2(data)
+
 
 """ MAIN FUNCTION """
 
