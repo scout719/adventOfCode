@@ -48,8 +48,13 @@ def day5_mode(insts, v, mode):
         return insts[v]
     if mode == 1:
         return v
+    raise NotImplementedError
 
-def day2_execute(op, pc, insts, inputs=[], outputs=[]):
+def day2_execute(op, pc, insts, inputs=None, outputs=None):
+    if inputs is None:
+        inputs = []
+    if outputs is None:
+        outputs = []
     modes = op // 100
     op = op % 100
     if op == 1:
@@ -362,15 +367,15 @@ def day6_get_orbits(data):
 def day6_part1(data):
     orbits, _ = day6_get_orbits(data)
     total_orbits = 0
-    visited = {obj: False for obj in orbits.keys()}
+    visited = {obj: False for obj in orbits}
     # COM is the only one that doesn't orbit
     visited["COM"] = False
-    for obj in orbits.keys():
+    for obj in orbits:
         for obj_key in visited.keys():
             visited[obj_key] = False
         queue = [obj]
         count = 0
-        while len(queue) > 0:
+        while queue:
             curr = queue.pop()
             if curr == "COM":
                 # COM is the only one that doesn't orbit
@@ -385,7 +390,7 @@ def day6_part1(data):
 
 def day6_part2(data):
     orbits, is_orbited_by = day6_get_orbits(data)
-    visited = {obj: sys.maxsize for obj in orbits.keys()}
+    visited = {obj: sys.maxsize for obj in orbits}
     # COM is the only one that doesn't orbit
     visited['COM'] = sys.maxsize
     queue = []
@@ -418,8 +423,71 @@ def day6_2(data):
     data = [l.split(')') for l in data]
     return day6_part2(data)
 
+""" DAY 7 """
+
+def t(insts, max_cpus, phases):
+    progs = {p:(False, 0, [i for i in insts], [phases[p]], []) for p in range(0, max_cpus)}
+    progs[0][3].append(0)
+    curr = 0
+    while not all([finished for finished, _, _, _, _ in progs.values()]):
+        f, pc, insts, inputs, outputs = progs[curr]
+        next_p = (curr+1) % max_cpus
+        if f:
+            curr = next_p
+        if not f:
+            try:
+                (pc, insts) = day2_execute(insts[pc], pc, insts, inputs, outputs)
+                if outputs:
+                    f, p, i, ii, o = progs[next_p]
+                    progs[next_p][3].append(outputs.pop())
+                progs[curr] = (insts[pc] == 99, pc, insts, inputs, outputs)
+            except IndexError:
+                curr = next_p
+    return progs
+
+
+def r(back, phases, max_val):
+    inputs = []
+    outputs = [0]
+    print(phases)
+    for i in range(0, max_val):
+        insts = [k for k in back]
+        inputs = [phases[i], outputs[0]]
+        outputs = []    
+        pc = 0
+        while insts[pc] != 99:
+            op = insts[pc]
+            (pc, insts) = day2_execute(op, pc, insts, inputs, outputs)
+    return outputs[0]
+
+def day7_1(data):
+    # data = read_input(2019, 701)
+    data = data[0].split(",")
+    data = [int(j) for j in data]
+    backup = [k for k in data]
+    max_val = 4+1
+    res = []
+    from itertools import permutations
+    perm = permutations(range(0, max_val)) 
+    #for i,j,k,l,m in list(perm):
+    i=4
+    j=3
+    k=2
+    l=1
+    m=0
+
+    print([i,j,k,l,m])
+    ps = t(backup, max_val, [i,j,k,l,m])
+    print(ps[0][3][-1])
+    res.append(ps[0][3][-1])
+
+    return max(res)
+
+def day7_2(data):
+    # data = read_input(2019, 701)
+    return None
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(sys.argv, globals(), 2019)
+    main(["", "7"], globals(), 2019)
