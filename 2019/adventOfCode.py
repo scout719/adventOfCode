@@ -424,53 +424,63 @@ def day6_2(data):
 
 """ DAY 7 """
 
-def t(backup, max_cpus, phases):
-    progs = {p:(False, 0, [i for i in backup], [phases[p]], []) for p in range(0, max_cpus)}
+def day7_multiple_cpus(original_prog, max_cpus, phases):
+    progs = {p: (False, 0, [i for i in original_prog], 
+                 [phases[p]], []) for p in range(0, max_cpus)}
+    # Input for first cpus is 0
     progs[0][3].append(0)
-    curr = 0
+    curr_cpu = 0
     while not all([finished for finished, _, _, _, _ in progs.values()]):
-        f, pc, insts, inputs, outputs = progs[curr]
-        next_p = (curr+1) % max_cpus
-        if f:
-            curr = next_p
-        if not f:
+        ended, pc, insts, inputs, outputs = progs[curr_cpu]
+        next_cpu = (curr_cpu + 1) % max_cpus
+        if ended:
+            curr_cpu = next_cpu
+        if not ended:
             try:
-                (pc, insts) = day2_execute(insts[pc], pc, insts, inputs, outputs)
+                (pc, insts) = day2_execute(
+                    insts[pc], pc, insts, inputs, outputs)
                 if outputs:
-                    f, p, i, ii, o = progs[next_p]
-                    progs[next_p][3].append(outputs.pop())
-                progs[curr] = (insts[pc] == 99, pc, insts, inputs, outputs)
+                    progs[next_cpu][3].append(outputs.pop())
+                progs[curr_cpu] = (insts[pc] == 99, pc, insts, inputs, outputs)
             except IndexError:
-                curr = next_p
+                # If there was an error the program is waiting for an input not available yet
+                curr_cpu = next_cpu
     return progs
+
+def day7_solve(prog, start_phase, total_amps):
+    max_val = total_amps
+    res = []
+    from itertools import permutations
+    perm = permutations(range(0 + start_phase, max_val + start_phase))
+    for phase_config in list(perm):
+        amps_states = day7_multiple_cpus(prog, max_val, phase_config)
+        res.append(amps_states[0][3][-1])
+
+    return max(res)
 
 def day7_1(data):
     #data = read_input(2019, 701)
     data = data[0].split(",")
     data = [int(j) for j in data]
-    max_val = 4+1
-    res = []
-    from itertools import permutations
-    perm = permutations(range(0, max_val)) 
-    for i,j,k,l,m in list(perm):
-        ps = t(data, max_val, [i,j,k,l,m])
-        res.append(ps[0][3][-1])
-
-    return max(res)
+    return day7_solve(data, 0, 5)
 
 def day7_2(data):
     # data = read_input(2019, 701)
     data = data[0].split(",")
     data = [int(j) for j in data]
-    max_val = 4+1
-    res = []
-    from itertools import permutations
-    perm = permutations(range(0+5, max_val+5)) 
-    for i,j,k,l,m in list(perm):
-        ps = t(data, max_val, [i,j,k,l,m])
-        res.append(ps[0][3][-1])
+    return day7_solve(data, 5, 5)
 
-    return max(res)
+""" DAY 8 """
+
+def day8_1(data):
+    #data = read_input(2019, 801)
+    data = data[0].split(",")
+    return None
+
+def day8_2(data):
+    # data = read_input(2019, 801)
+    data = data[0].split(",")
+    return None
 
 """ MAIN FUNCTION """
 
