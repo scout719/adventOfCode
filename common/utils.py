@@ -13,6 +13,14 @@ class SignalCatchingError(Exception):
 HEAVY_EXERCISE = "nil (too computationally heavy)"
 EXERCISE_TIMEOUT = 120  # secs
 
+def clear():
+    # for windows
+    if os.name == 'nt':
+        _ = os.system('cls')
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = os.system('clear')
+
 def timeout(seconds_before_timeout):
     def deco(func):
         @functools.wraps(func)

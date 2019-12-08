@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
@@ -18,7 +19,7 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
-from common.utils import execute_day, read_input, main  # NOQA: E402
+from common.utils import execute_day, read_input, main, clear  # NOQA: E402
 # pylint: enable=unused-import
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
@@ -484,8 +485,26 @@ def day8_get_layers(data, width, height):
         curr_layer += 1
     return layers
 
-def day8_count_values(layers, layer, val):
-    return functools.reduce(lambda a, k: a + (1 if layers[layer][k] == val else 0), layers[layer], 0)
+def day8_count_values(layers, layer):
+    return functools.reduce(lambda a, k:
+                            (a[0] + (1 if layers[layer][k] == 0 else 0),
+                             a[1] + (1 if layers[layer][k] == 1 else 0),
+                             a[2] + (1 if layers[layer][k] == 2 else 0)),
+                            layers[layer], (0, 0, 0))
+
+def day8_get_image(stack):
+    image = ""
+    for coord in stack:
+        x, y = coord
+        if x == 0:
+            image += "\n"
+        if stack[(x, y)] == 2:
+            image += "#"
+        elif stack[(x, y)] == 1:
+            image += "█"
+        elif stack[(x, y)] == 0:
+            image += " "
+    return image
 
 def day8_1(data):
     #data = read_input(2019, 801)
@@ -495,10 +514,7 @@ def day8_1(data):
     layers = day8_get_layers(data, width, height)
     values_count = {}
     for layer in layers:
-        zeros = day8_count_values(layers, layer, 0)
-        ones = day8_count_values(layers, layer, 1)
-        twos = day8_count_values(layers, layer, 2)
-        values_count[layer] = {0: zeros, 1: ones, 2: twos}
+        values_count[layer] = day8_count_values(layers, layer)
     min_layer = 0
     for layer in values_count:
         if values_count[layer][0] < values_count[min_layer][0]:
@@ -511,25 +527,17 @@ def day8_2(data):
     width = 25
     height = 6
     layers = day8_get_layers(data, width, height)
-    stack = {}
+    stack = {coord: 2 for coord in layers[0]}
     for coord in layers[0]:
-        stack[coord] = -1
         for layer in layers:
-            if stack[coord] == -1 or stack[coord] == 2:
+            if stack[coord] == 2:
                 stack[coord] = layers[layer][coord]
+                if False and stack[coord] != 2:
+                    image = day8_get_image(stack)
+                    clear()
+                    print(image)
 
-    image = ""
-    for coord in stack:
-        x, y = coord
-        if x == 0:
-            image += "\n"
-        if stack[(x, y)] == 2:
-            image += " "
-        elif stack[(x, y)] == 1:
-            image += "█"
-        elif stack[(x, y)] == 0:
-            image += " "
-    return image
+    return day8_get_image(stack)
 
 """ MAIN FUNCTION """
 
