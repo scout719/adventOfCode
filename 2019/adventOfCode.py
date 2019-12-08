@@ -425,7 +425,7 @@ def day6_2(data):
 """ DAY 7 """
 
 def day7_multiple_cpus(original_prog, max_cpus, phases):
-    progs = {p: (False, 0, [i for i in original_prog], 
+    progs = {p: (False, 0, [i for i in original_prog],
                  [phases[p]], []) for p in range(0, max_cpus)}
     # Input for first cpus is 0
     progs[0][3].append(0)
@@ -472,17 +472,66 @@ def day7_2(data):
 
 """ DAY 8 """
 
+def day8_get_layers(data, width, height):
+    layers = {}
+    curr_layer = 0
+    while (curr_layer * width * height < len(data)):
+        layers[curr_layer] = {}
+        for y in range(height):
+            for x in range(width):
+                pos = width * height * curr_layer + width * y + x
+                layers[curr_layer][(x, y)] = data[pos]
+        curr_layer += 1
+    return layers
+
+def day8_count_values(layers, layer, val):
+    return functools.reduce(lambda a, k: a + (1 if layers[layer][k] == val else 0), layers[layer], 0)
+
 def day8_1(data):
     #data = read_input(2019, 801)
-    data = data[0].split(",")
-    return None
+    data = [int(k) for k in data[0]]
+    width = 25
+    height = 6
+    layers = day8_get_layers(data, width, height)
+    values_count = {}
+    for layer in layers:
+        zeros = day8_count_values(layers, layer, 0)
+        ones = day8_count_values(layers, layer, 1)
+        twos = day8_count_values(layers, layer, 2)
+        values_count[layer] = {0: zeros, 1: ones, 2: twos}
+    min_layer = 0
+    for layer in values_count:
+        if values_count[layer][0] < values_count[min_layer][0]:
+            min_layer = layer
+    return values_count[min_layer][1] * values_count[min_layer][2]
 
 def day8_2(data):
-    # data = read_input(2019, 801)
-    data = data[0].split(",")
-    return None
+    #data = read_input(2019, 801)
+    data = [int(k) for k in data[0]]
+    width = 25
+    height = 6
+    layers = day8_get_layers(data, width, height)
+    stack = {}
+    for coord in layers[0]:
+        stack[coord] = -1
+        for layer in layers:
+            if stack[coord] == -1 or stack[coord] == 2:
+                stack[coord] = layers[layer][coord]
+
+    image = ""
+    for coord in stack:
+        x, y = coord
+        if x == 0:
+            image += "\n"
+        if stack[(x, y)] == 2:
+            image += " "
+        elif stack[(x, y)] == 1:
+            image += "█"
+        elif stack[(x, y)] == 0:
+            image += " "
+    return image
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main([sys.argv], globals(), 2019)
+    main(sys.argv, globals(), 2019)
