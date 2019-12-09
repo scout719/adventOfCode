@@ -44,14 +44,24 @@ def day1_2(data):
 
 """ DAY 2 """
 
-def day5_mode(insts, v, mode):
+def day5_mode(insts, v, mode, rel_base=0, to_write=False, offset=0):
     if mode == 0:
-        return insts[v]
+        if to_write:
+            return v + offset
+        else:
+            return insts[v]
     if mode == 1:
+        if to_write:
+            return v + offset
         return v
+    if mode == 2:
+        if to_write:
+            return rel_base + insts[v] + offset
+        else:
+            return insts[rel_base + v]
     raise NotImplementedError
 
-def day2_execute(op, pc, insts, inputs=None, outputs=None):
+def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0):
     if inputs is None:
         inputs = []
     if outputs is None:
@@ -66,8 +76,11 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        insts[c] = day5_mode(insts, a, a_mode) + day5_mode(insts, b, b_mode)
-        return (pc + 4, insts)
+        c_mode = modes % 10
+        modes = modes // 10
+        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        insts[c] = day5_mode(insts, a, a_mode, rel_base) + day5_mode(insts, b, b_mode, rel_base)
+        return (pc + 4, insts, rel_base)
     elif op == 2:
         a = insts[pc + 1]
         b = insts[pc + 2]
@@ -76,18 +89,29 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        insts[c] = day5_mode(insts, a, a_mode) * day5_mode(insts, b, b_mode)
-        return (pc + 4, insts)
+        c_mode = modes % 10
+        modes = modes // 10
+        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        insts[c] = day5_mode(insts, a, a_mode, rel_base) * day5_mode(insts, b, b_mode, rel_base)
+        return (pc + 4, insts, rel_base)
     elif op == 3:
         a = insts[pc + 1]
+        print(op)
+        print(pc)
+        print(a)
+        a_mode = modes % 10
+        modes = modes // 10
+        print(a_mode)
+        print(rel_base)
+        a = day5_mode(insts, a, a_mode, rel_base, True, offset)
         insts[a] = inputs.pop(0)
-        return (pc + 2, insts)
+        return (pc + 2, insts, rel_base)
     elif op == 4:
         a = insts[pc + 1]
         a_mode = modes % 10
         modes = modes // 10
-        outputs.append(day5_mode(insts, a, a_mode))
-        return (pc + 2, insts)
+        outputs.append(day5_mode(insts, a, a_mode, rel_base))
+        return (pc + 2, insts, rel_base)
     elif op == 5:
         a = insts[pc + 1]
         b = insts[pc + 2]
@@ -95,12 +119,12 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        val = day5_mode(insts, a, a_mode)
+        val = day5_mode(insts, a, a_mode, rel_base)
         if val != 0:
-            pc = day5_mode(insts, b, b_mode)
+            pc = day5_mode(insts, b, b_mode, rel_base)
         else:
             pc = pc + 3
-        return (pc, insts)
+        return (pc, insts, rel_base)
     elif op == 6:
         a = insts[pc + 1]
         b = insts[pc + 2]
@@ -108,12 +132,12 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        val = day5_mode(insts, a, a_mode)
+        val = day5_mode(insts, a, a_mode, rel_base)
         if val == 0:
-            pc = day5_mode(insts, b, b_mode)
+            pc = day5_mode(insts, b, b_mode, rel_base)
         else:
             pc = pc + 3
-        return (pc, insts)
+        return (pc, insts, rel_base)
     elif op == 7:
         a = insts[pc + 1]
         b = insts[pc + 2]
@@ -122,13 +146,16 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        val1 = day5_mode(insts, a, a_mode)
-        val2 = day5_mode(insts, b, b_mode)
+        c_mode = modes % 10
+        modes = modes // 10
+        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        val1 = day5_mode(insts, a, a_mode, rel_base)
+        val2 = day5_mode(insts, b, b_mode, rel_base)
         if val1 < val2:
             insts[c] = 1
         else:
             insts[c] = 0
-        return (pc + 4, insts)
+        return (pc + 4, insts, rel_base)
     elif op == 8:
         a = insts[pc + 1]
         b = insts[pc + 2]
@@ -137,13 +164,22 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None):
         modes = modes // 10
         b_mode = modes % 10
         modes = modes // 10
-        val1 = day5_mode(insts, a, a_mode)
-        val2 = day5_mode(insts, b, b_mode)
+        c_mode = modes % 10
+        modes = modes // 10
+        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        val1 = day5_mode(insts, a, a_mode, rel_base)
+        val2 = day5_mode(insts, b, b_mode, rel_base)
         if val1 == val2:
             insts[c] = 1
         else:
             insts[c] = 0
-        return (pc + 4, insts)
+        return (pc + 4, insts, rel_base)
+    elif op == 9:
+        a = insts[pc +1]
+        a_mode = modes % 10
+        val1 = day5_mode(insts, a, a_mode, rel_base)
+        rel_base += val1
+        return (pc + 2, insts, rel_base)
     raise NotImplementedError
 
 def day2_run_program(insts):
@@ -532,12 +568,33 @@ def day8_2(data):
         for layer in layers:
             if stack[coord] == 2:
                 stack[coord] = layers[layer][coord]
-                if False and stack[coord] != 2:
+                if stack[coord] != 2:
                     image = day8_get_image(stack)
                     clear()
                     print(image)
 
     return day8_get_image(stack)
+
+""" DAY 9 """
+def day9_run(insts, inputs, offset):
+    pc = 0
+    rel_base = 0
+    outputs = []
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = day2_execute(op, pc, insts, inputs, outputs, rel_base, offset)
+    return outputs
+
+def day9_1(data):
+    data = read_input(2019,901)
+    data = [int(k) for k in data[0].split(",")]
+    offset = len(data)
+    print(offset)
+    data = [data[i] if i < len(data) else 0 for i in range(100000)]
+    return day9_run(data, [1], offset)
+    
+def day9_2(data):
+    data = read_input(2019,901)
 
 """ MAIN FUNCTION """
 
