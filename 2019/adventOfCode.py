@@ -44,24 +44,16 @@ def day1_2(data):
 
 """ DAY 2 """
 
-def day5_mode(insts, v, mode, rel_base=0, to_write=False, offset=0):
-    if mode == 0:
-        if to_write:
-            return v + offset
-        else:
-            return insts[v]
+def day5_mode(insts, v, mode, rel_base=0, to_write=False):
+    if to_write:
+        return v + (rel_base if mode == 2 else 0)
     if mode == 1:
-        if to_write:
-            return v + offset
         return v
-    if mode == 2:
-        if to_write:
-            return rel_base + insts[v] + offset
-        else:
-            return insts[rel_base + v]
+    else:
+        return insts[v + (rel_base if mode == 2 else 0)]
     raise NotImplementedError
 
-def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0):
+def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0):
     if inputs is None:
         inputs = []
     if outputs is None:
@@ -78,8 +70,9 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0)
         modes = modes // 10
         c_mode = modes % 10
         modes = modes // 10
-        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
-        insts[c] = day5_mode(insts, a, a_mode, rel_base) + day5_mode(insts, b, b_mode, rel_base)
+        c = day5_mode(insts, c, c_mode, rel_base, True)
+        insts[c] = day5_mode(insts, a, a_mode, rel_base) + \
+            day5_mode(insts, b, b_mode, rel_base)
         return (pc + 4, insts, rel_base)
     elif op == 2:
         a = insts[pc + 1]
@@ -91,19 +84,15 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0)
         modes = modes // 10
         c_mode = modes % 10
         modes = modes // 10
-        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
-        insts[c] = day5_mode(insts, a, a_mode, rel_base) * day5_mode(insts, b, b_mode, rel_base)
+        c = day5_mode(insts, c, c_mode, rel_base, True)
+        insts[c] = day5_mode(insts, a, a_mode, rel_base) * \
+            day5_mode(insts, b, b_mode, rel_base)
         return (pc + 4, insts, rel_base)
     elif op == 3:
         a = insts[pc + 1]
-        print(op)
-        print(pc)
-        print(a)
         a_mode = modes % 10
         modes = modes // 10
-        print(a_mode)
-        print(rel_base)
-        a = day5_mode(insts, a, a_mode, rel_base, True, offset)
+        a = day5_mode(insts, a, a_mode, rel_base, True)
         insts[a] = inputs.pop(0)
         return (pc + 2, insts, rel_base)
     elif op == 4:
@@ -148,7 +137,7 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0)
         modes = modes // 10
         c_mode = modes % 10
         modes = modes // 10
-        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        c = day5_mode(insts, c, c_mode, rel_base, True)
         val1 = day5_mode(insts, a, a_mode, rel_base)
         val2 = day5_mode(insts, b, b_mode, rel_base)
         if val1 < val2:
@@ -166,7 +155,7 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0)
         modes = modes // 10
         c_mode = modes % 10
         modes = modes // 10
-        c = day5_mode(insts, c, c_mode, rel_base, True, offset)
+        c = day5_mode(insts, c, c_mode, rel_base, True)
         val1 = day5_mode(insts, a, a_mode, rel_base)
         val2 = day5_mode(insts, b, b_mode, rel_base)
         if val1 == val2:
@@ -175,7 +164,7 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, offset=0)
             insts[c] = 0
         return (pc + 4, insts, rel_base)
     elif op == 9:
-        a = insts[pc +1]
+        a = insts[pc + 1]
         a_mode = modes % 10
         val1 = day5_mode(insts, a, a_mode, rel_base)
         rel_base += val1
@@ -186,7 +175,7 @@ def day2_run_program(insts):
     pc = 0
     while insts[pc] != 99:
         op = insts[pc]
-        (pc, insts) = day2_execute(op, pc, insts)
+        (pc, insts, _) = day2_execute(op, pc, insts)
     return insts
 
 def day2_1(data):
@@ -365,7 +354,7 @@ def day5_run_program(insts, inputs):
     outputs = []
     while insts[pc] != 99:
         op = insts[pc]
-        (pc, insts) = day2_execute(op, pc, insts, inputs, outputs)
+        (pc, insts, _) = day2_execute(op, pc, insts, inputs, outputs)
     return outputs
 
 def day5_1(data):
@@ -474,7 +463,7 @@ def day7_multiple_cpus(original_prog, max_cpus, phases):
             curr_cpu = next_cpu
         if not ended:
             try:
-                (pc, insts) = day2_execute(
+                (pc, insts, _) = day2_execute(
                     insts[pc], pc, insts, inputs, outputs)
                 if outputs:
                     progs[next_cpu][3].append(outputs.pop())
@@ -564,37 +553,43 @@ def day8_2(data):
     height = 6
     layers = day8_get_layers(data, width, height)
     stack = {coord: 2 for coord in layers[0]}
-    for coord in layers[0]:
-        for layer in layers:
+    for layer in layers:
+        for coord in layers[0]:
             if stack[coord] == 2:
                 stack[coord] = layers[layer][coord]
-                if stack[coord] != 2:
+                if False and stack[coord] != 2:
                     image = day8_get_image(stack)
                     clear()
                     print(image)
+                    time.sleep(.05)
 
     return day8_get_image(stack)
 
 """ DAY 9 """
-def day9_run(insts, inputs, offset):
+
+def int_run(insts, inputs):
     pc = 0
     rel_base = 0
     outputs = []
     while insts[pc] != 99:
         op = insts[pc]
-        (pc, insts, rel_base) = day2_execute(op, pc, insts, inputs, outputs, rel_base, offset)
+        (pc, insts, rel_base) = day2_execute(
+            op, pc, insts, inputs, outputs, rel_base)
     return outputs
 
 def day9_1(data):
-    data = read_input(2019,901)
+    #data = read_input(2019,901)
     data = [int(k) for k in data[0].split(",")]
-    offset = len(data)
-    print(offset)
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
-    return day9_run(data, [1], offset)
-    
+    return int_run(data, [1])[0]
+
 def day9_2(data):
-    data = read_input(2019,901)
+    #data = read_input(2019,901)
+    data = [int(k) for k in data[0].split(",")]
+    data = [data[i] if i < len(data) else 0 for i in range(100000)]
+    return int_run(data, [2])[0]
+
+# IntCode logic available @ int_run(insts, inputs)
 
 """ MAIN FUNCTION """
 
