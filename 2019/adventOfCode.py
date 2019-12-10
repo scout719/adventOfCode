@@ -589,162 +589,124 @@ def day9_2(data):
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
     return int_run(data, [2])[0]
 
-""" DAY 9 """
-def day10_slope(x1, y1, x2, y2):
-    return (x2-x1)/(y2-y1)
+""" DAY 10 """
 
-def isBetween(a, b, c):
-    crossproduct = (c[1] - a[1]) * (b[0] - a[0]) - (c[0] - a[0]) * (b[1] - a[1])
+def isPointBetween(start, end, check):
+    a_x, a_y = start
+    b_x, b_y = end
+    c_x, c_y = check
 
-    # compare versus epsilon for floating point values, or != 0 if using integers
+    crossproduct = (c_y - a_y) * (b_x - a_x) - (c_x - a_x) * (b_y - a_y)
+
     if abs(crossproduct) != 0:
         return False
 
-    dotproduct = (c[0] - a[0]) * (b[0] - a[0]) + (c[1] - a[1])*(b[1] - a[1])
+    dotproduct = (c_x - a_x) * (b_x - a_x) + (c_y - a_y) * (b_y - a_y)
     if dotproduct < 0:
         return False
 
-    squaredlengthba = (b[0] - a[0])*(b[0] - a[0]) + (b[1] - a[1])*(b[1] - a[1])
+    squaredlengthba = (b_x - a_x) * (b_x - a_x) + (b_y - a_y) * (b_y - a_y)
     if dotproduct > squaredlengthba:
         return False
 
     return True
 
-def day_10_1(data):
+def day10_1(data):
     #data = read_input(2019,1001)
-    #data = [k.split("") for k in data]
-    map_ = {}
+    asteroids_counts = {}
     for i in range(len(data)):
         for j in range(len(data[i])):
             if data[i][j] == "#":
-                cod = str(j) + "," + str(i)
-                map_[cod] = 0
-                for i2 in range(len(data)):
-                    for j2 in range(len(data[i2])):
-                        if (i != i2 or j != j2) and data[i2][j2] == "#":
-                            visible = True
-                            #if j2 != j:
-                            imin, imax = (i, i2)
-                            if imin > imax:
-                                imin = i2
-                                imax = i
-                            jmin, jmax = (j, j2)
-                            if jmin > jmax:
-                                jmin = j2
-                                jmax = j
-                            for i3 in range(imin, imax+1):
-                                for j3 in range(jmin, jmax+1):
-                                    if i3 == i and j3 == j:
-                                        continue
-                                    if i3 == i2 and j3 == j2:
-                                        continue
-                                    if data[i3][j3] == "#":
-                                        if i == 4 and j == 3:
-                                            print((j,i), (j2,i2), (j3,i3))
-                                        if isBetween((j,i), (j2,i2), (j3,i3)):
-                                            if i == 4 and j == 3:
-                                                print("T")
-                                            visible = False
-                                            break
-                                if not visible:
-                                    break
-                            if visible:
-                                map_[cod] += 1
+                asteroids_counts[(i, j)] = 0
+    keys = asteroids_counts.keys()
+    for max_key in keys:
+        i, j = max_key
+        for key2 in keys:
+            i2, j2 = key2
+            if max_key != key2:
+                visible = True
+                delta_i = 1 if i2 > i else -1
+                delta_j = 1 if j2 > j else -1
 
-    print(map_)
-    ma = -1
-    k2 = ""
-    for k in map_:
-        if map_[k] > ma:
-            ma =map_[k] 
-            k2 = k
+                for i3 in range(i, i2 + delta_i, delta_i):
+                    for j3 in range(j, j2 + delta_j, delta_j):
+                        if (i3 == i and j3 == j) or (i3 == i2 and j3 == j2):
+                            continue
+                        elif (i3, j3) in keys:
+                            if isPointBetween((j, i), (j2, i2), (j3, i3)):
+                                visible = False
+                                break
+                    if not visible:
+                        break
+                if visible:
+                    asteroids_counts[max_key] += 1
 
-    return k2, map_[k2]
+    max_asteroids = -1
+    max_key = ""
+    for key in asteroids_counts:
+        if asteroids_counts[key] > max_asteroids:
+            max_asteroids = asteroids_counts[key]
+            max_key = key
+    return asteroids_counts[max_key]
 
-def next(x, y, max_x, max_y):
-    if x == max_x:
-        if y == max_y:
-            return (-1, 0)
-        else:
-            return (0, 1) 
-    if y == max_y:
-        if x  == 0:
-            return (0, -1)
-        else:
-            return (-1, 0) 
-    if x == 0:
-        if y == 0:
-            return (1, 0)
-        else:
-            return (0, -1)
-    if y == 0:
-        if x == max_x:
-            return (0, 1)
-        else:
-            return (1, 0)
+def day10_measure_angle(origin_x, origin_y, p1_x, p1_y, p2_x, p2_y):
+    # negate y since its axis is inverted
+    vector1_x = p1_x - origin_x
+    vector1_y = -p1_y - -origin_y
+    vector2_x = p2_x - origin_x
+    vector2_y = -p2_y - -origin_y
+
+    dot_product = vector1_x * vector2_x + vector1_y * vector2_y
+    determinant = -vector1_x * vector2_y + vector1_y * vector2_x
+    angle = math.atan2(determinant, dot_product)
+    # move angle to [0, 2*pi]
+    angle = (angle + 2 * math.pi) % (2 * math.pi)
+    return angle
 
 def day10_2(data):
+    data = [[data[i][j] 
+            for j in range(len(data[i]))]
+            for i in range(len(data))]
+    origin_x = 28
+    origin_y = 29
     #data = read_input(2019,1001)
-    data = [[data[i][j] for j in range(len(data[i]))] for i in range(len(data))]
-    map_ = {}
-    prec = 20
-    x = 28*prec
-    y = 29*prec
-    #x = 8*2
-    #y = 3*2
-    data[y//prec][x//prec] = "."
-    cur_x = x
-    cur_y = 0
-    dx = 1
-    dy = 0
+    #origin_x = 11
+    #origin_y = 13
+    asteroids = []
+    data[origin_y][origin_x] = "."
+    for y in range(len(data)):
+        for x in range(len(data[0])):
+            if data[y][x] == "#":
+                # Angle to initial laser position
+                angle = day10_measure_angle(
+                    origin_x, origin_y, origin_x, 0, x, y)
+                # Distance to laser's asteroid
+                dist = math.sqrt(math.pow(x - origin_x, 2) +
+                                 math.pow(y - origin_y, 2))
+                asteroids.append((angle, dist, x, y))
+
+    asteroids.sort()
+    laser_angle = 2 * math.pi - 0.000000000000001
     count = 0
+    last_hit = (0, 0)
     while count < 200:
-        visible = True
-        #if j2 != j:
-        imin, imax = (y, cur_y)
-        step_y = 1
-        if imin > imax:
-            step_y = -1
-        jmin, jmax = (x, cur_x)
-        step_x = 1
-        if jmin > jmax:
-            step_x = -1
-        
-        broke = False
-        for y3 in range(imin, imax+step_y, step_y):
-            for x3 in range(jmin, jmax+step_x, step_x):
-                if y3 % prec == 0 and x3 % prec == 0 and data[y3//prec][x3//prec] == "#":
-                    if (y3 == cur_y and x3 == cur_x) or isBetween((x,y), (cur_x,cur_y), (x3,y3)):
-                        broke = True
-                        data[y3//prec][x3//prec] = "."
-                        count += 1
-                        print(x3,y3)
-                        print(count)
-                        #if count == 10:
-                             #return
-                        if count == 200:
-                            print(x, y, x*y)
-                        break
-            if broke:
-                break
-        #print(count, cur_x, cur_y, dx, dy)
-        dx, dy = next(cur_x,cur_y, (len(data[0])-1)*prec, (len(data)-1)*prec)
-        cur_x += dx
-        cur_y += dy
+        new_asts = [(
+            angle - laser_angle if angle - laser_angle > 0 else math.pi * 2 + angle - laser_angle, 
+            dist,
+            angle, 
+            x, 
+            y) for angle, dist, x, y in asteroids]
+        _, dist, angle, x, y = min(new_asts)
+        asteroids.remove((angle, dist, x, y))
+        laser_angle = angle
+        last_hit = (x, y)
+        count += 1
 
-    print(map_)
-    ma = -1
-    k2 = ""
-    for k in map_:
-        if map_[k] > ma:
-            ma =map_[k] 
-            k2 = k
-
-    return k2, map_[k2]
+    return last_hit[0] * 100 + last_hit[1]
 
 # IntCode logic available @ int_run(insts, inputs)
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(["b", "10"], globals(), 2019)
+    main(sys.argv, globals(), 2019)
