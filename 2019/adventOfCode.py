@@ -614,35 +614,26 @@ def isPointBetween(start, end, check):
 def day10_1(data):
     #data = read_input(2019,1001)
     asteroids_counts = {}
-    for i in range(len(data)):
-        for j in range(len(data[i])):
-            if data[i][j] == "#":
-                asteroids_counts[(i, j)] = 0
+    for y in range(len(data)):
+        for x in range(len(data[y])):
+            if data[y][x] == "#":
+                asteroids_counts[(x, y)] = 0
     keys = asteroids_counts.keys()
-    for max_key in keys:
-        i, j = max_key
+    for key in keys:
+        x1, y1 = key
+        slopes = set()
         for key2 in keys:
-            i2, j2 = key2
-            if max_key != key2:
-                visible = True
-                delta_i = 1 if i2 > i else -1
-                delta_j = 1 if j2 > j else -1
-
-                for i3 in range(i, i2 + delta_i, delta_i):
-                    for j3 in range(j, j2 + delta_j, delta_j):
-                        if (i3 == i and j3 == j) or (i3 == i2 and j3 == j2):
-                            continue
-                        elif (i3, j3) in keys:
-                            if isPointBetween((j, i), (j2, i2), (j3, i3)):
-                                visible = False
-                                break
-                    if not visible:
-                        break
-                if visible:
-                    asteroids_counts[max_key] += 1
-
+            x2, y2 = key2
+            if key != key2:
+                slope = math.inf
+                if y2 != y1:
+                    slope = (x2 - x1) / (y2 - y1)
+                y_dir = "+" if y2 > y1 else "-"
+                x_dir = "+" if x2 > x1 else "-"
+                slopes.add((slope, x_dir, y_dir))
+        asteroids_counts[key] = len(slopes)
     max_asteroids = -1
-    max_key = ""
+    max_key = (0, 0)
     for key in asteroids_counts:
         if asteroids_counts[key] > max_asteroids:
             max_asteroids = asteroids_counts[key]
@@ -664,8 +655,8 @@ def day10_measure_angle(origin_x, origin_y, p1_x, p1_y, p2_x, p2_y):
     return angle
 
 def day10_2(data):
-    data = [[data[i][j] 
-            for j in range(len(data[i]))]
+    data = [[data[i][j]
+             for j in range(len(data[i]))]
             for i in range(len(data))]
     origin_x = 28
     origin_y = 29
@@ -691,10 +682,10 @@ def day10_2(data):
     last_hit = (0, 0)
     while count < 200:
         new_asts = [(
-            angle - laser_angle if angle - laser_angle > 0 else math.pi * 2 + angle - laser_angle, 
+            angle - laser_angle if angle - laser_angle > 0 else math.pi * 2 + angle - laser_angle,
             dist,
-            angle, 
-            x, 
+            angle,
+            x,
             y) for angle, dist, x, y in asteroids]
         _, dist, angle, x, y = min(new_asts)
         asteroids.remove((angle, dist, x, y))
