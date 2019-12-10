@@ -589,9 +589,162 @@ def day9_2(data):
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
     return int_run(data, [2])[0]
 
+""" DAY 9 """
+def day10_slope(x1, y1, x2, y2):
+    return (x2-x1)/(y2-y1)
+
+def isBetween(a, b, c):
+    crossproduct = (c[1] - a[1]) * (b[0] - a[0]) - (c[0] - a[0]) * (b[1] - a[1])
+
+    # compare versus epsilon for floating point values, or != 0 if using integers
+    if abs(crossproduct) != 0:
+        return False
+
+    dotproduct = (c[0] - a[0]) * (b[0] - a[0]) + (c[1] - a[1])*(b[1] - a[1])
+    if dotproduct < 0:
+        return False
+
+    squaredlengthba = (b[0] - a[0])*(b[0] - a[0]) + (b[1] - a[1])*(b[1] - a[1])
+    if dotproduct > squaredlengthba:
+        return False
+
+    return True
+
+def day_10_1(data):
+    #data = read_input(2019,1001)
+    #data = [k.split("") for k in data]
+    map_ = {}
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == "#":
+                cod = str(j) + "," + str(i)
+                map_[cod] = 0
+                for i2 in range(len(data)):
+                    for j2 in range(len(data[i2])):
+                        if (i != i2 or j != j2) and data[i2][j2] == "#":
+                            visible = True
+                            #if j2 != j:
+                            imin, imax = (i, i2)
+                            if imin > imax:
+                                imin = i2
+                                imax = i
+                            jmin, jmax = (j, j2)
+                            if jmin > jmax:
+                                jmin = j2
+                                jmax = j
+                            for i3 in range(imin, imax+1):
+                                for j3 in range(jmin, jmax+1):
+                                    if i3 == i and j3 == j:
+                                        continue
+                                    if i3 == i2 and j3 == j2:
+                                        continue
+                                    if data[i3][j3] == "#":
+                                        if i == 4 and j == 3:
+                                            print((j,i), (j2,i2), (j3,i3))
+                                        if isBetween((j,i), (j2,i2), (j3,i3)):
+                                            if i == 4 and j == 3:
+                                                print("T")
+                                            visible = False
+                                            break
+                                if not visible:
+                                    break
+                            if visible:
+                                map_[cod] += 1
+
+    print(map_)
+    ma = -1
+    k2 = ""
+    for k in map_:
+        if map_[k] > ma:
+            ma =map_[k] 
+            k2 = k
+
+    return k2, map_[k2]
+
+def next(x, y, max_x, max_y):
+    if x == max_x:
+        if y == max_y:
+            return (-1, 0)
+        else:
+            return (0, 1) 
+    if y == max_y:
+        if x  == 0:
+            return (0, -1)
+        else:
+            return (-1, 0) 
+    if x == 0:
+        if y == 0:
+            return (1, 0)
+        else:
+            return (0, -1)
+    if y == 0:
+        if x == max_x:
+            return (0, 1)
+        else:
+            return (1, 0)
+
+def day10_2(data):
+    #data = read_input(2019,1001)
+    data = [[data[i][j] for j in range(len(data[i]))] for i in range(len(data))]
+    map_ = {}
+    prec = 20
+    x = 28*prec
+    y = 29*prec
+    #x = 8*2
+    #y = 3*2
+    data[y//prec][x//prec] = "."
+    cur_x = x
+    cur_y = 0
+    dx = 1
+    dy = 0
+    count = 0
+    while count < 200:
+        visible = True
+        #if j2 != j:
+        imin, imax = (y, cur_y)
+        step_y = 1
+        if imin > imax:
+            step_y = -1
+        jmin, jmax = (x, cur_x)
+        step_x = 1
+        if jmin > jmax:
+            step_x = -1
+        
+        broke = False
+        for y3 in range(imin, imax+step_y, step_y):
+            for x3 in range(jmin, jmax+step_x, step_x):
+                if y3 % prec == 0 and x3 % prec == 0 and data[y3//prec][x3//prec] == "#":
+                    if (y3 == cur_y and x3 == cur_x) or isBetween((x,y), (cur_x,cur_y), (x3,y3)):
+                        broke = True
+                        data[y3//prec][x3//prec] = "."
+                        count += 1
+                        print(x3,y3)
+                        print(count)
+                        #if count == 10:
+                             #return
+                        if count == 200:
+                            print(x, y, x*y)
+                        break
+            if broke:
+                break
+        #print(count, cur_x, cur_y, dx, dy)
+        dx, dy = next(cur_x,cur_y, (len(data[0])-1)*prec, (len(data)-1)*prec)
+        cur_x += dx
+        cur_y += dy
+
+    print(map_)
+    ma = -1
+    k2 = ""
+    for k in map_:
+        if map_[k] > ma:
+            ma =map_[k] 
+            k2 = k
+
+    return k2, map_[k2]
+
 # IntCode logic available @ int_run(insts, inputs)
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(sys.argv, globals(), 2019)
+    main(["b", "10"], globals(), 2019)
