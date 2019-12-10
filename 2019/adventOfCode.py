@@ -501,7 +501,7 @@ def day7_2(data):
 def day8_get_layers(data, width, height):
     layers = {}
     curr_layer = 0
-    while (curr_layer * width * height < len(data)):
+    while curr_layer * width * height < len(data):
         layers[curr_layer] = {}
         for y in range(height):
             for x in range(width):
@@ -614,9 +614,9 @@ def isPointBetween(start, end, check):
 def day10_1(data):
     #data = read_input(2019,1001)
     asteroids_counts = {}
-    for y in range(len(data)):
-        for x in range(len(data[y])):
-            if data[y][x] == "#":
+    for y, line in enumerate(data):
+        for x, char in enumerate(line):
+            if char == "#":
                 asteroids_counts[(x, y)] = 0
     keys = asteroids_counts.keys()
     for key in keys:
@@ -655,19 +655,17 @@ def day10_measure_angle(origin_x, origin_y, p1_x, p1_y, p2_x, p2_y):
     return angle
 
 def day10_2(data):
-    data = [[data[i][j]
-             for j in range(len(data[i]))]
-            for i in range(len(data))]
     origin_x = 28
     origin_y = 29
     #data = read_input(2019,1001)
     #origin_x = 11
     #origin_y = 13
     asteroids = []
-    data[origin_y][origin_x] = "."
-    for y in range(len(data)):
-        for x in range(len(data[0])):
-            if data[y][x] == "#":
+    for y, line in enumerate(data):
+        for x, char in enumerate(line):
+            if x == origin_x and y == origin_y:
+                continue
+            if char == "#":
                 # Angle to initial laser position
                 angle = day10_measure_angle(
                     origin_x, origin_y, origin_x, 0, x, y)
