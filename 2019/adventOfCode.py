@@ -593,26 +593,6 @@ def day9_2(data):
 
 """ DAY 10 """
 
-def isPointBetween(start, end, check):
-    a_x, a_y = start
-    b_x, b_y = end
-    c_x, c_y = check
-
-    crossproduct = (c_y - a_y) * (b_x - a_x) - (c_x - a_x) * (b_y - a_y)
-
-    if abs(crossproduct) != 0:
-        return False
-
-    dotproduct = (c_x - a_x) * (b_x - a_x) + (c_y - a_y) * (b_y - a_y)
-    if dotproduct < 0:
-        return False
-
-    squaredlengthba = (b_x - a_x) * (b_x - a_x) + (b_y - a_y) * (b_y - a_y)
-    if dotproduct > squaredlengthba:
-        return False
-
-    return True
-
 def day10_1(data):
     #data = read_input(2019,1001)
     asteroids_counts = {}
