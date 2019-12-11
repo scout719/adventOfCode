@@ -24,6 +24,8 @@ from common.utils import execute_day, read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
 
+WHITE_SQUARE = "█"
+
 """ DAY 1 """
 
 def day1_calc_fuel(mod):
@@ -526,7 +528,7 @@ def day8_get_image(stack):
         if stack[(x, y)] == 2:
             image += "#"
         elif stack[(x, y)] == 1:
-            image += "█"
+            image += WHITE_SQUARE
         elif stack[(x, y)] == 0:
             image += " "
     return image
@@ -693,7 +695,103 @@ def day10_2(data):
 
     return last_hit[0] * 100 + last_hit[1]
 
-# IntCode logic available @ int_run(insts, inputs)
+""" DAY 11 """
+
+def day11_get_turn(dx, dy, d):
+    if d == 1:
+        if dx == 0 and dy == -1:
+            return (1, 0)
+        if dx == 1 and dy == 0:
+            return (0, 1)
+        if dx == 0 and dy == 1:
+            return (-1, 0)
+        if dx == -1 and dy == 0:
+            return (0, -1)
+    if d == 0:
+        if dx == 0 and dy == -1:
+            return (-1, 0)
+        if dx == 1 and dy == 0:
+            return (0, -1)
+        if dx == 0 and dy == 1:
+            return (1, 0)
+        if dx == -1 and dy == 0:
+            return (0, 1)
+
+def day11_run_robot(insts, inputs, panels):
+    pc = 0
+    rel_base = 0
+    outputs = []
+    x, y = (0, 0)
+    dx, dy = (0, -1)
+    is_paint = True
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = day2_execute(
+            op, pc, insts, inputs, outputs, rel_base)
+        if len(outputs) > 0:
+            if is_paint:
+                is_paint = False
+                color = outputs.pop(0)
+                panels[(x, y)] = color
+                # day11_print(m)
+            else:
+                is_paint = True
+                rotation = outputs.pop(0)
+                dx, dy = day11_get_turn(dx, dy, rotation)
+                x += dx
+                y += dy
+                if (x, y) in panels:
+                    inputs.append(panels[(x, y)])
+                else:
+                    inputs.append(0)
+
+    return panels
+
+def day11_print(panels, min_x=0, max_x=42, min_y=0, max_y=5, should_print=True):
+    image = ""
+    for y in range(min_y, max_y + 1):
+        image += "\n"
+        for x in range(min_x, max_x + 1):
+            if (x, y) in panels and panels[(x, y)] == 1:
+                image += WHITE_SQUARE
+            else:
+                image += " "
+    if should_print:
+        time.sleep(.05)
+        clear()
+        print(image)
+    return image
+
+def day11_1(data):
+    data = [int(d) for d in data[0].split(",")]
+    data = [data[i] if i < len(data) else 0 for i in range(10000)]
+
+    panels = day11_run_robot(data, [0], {})
+    return len(panels.keys())
+
+def day11_2(data):
+    data = [int(d) for d in data[0].split(",")]
+    data = [data[i] if i < len(data) else 0 for i in range(10000)]
+
+    panels = day11_run_robot(data, [1], {})
+    positions = panels.keys()
+    min_x = min([pos[0] for pos in positions])
+    max_x = max([pos[0] for pos in positions])
+    min_y = min([pos[1] for pos in positions])
+    max_y = max([pos[1] for pos in positions])
+
+    return day11_print(panels, min_x, max_x, min_y, max_y, should_print=False)
+
+# IntCode logic:
+# def int_run(insts, inputs):
+#     pc = 0
+#     rel_base = 0
+#     outputs = []
+#     while insts[pc] != 99:
+#         op = insts[pc]
+#         (pc, insts, rel_base) = day2_execute(
+#             op, pc, insts, inputs, outputs, rel_base)
+#     return outputs
 
 """ MAIN FUNCTION """
 
