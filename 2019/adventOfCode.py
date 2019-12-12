@@ -762,6 +762,76 @@ def day11_2(data):
 
     return day11_print(panels, min_x, max_x, min_y, max_y, should_print=False)
 
+def day12_1(data):
+    data = [l.lstrip("<").rstrip(">") for l in data]
+    data = [l.split(", ") for l in data]
+    moons = [[int(m[2:]) for m in l]for l in data]
+    vels = [[0 for p in m] for m in moons]
+    
+    step =0
+    view = set()
+    print(moons)
+    while step < 1000:
+        step +=1
+        for i in range(len(moons)):
+            for j in range(len(moons)):
+                if moons[i][0] < moons[j][0]:
+                    vels[i][0] +=1
+                if moons[i][1] < moons[j][1]:
+                    vels[i][1] +=1  
+                if moons[i][2] < moons[j][2]:
+                    vels[i][2] +=1 
+                if moons[i][0] > moons[j][0]:
+                    vels[i][0] -=1
+                if moons[i][1] > moons[j][1]:
+                    vels[i][1] -=1  
+                if moons[i][2] > moons[j][2]:
+                    vels[i][2] -=1
+        for i in range(len(moons)):
+            moons[i][0] += vels[i][0]
+            moons[i][1] += vels[i][1]
+            moons[i][2] += vels[i][2]
+        #print(moons)
+        #print(vels)
+        view.add((moons[i][0],moons[i][1],moons[i][2],vels[i][0],vels[i][1],vels[i][2]))
+    print(moons)
+    print(vels)
+    total = 0
+    for i in range(len(moons)):
+        total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
+    print(total)
+    
+    while True:
+        step += 1
+        for i in range(len(moons)):
+            for j in range(len(moons)):
+                if moons[i][0] < moons[j][0]:
+                    vels[i][0] +=1
+                if moons[i][1] < moons[j][1]:
+                    vels[i][1] +=1  
+                if moons[i][2] < moons[j][2]:
+                    vels[i][2] +=1 
+                if moons[i][0] > moons[j][0]:
+                    vels[i][0] -=1
+                if moons[i][1] > moons[j][1]:
+                    vels[i][1] -=1  
+                if moons[i][2] > moons[j][2]:
+                    vels[i][2] -=1
+        for i in range(len(moons)):
+            moons[i][0] += vels[i][0]
+            moons[i][1] += vels[i][1]
+            moons[i][2] += vels[i][2]
+        #print(moons)
+        #print(vels)
+        state = (moons[i][0],moons[i][1],moons[i][2],vels[i][0],vels[i][1],vels[i][2])
+        if state in view:
+            return step
+        view.add(state)
+        total = 0
+        for i in range(len(moons)):
+            total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
+        print(total)
+    
 # IntCode logic:
 # def int_run(insts, inputs):
 #     pc = 0
