@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=unused-import
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
 import functools
 import math
-import multiprocessing as mp
 import os
-import re
-import string
 import sys
 import time
-from collections import Counter, deque
 import heapq
-from enum import IntEnum
-from struct import pack
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
-from common.utils import execute_day, read_input, main, clear  # NOQA: E402
-# pylint: enable=unused-import
+from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
 
@@ -708,7 +700,7 @@ def day11_run_robot(insts, inputs, panels):
         op = insts[pc]
         (pc, insts, rel_base) = day2_execute(
             op, pc, insts, inputs, outputs, rel_base)
-        if len(outputs) > 0:
+        if outputs:
             if is_paint:
                 is_paint = False
                 color = outputs.pop(0)
@@ -762,160 +754,71 @@ def day11_2(data):
 
     return day11_print(panels, min_x, max_x, min_y, max_y, should_print=False)
 
+""" DAY 12 """
+
+def day12_apply_gravity(moons, vels):
+    for i, moon1 in enumerate(moons):
+        for _, moon2 in enumerate(moons):
+            for c, _ in enumerate(moon1):
+                if moon1[c] < moon2[c]:
+                    vels[i][c] += 1
+                if moon1[c] > moon2[c]:
+                    vels[i][c] -= 1
+
+def day12_apply_velocity(moons, vels):
+    for i, moon in enumerate(moons):
+        for c, _ in enumerate(moon):
+            moon[c] += vels[i][c]
+
 def day12_1(data):
     #data = read_input(2019,1201)
     data = [l.lstrip("<").rstrip(">") for l in data]
     data = [l.split(", ") for l in data]
     moons = [[int(m[2:]) for m in l]for l in data]
     vels = [[0 for p in m] for m in moons]
-    
-    step =0
-    view = set()
-    print(moons)
+
+    step = 0
     while step < 1000:
-        step +=1
-        for i in range(len(moons)):
-            for j in range(len(moons)):
-                if moons[i][0] < moons[j][0]:
-                    vels[i][0] +=1
-                if moons[i][1] < moons[j][1]:
-                    vels[i][1] +=1  
-                if moons[i][2] < moons[j][2]:
-                    vels[i][2] +=1 
-                if moons[i][0] > moons[j][0]:
-                    vels[i][0] -=1
-                if moons[i][1] > moons[j][1]:
-                    vels[i][1] -=1  
-                if moons[i][2] > moons[j][2]:
-                    vels[i][2] -=1
-        for i in range(len(moons)):
-            moons[i][0] += vels[i][0]
-            moons[i][1] += vels[i][1]
-            moons[i][2] += vels[i][2]
-        #print(moons)
-        #print(vels)
-        state = (moons[0][0],moons[0][1],moons[0][2],vels[0][0],vels[0][1],vels[0][2],
-        moons[1][0],moons[1][1],moons[1][2],vels[1][0],vels[1][1],vels[1][2],
-        moons[2][0],moons[2][1],moons[2][2],vels[2][0],vels[2][1],vels[2][2],
-        moons[3][0],moons[3][1],moons[3][2],vels[3][0],vels[3][1],vels[3][2])
-        view.add(state)
-    print(moons)
-    print(vels)
+        step += 1
+        day12_apply_gravity(moons, vels)
+        day12_apply_velocity(moons, vels)
     total = 0
     for i in range(len(moons)):
-        total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-    print(total)
+        total += sum([abs(moons[i][c]) for c in range(len(moons[i]))]) * \
+            sum([abs(vels[i][c]) for c in range(len(vels[i]))])
     return total
-    
-    while True:
-        step += 1
-        for i in range(len(moons)):
-            for j in range(len(moons)):
-                if moons[i][0] < moons[j][0]:
-                    vels[i][0] +=1
-                if moons[i][1] < moons[j][1]:
-                    vels[i][1] +=1  
-                if moons[i][2] < moons[j][2]:
-                    vels[i][2] +=1 
-                if moons[i][0] > moons[j][0]:
-                    vels[i][0] -=1
-                if moons[i][1] > moons[j][1]:
-                    vels[i][1] -=1  
-                if moons[i][2] > moons[j][2]:
-                    vels[i][2] -=1
-        for i in range(len(moons)):
-            moons[i][0] += vels[i][0]
-            moons[i][1] += vels[i][1]
-            moons[i][2] += vels[i][2]
-        #print(moons)
-        #print(vels)
-        state = (moons[0][0],moons[0][1],moons[0][2],vels[0][0],vels[0][1],vels[0][2],
-        moons[1][0],moons[1][1],moons[1][2],vels[1][0],vels[1][1],vels[1][2],
-        moons[2][0],moons[2][1],moons[2][2],vels[2][0],vels[2][1],vels[2][2],
-        moons[3][0],moons[3][1],moons[3][2],vels[3][0],vels[3][1],vels[3][2])
-        if step == 1000000:
-            return
 
-        total = 0
-        for i in range(len(moons)):
-            total += (abs(moons[i][0]))*(abs(vels[i][0]))
-        if total in temp:
-            print("Rep")
-        else:
-            temp.add(total)
-        #print(total)
-        #if step % 10000 == 0:
-            #print(step)
-        if state in view:
-            print("Repeated")
-            total = 0
-            for i in range(len(moons)):
-               total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-            print(total)
-            print(step)
-            #return step
-        else:
-            view.add(state)
-        #total = 0
-        #for i in range(len(moons)):
-        #    total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-        #print(total)
-
-def get_cycle(moons, vels):
+def day12_calc_cycles(moons, vels):
     count = 0
-    seen = {(moons[0],moons[1],moons[2],vels[0],vels[1],vels[2]):True}
-    while True:
+    seen = [set(), set(), set()]
+    repeated = 0
+    results = [0, 0, 0]
+    while repeated < 3:
+        state = [[], [], []]
+        for i, moon in enumerate(moons):
+            for c, _ in enumerate(moon):
+                state[c].append(moon[c])
+                state[c].append(vels[i][c])
+
+        for c in range(3):
+            if results[c] == 0:
+                state_c = tuple(state[c])
+                if state_c in seen[c]:
+                    repeated += 1
+                    results[c] = count
+                else:
+                    seen[c].add(state_c)
+            if repeated == 3:
+                return results
+
+        day12_apply_gravity(moons, vels)
+        day12_apply_velocity(moons, vels)
         count += 1
-        for i in range(len(moons)):
-            for j in range(len(moons)):
-                if moons[i] < moons[j]:
-                    vels[i] +=1
-                if moons[i] > moons[j]:
-                    vels[i] -=1
-        for i in range(len(moons)):
-            moons[i] += vels[i]
-        
-        state = (moons[0],moons[1],moons[2],vels[0],vels[1],vels[2])
-        if state in seen:
-            return 0, count, None
-        seen[state]  =True
 
+    return results
 
-from functools import reduce    # need this line if you're using Python3.x
-
-def lcm(a, b):
-    if a > b:
-        greater = a
-    else:
-        greater = b
-
-    while True:
-        if greater % a == 0 and greater % b == 0:
-            lcm = greater
-            break
-        greater += 1
-
-    return lcm
-
-def get_lcm_for(your_list):
-    return reduce(lambda x, y: lcm(x, y), your_list)
-
-# ans = get_lcm_for([1, 2, 3, 4, 5, 6, 7, 8, 9])
-# print(ans)
-from functools import reduce # Needed for Python3.x
-
-def lcm2(denominators):
-    return reduce(lambda x,y: (lambda a,b: next(i for i in range(max(a,b),a*b+1) if i%a==0 and i%b==0))(x,y), denominators)
-
-
-def gcd3(a,b):
-    while b:
-        a,b = b, a%b
-    return a
-
-def lcm3(a,b):
-    return a*b // math.gcd(a,b)
-
+def day12_lcm(a, b):
+    return a * b // math.gcd(a, b)
 
 def day12_2(data):
     #data = read_input(2019,1201)
@@ -923,141 +826,9 @@ def day12_2(data):
     data = [l.split(", ") for l in data]
     moons = [[int(m[2:]) for m in l]for l in data]
     vels = [[0 for p in m] for m in moons]
-    
-    step =0
-    view = set()
-    temp = set()
-    x_i, x_count, seen_x = get_cycle([moons[i][0] for i in range(len(moons))],[vels[i][0] for i in range(len(vels))])
-    y_i, y_count, seen_y = get_cycle([moons[i][1] for i in range(len(moons))],[vels[i][1] for i in range(len(vels))])
-    z_i, z_count, seen_z = get_cycle([moons[i][2] for i in range(len(moons))],[vels[i][2] for i in range(len(vels))])
 
-    # while True:
-    #     if seen_x[step % len(seen_x)] == seen_y[step % len(seen_y)] == seen_z[step % len(seen_z)]:
-    #         return step
-    #     step +=1
-    print(x_i, y_i, z_i, x_count, y_count, z_count)
-    import numpy as np
-    return functools.reduce(lambda x, y: lcm3(x, y), [x_count, y_count, z_count])
+    return functools.reduce(day12_lcm, day12_calc_cycles(moons, vels))
 
-def day12__2(data):
-    data = read_input(2019,1201)
-    data = [l.lstrip("<").rstrip(">") for l in data]
-    data = [l.split(", ") for l in data]
-    moons = [[int(m[2:]) for m in l]for l in data]
-    vels = [[0 for p in m] for m in moons]
-    
-    step =0
-    view = set()
-    temp = set()
-    print(moons)
-    while step < 1000:
-        step +=1
-        for i in range(len(moons)):
-            for j in range(len(moons)):
-                if moons[i][0] < moons[j][0]:
-                    vels[i][0] +=1
-                if moons[i][1] < moons[j][1]:
-                    vels[i][1] +=1  
-                if moons[i][2] < moons[j][2]:
-                    vels[i][2] +=1 
-                if moons[i][0] > moons[j][0]:
-                    vels[i][0] -=1
-                if moons[i][1] > moons[j][1]:
-                    vels[i][1] -=1  
-                if moons[i][2] > moons[j][2]:
-                    vels[i][2] -=1
-        for i in range(len(moons)):
-            moons[i][0] += vels[i][0]
-            moons[i][1] += vels[i][1]
-            moons[i][2] += vels[i][2]
-        #print(moons)
-        #print(vels)
-        state = (moons[0][0],moons[0][1],moons[0][2],vels[0][0],vels[0][1],vels[0][2],
-        moons[1][0],moons[1][1],moons[1][2],vels[1][0],vels[1][1],vels[1][2],
-        moons[2][0],moons[2][1],moons[2][2],vels[2][0],vels[2][1],vels[2][2],
-        moons[3][0],moons[3][1],moons[3][2],vels[3][0],vels[3][1],vels[3][2])
-        view.add(state)
-    print(moons)
-    print(vels)
-    total = 0
-    for i in range(len(moons)):
-        total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-    temp.add(total)
-    print(total)
-    
-    
-    while True:
-        step += 1
-        for i in range(len(moons)):
-            for j in range(len(moons)):
-                if moons[i][0] < moons[j][0]:
-                    vels[i][0] +=1
-                if moons[i][1] < moons[j][1]:
-                    vels[i][1] +=1  
-                if moons[i][2] < moons[j][2]:
-                    vels[i][2] +=1 
-                if moons[i][0] > moons[j][0]:
-                    vels[i][0] -=1
-                if moons[i][1] > moons[j][1]:
-                    vels[i][1] -=1  
-                if moons[i][2] > moons[j][2]:
-                    vels[i][2] -=1
-        for i in range(len(moons)):
-            moons[i][0] += vels[i][0]
-            moons[i][1] += vels[i][1]
-            moons[i][2] += vels[i][2]
-        #print(moons)
-        #print(vels)
-        #if step == 1000000:
-            #return
-
-        total = 0
-        for i in range(len(moons)):
-            total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-        
-#         [[2, -1, 1], [3, -7, -4], [1, -7, 5], [2, 2, 0]]
-#         [[3, -1, -1], [1, 3, 3], [-3, 1, -3], [-1, -3, 1]]
-        state = (moons[0][0],moons[0][1],moons[0][2],vels[0][0],vels[0][1],vels[0][2],
-        moons[1][0],moons[1][1],moons[1][2],vels[1][0],vels[1][1],vels[1][2],
-        moons[2][0],moons[2][1],moons[2][2],vels[2][0],vels[2][1],vels[2][2],
-        moons[3][0],moons[3][1],moons[3][2],vels[3][0],vels[3][1],vels[3][2])
-        if total in temp:
-            if state in view:
-                print("Repeated")
-                total = 0
-                for i in range(len(moons)):
-                    total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-                print(total)
-                print(step)
-                print(moons)
-                print(vels)
-                return step
-            else:
-                view.add(state)
-            # return
-        else:
-            temp.add(total)
-            view.add(state)
-        #print(total)
-        #if step % 10000 == 0:
-            #print(step)
-        # if state in view:
-        #     print("Repeated")
-        #     total = 0
-        #     for i in range(len(moons)):
-        #        total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-        #     print(total)
-        #     print(step)
-        #     print(moons)
-        #     print(vels)
-        #     return step
-        # else:
-        #     view.add(state)
-        #total = 0
-        #for i in range(len(moons)):
-        #    total += (abs(moons[i][0]) + abs(moons[i][1]) + abs(moons[i][2]))*(abs(vels[i][0]) + abs(vels[i][1]) + abs(vels[i][2]))
-        #print(total)
-    
 # IntCode logic:
 # def int_run(insts, inputs):
 #     pc = 0
