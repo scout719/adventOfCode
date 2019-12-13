@@ -22,8 +22,8 @@ def day14_1(data):
     return None
 
 def day14_2(data):
-    data = [int(d) for d in data[0].split(",")]
-    #return None
+    #data = [int(d) for d in data[0].split(",")]
+    return None
 
 # IntCode logic:
 # def int_run(insts, inputs):

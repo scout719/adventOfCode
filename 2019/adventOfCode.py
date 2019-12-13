@@ -864,7 +864,7 @@ def ic_run_13(insts, inputs, grid=[]):
     return outputs, score
 
 def day13_print(grid):
-    time.sleep(0.005)
+    time.sleep(0.05)
     clear()
     for y, line in enumerate(grid):
         for x, tile in enumerate(line):
@@ -878,6 +878,7 @@ def day13_print(grid):
                 print("O", end="")
             else:
                 print(" ", end="")
+        print()
 
 def day13_1(data):
     data = [int(d) for d in data[0].split(",")]
