@@ -8,7 +8,7 @@ def ic_mode(insts, v, mode, rel_base=0, to_write=False):
         return insts[v + (rel_base if mode == 2 else 0)]
     raise NotImplementedError
 
-def ic_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0):
+def ic_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, get_input=None):
     if inputs is None:
         inputs = []
     if outputs is None:
@@ -48,6 +48,8 @@ def ic_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0):
         a_mode = modes % 10
         modes = modes // 10
         a = ic_mode(insts, a, a_mode, rel_base, True)
+        if get_input != None:
+            inputs.append(get_input())
         insts[a] = inputs.pop(0)
         return (pc + 2, insts, rel_base)
     elif op == 4:

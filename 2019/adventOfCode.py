@@ -47,7 +47,7 @@ def day5_mode(insts, v, mode, rel_base=0, to_write=False):
         return insts[v + (rel_base if mode == 2 else 0)]
     raise NotImplementedError
 
-def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0):
+def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, get_input=None):
     if inputs is None:
         inputs = []
     if outputs is None:
@@ -87,6 +87,8 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0):
         a_mode = modes % 10
         modes = modes // 10
         a = day5_mode(insts, a, a_mode, rel_base, True)
+        if get_input != None:
+            inputs.append(get_input())
         insts[a] = inputs.pop(0)
         return (pc + 2, insts, rel_base)
     elif op == 4:
@@ -829,16 +831,80 @@ def day12_2(data):
 
     return functools.reduce(day12_lcm, day12_calc_cycles(moons, vels))
 
+""" DAY 13 """
+
 # IntCode logic:
-# def int_run(insts, inputs):
-#     pc = 0
-#     rel_base = 0
-#     outputs = []
-#     while insts[pc] != 99:
-#         op = insts[pc]
-#         (pc, insts, rel_base) = day2_execute(
-#             op, pc, insts, inputs, outputs, rel_base)
-#     return outputs
+def ic_run_13(insts, inputs, grid=[]):
+    def calculate_input():
+        # day13_print(grid)
+        b_x, p_x = (0, 0)
+        for y, line in enumerate(grid):
+            for x, tile in enumerate(line):
+                if tile == 4:
+                    b_x = x
+                if tile == 3:
+                    p_x = x
+        return -1 if p_x > b_x else 1 if p_x < b_x else 0
+    pc = 0
+    rel_base = 0
+    outputs = []
+    score = 0
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = day2_execute(
+            op, pc, insts, inputs, outputs, rel_base, calculate_input)
+        if grid and len(outputs) == 3:
+            x = outputs.pop(0)
+            y = outputs.pop(0)
+            tile_id = outputs.pop(0)
+            if x == -1 and y == 0:
+                score = tile_id
+            else:
+                grid[y][x] = tile_id
+    return outputs, score
+
+def day13_print(grid):
+    time.sleep(0.005)
+    clear()
+    for y, line in enumerate(grid):
+        for x, tile in enumerate(line):
+            if tile == 1:
+                print(WHITE_SQUARE, end="")
+            elif tile == 2:
+                print("#", end="")
+            elif tile == 3:
+                print("_", end="")
+            elif tile == 4:
+                print("O", end="")
+            else:
+                print(" ", end="")
+
+def day13_1(data):
+    data = [int(d) for d in data[0].split(",")]
+    for i in range(1000):
+        data.append(0)
+    results, _ = ic_run_13(data, [])
+    i = 0
+    count = 0
+    while i < len(results):
+        tile_id = results[i + 2]
+        i += 3
+        if tile_id == 2:
+            count += 1
+    return count
+
+def day13_2(data):
+    data = [int(d) for d in data[0].split(",")]
+    for i in range(1000):
+        data.append(0)
+    backup = data[:]
+    grid = [[0 for j in range(40)] for i in range(22)]
+    results, _ = ic_run_13(data, [], grid)
+
+    data = backup
+    data[0] = 2
+    results, score = ic_run_13(data, [], grid)
+    return score
 
 """ MAIN FUNCTION """
 
