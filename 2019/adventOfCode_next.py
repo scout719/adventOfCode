@@ -17,12 +17,17 @@ from icComputer import ic_execute  # NOQA: E402
 
 WHITE_SQUARE = "█"
 
-def day14_1(data):
-    #data = [int(d) for d in data[0].split(",")]
+def day15_parse_input(data):
+    return data
+
+def day15_1(data):
+    # data = read_input(2019, 1401)
+    data = day15_parse_input(data)
     return None
 
-def day14_2(data):
-    #data = [int(d) for d in data[0].split(",")]
+def day15_2(data):
+    # data = read_input(2019, 1401)
+    data = day15_parse_input(data)
     return None
 
 # IntCode logic:

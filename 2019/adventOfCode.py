@@ -7,6 +7,8 @@ import os
 import sys
 import time
 import heapq
+import copy
+from collections import defaultdict
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
@@ -87,7 +89,7 @@ def day2_execute(op, pc, insts, inputs=None, outputs=None, rel_base=0, get_input
         a_mode = modes % 10
         modes = modes // 10
         a = day5_mode(insts, a, a_mode, rel_base, True)
-        if get_input != None:
+        if not get_input is None:
             inputs.append(get_input())
         insts[a] = inputs.pop(0)
         return (pc + 2, insts, rel_base)
@@ -834,11 +836,14 @@ def day12_2(data):
 """ DAY 13 """
 
 # IntCode logic:
-def ic_run_13(insts, inputs, grid=[]):
+def ic_run_13(insts, inputs, grid=None):
+    if grid is None:
+        grid = []
+
     def calculate_input():
         # day13_print(grid)
         b_x, p_x = (0, 0)
-        for y, line in enumerate(grid):
+        for line in grid:
             for x, tile in enumerate(line):
                 if tile == 4:
                     b_x = x
@@ -866,8 +871,8 @@ def ic_run_13(insts, inputs, grid=[]):
 def day13_print(grid):
     time.sleep(0.05)
     clear()
-    for y, line in enumerate(grid):
-        for x, tile in enumerate(line):
+    for line in grid:
+        for tile in line:
             if tile == 1:
                 print(WHITE_SQUARE, end="")
             elif tile == 2:
@@ -896,16 +901,92 @@ def day13_1(data):
 
 def day13_2(data):
     data = [int(d) for d in data[0].split(",")]
-    for i in range(1000):
+    for _ in range(1000):
         data.append(0)
     backup = data[:]
     grid = [[0 for j in range(40)] for i in range(22)]
-    results, _ = ic_run_13(data, [], grid)
+    _, _ = ic_run_13(data, [], grid)
 
     data = backup
     data[0] = 2
-    results, score = ic_run_13(data, [], grid)
+    _, score = ic_run_13(data, [], grid)
     return score
+
+""" DAY 14 """
+
+def day14_parse_input(data):
+    reactions = []
+    for line in data:
+        # Split requirements from reaction
+        parts = line.split(" => ")
+        reaction_parts = parts[1].split(" ")
+        reaction_quantity = int(reaction_parts[0])
+        reaction_chemical = reaction_parts[1]
+        requirements = parts[0].split(", ")
+        for i, requirement in enumerate(requirements):
+            requirement_parts = requirement.split(" ")
+            requirement_quantity = int(requirement_parts[0])
+            requirement_chemical = requirement_parts[1]
+            requirements[i] = (requirement_quantity, requirement_chemical)
+        reactions.append(
+            (requirements, (reaction_quantity, reaction_chemical)))
+
+    reqs_map = {}
+    for reqs, (quantity, chemical) in reactions:
+        reqs_map[chemical] = (quantity, reqs)
+    return reqs_map
+
+def day14_produce_fuel(reqs_map, amount, leftovers):
+    to_produce_amount = defaultdict(int)
+    to_produce_amount["FUEL"] = amount
+    ore_amount = 0
+    while to_produce_amount:
+        next_chemical = next(iter(to_produce_amount))
+        next_quantity = to_produce_amount[next_chemical]
+        del to_produce_amount[next_chemical]
+        if next_quantity > leftovers[next_chemical]:
+            next_quantity -= leftovers[next_chemical]
+            leftovers[next_chemical] = 0
+        else:
+            leftovers[next_chemical] -= next_quantity
+            continue
+        (prod_quantity, requirements) = reqs_map[next_chemical]
+        multiplier = math.ceil(next_quantity / prod_quantity)
+        leftovers[next_chemical] += prod_quantity * multiplier - next_quantity
+
+        for required_quantity, required_chemical in requirements:
+            total_required_quantity = required_quantity * multiplier
+            if required_chemical == "ORE":
+                ore_amount += total_required_quantity
+            else:
+                to_produce_amount[required_chemical] += total_required_quantity
+
+    return (ore_amount, leftovers)
+
+def day14_1(data):
+    # data = read_input(2019, 1401)
+    reqs_map = day14_parse_input(data)
+    ore_amount, _ = day14_produce_fuel(reqs_map, 1, defaultdict(int))
+    return ore_amount
+
+def day14_2(data):
+    # data = read_input(2019, 1401)
+    reqs_map = day14_parse_input(data)
+    max_fuel = 0
+    leftovers = defaultdict(int)
+    leftovers["ORE"] = 1000000000000
+    fuel_to_produce = leftovers["ORE"]
+    while fuel_to_produce > 0:
+        leftovers_backup = copy.deepcopy(leftovers)
+        ore_amount, leftovers = day14_produce_fuel(
+            reqs_map, fuel_to_produce, leftovers)
+        leftovers["ORE"] -= ore_amount
+        if leftovers["ORE"] > 0:
+            max_fuel += fuel_to_produce
+        elif leftovers["ORE"] < 0:
+            leftovers = leftovers_backup
+        fuel_to_produce = fuel_to_produce // 2
+    return max_fuel
 
 """ MAIN FUNCTION """
 
