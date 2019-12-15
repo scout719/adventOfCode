@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
+from _heapq import *
+from _collections import defaultdict
 import time
 import os
 import sys
@@ -16,18 +18,19 @@ from icComputer import ic_execute  # NOQA: E402
 # pylint: enable=wrong-import-position
 
 WHITE_SQUARE = "█"
+WHITE_CIRCLE = "•"
 
-def day15_parse_input(data):
+def day16_parse_input(data):
     return data
 
-def day15_1(data):
-    # data = read_input(2019, 1401)
-    data = day15_parse_input(data)
+def day16_1(data):
+    # data = read_input(2019, 1601)
+    data = day16_parse_input(data)
     return None
 
-def day15_2(data):
-    # data = read_input(2019, 1401)
-    data = day15_parse_input(data)
+def day16_2(data):
+    # data = read_input(2019, 1601)
+    data = day16_parse_input(data)
     return None
 
 # IntCode logic:

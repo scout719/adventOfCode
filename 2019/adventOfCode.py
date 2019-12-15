@@ -6,9 +6,9 @@ import math
 import os
 import sys
 import time
-import heapq
-import copy
 from collections import defaultdict
+from _heapq import *
+import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
@@ -19,6 +19,7 @@ from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=wrong-import-position
 
 WHITE_SQUARE = "█"
+WHITE_CIRCLE = "•"
 
 """ DAY 1 """
 
@@ -417,10 +418,10 @@ def day6_part2(data):
     # COM is the only one that doesn't orbit
     visited['COM'] = sys.maxsize
     queue = []
-    heapq.heappush(queue, (0, 'YOU'))
+    heappush(queue, (0, 'YOU'))
     count = 0
     while queue:
-        s, curr = heapq.heappop(queue)
+        s, curr = heappop(queue)
         if curr == "SAN":
             # Don't count the first and last hops
             return s - 2
@@ -429,11 +430,11 @@ def day6_part2(data):
         if curr in orbits:
             for next_orb in orbits[curr]:
                 if visited[next_orb] >= s:
-                    heapq.heappush(queue, (s + 1, next_orb))
+                    heappush(queue, (s + 1, next_orb))
         if curr in is_orbited_by:
             for prev_orb in is_orbited_by[curr]:
                 if visited[prev_orb] >= s:
-                    heapq.heappush(queue, (s + 1, prev_orb))
+                    heappush(queue, (s + 1, prev_orb))
     raise AssertionError
 
 def day6_1(data):
@@ -987,6 +988,111 @@ def day14_2(data):
             leftovers = leftovers_backup
         fuel_to_produce = fuel_to_produce // 2
     return max_fuel
+
+""" DAY 15 """
+
+def day15_int_run(insts, pc, rel_base, curr_move):
+    outputs = []
+    move_comm = [1, 4, 2, 3]
+
+    def calculate_input():
+        return move_comm[curr_move]
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = day2_execute(
+            op, pc, insts, [], outputs, rel_base, calculate_input)
+        if outputs:
+            return outputs.pop(0), insts, pc, rel_base
+    return outputs
+
+def day15_discover(insts, stop_at_oxygen):
+    curr_move = 0
+    move_delta = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+    x, y = (0, 0)
+    steps = 0
+    moves_made = defaultdict(set)
+    grid = defaultdict(lambda: " ")
+    unexplored = []
+    heappush(unexplored, (steps, x, y, 0, insts[:], 0, 0))
+    heappush(unexplored, (steps, x, y, 1, insts[:], 0, 0))
+    heappush(unexplored, (steps, x, y, 2, insts[:], 0, 0))
+    heappush(unexplored, (steps, x, y, 3, insts[:], 0, 0))
+    oxygen_x, oxygen_y = 0, 0
+    while unexplored:
+        steps, x, y, curr_move, insts, pc, rel_base = heappop(unexplored)
+        # print(x,y,steps)
+        code, insts, pc, rel_base = day15_int_run(
+            insts, pc, rel_base, curr_move)
+        if code == 0:
+            moves_made[(x, y)].add(curr_move)
+            dx, dy = move_delta[curr_move]
+            wall_x, wall_y = x + dx, y + dy
+            grid[(wall_x, wall_y)] = WHITE_SQUARE
+            continue
+        else:
+            dx, dy = move_delta[curr_move]
+            x, y = x + dx, y + dy
+            steps += 1
+            moves_made[(x, y)].add((curr_move + 2) % 4)
+            for move in range(0, 4):
+                if not move in moves_made[(x, y)]:
+                    heappush(unexplored, (steps, x, y,
+                                          move, insts[:], pc, rel_base))
+            if code == 2:
+                oxygen_x, oxygen_y = x, y
+                if stop_at_oxygen:
+                    return steps, grid, oxygen_x, oxygen_y
+
+    return steps, grid, oxygen_x, oxygen_y
+
+
+def day15_parse_input(data):
+    data = [int(d) for d in data[0].split(",")]
+    for _ in range(1000):
+        data.append(0)
+    return data
+
+max_t = -1
+def print_g(grid, t):
+    global max_t
+    if t <= max_t:
+        return
+    max_t = t
+    time.sleep(0.01)
+    s = ""
+    for y in range(-21, 22):
+        s += "\n"
+        for x in range(-21, 22):
+            s += grid[(x, y)]
+    clear()
+    print(s)
+
+def day15_1(data):
+    data = day15_parse_input(data)
+    steps, _, _, _ = day15_discover(data, True)
+    return steps
+
+def day15_2(data):
+    data = day15_parse_input(data)
+    _, grid, oxygen_x, oxygen_y = day15_discover(data, False)
+    unfilled = [(0, oxygen_x, oxygen_y)]
+    filled = set([(oxygen_x, oxygen_y)])
+    max_minute = set()
+    while unfilled:
+        minute, x, y = unfilled.pop(0)
+        grid[(x, y)] = WHITE_CIRCLE
+        # print_g(grid,m)
+        max_minute.add(minute)
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if abs(dx) == abs(dy):
+                    continue
+                next_x = x + dx
+                next_y = y + dy
+                if grid[(next_x, next_y)] != WHITE_SQUARE and not (next_x, next_y) in filled:
+                    filled.add((next_x, next_y))
+                    unfilled.append((minute + 1, next_x, next_y))
+    return max(max_minute)
 
 """ MAIN FUNCTION """
 
