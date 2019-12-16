@@ -21,12 +21,38 @@ WHITE_SQUARE = "█"
 WHITE_CIRCLE = "•"
 
 def day16_parse_input(data):
-    return data
+    return [d for d in data[0]]
 
+import itertools
+import math
 def day16_1(data):
-    # data = read_input(2019, 1601)
+    data = read_input(2019, 1601)
     data = day16_parse_input(data)
-    return None
+    offset = int(''.join(data[0:7]))
+    data = data *10000
+    pattern = [0,1,0,-1]
+    mem = {}
+    for p in range(100):
+        print(p)
+        out=""
+        k = ''.join(data)
+        if k in mem:
+            data = list(mem[k])
+            continue
+        for o_c in range(len(data)):
+            #print(o_c, data)
+            c_pat = [[d]*(o_c+1) for d in pattern]
+            c_pat=list(itertools.chain.from_iterable(c_pat))
+            #c_pat = c_pat*max((len(data))//len(c_pat),1)
+            #print(c_pat)
+            value = 0 
+            for i, c in enumerate(data):
+                #print(i)
+                value += int(c)*c_pat[(i+1)%len(c_pat)]
+            out += str(value)[-1] 
+        mem[''.join(data)]=out
+        data = list(out)
+    return ''.join(data[offset:8])
 
 def day16_2(data):
     # data = read_input(2019, 1601)
