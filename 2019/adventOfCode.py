@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
-import functools
+import _functools
 import math
 import os
 import sys
 import time
-from collections import defaultdict
-from _heapq import *
+from _collections import defaultdict
+from heapq import *
 import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -38,7 +38,7 @@ def day1_calc_fuel(mod):
     return math.floor(mod / 3) - 2
 
 def day1_1(data):
-    return functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
+    return _functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
 
 def day1_2(data):
     total = 0
@@ -1065,7 +1065,7 @@ def day15_parse_input(data):
     return data
 
 max_t = -1
-def day15_print_grid(grid, t = None):
+def day15_print_grid(grid, t=None):
     global max_t
     if not t is None:
         if t <= max_t:
@@ -1106,6 +1106,73 @@ def day15_2(data):
                     filled.add((next_x, next_y))
                     unfilled.append((minute + 1, next_x, next_y))
     return max(max_minute)
+
+""" DAY 16 """
+
+def day16_parse_input(data):
+    return [d for d in data[0]]
+
+def day16_1(data):
+    #data = read_input(2019, 1601)
+    data = day16_parse_input(data)
+    data = [int(d) for d in data]
+    size = len(data)
+    half_size = size // 2
+    workspace = [data, [0 for _ in range(size)]]
+    data_idx = 0
+    result_idx = 1
+    for _ in range(100):
+        res_pos = 0
+        while res_pos < size:
+            workspace[result_idx][res_pos] = 0
+            value = 0
+            i = res_pos
+            while i < size:
+                if res_pos > half_size:
+                    pattern_idx = 1
+                else:
+                    pattern_idx = ((i + 1) // (res_pos + 1)) % 4
+
+                if pattern_idx == 1:
+                    v = workspace[data_idx][i]
+                    value += v
+                elif pattern_idx % 2 == 0:
+                    i += res_pos + 1
+                    continue
+                elif pattern_idx == 3:
+                    v = workspace[data_idx][i]
+                    value -= v
+                i += 1
+            workspace[result_idx][res_pos] = abs(value) % 10
+            res_pos += 1
+
+        data_idx = (data_idx + 1) % 2
+        result_idx = (result_idx + 1) % 2
+    return ''.join([str(d) for d in workspace[data_idx][:8]])
+
+def day16_2(data):
+    #data = read_input(2019, 1601)
+    data = day16_parse_input(data)
+    offset = int(''.join(data[0:7]))
+    data = data * 10000
+    data = [int(d) for d in data]
+    size = len(data)
+    workspace = [data, [0 for _ in range(size)]]
+    data_idx = 0
+    result_idx = 1
+    for _ in range(100):
+        res_pos = offset
+
+        total_remaining = sum(workspace[data_idx][res_pos - 1:])
+        i = res_pos
+        while i < size:
+            total_remaining = total_remaining - workspace[data_idx][i - 1]
+            workspace[result_idx][i] = abs(total_remaining) % 10
+            i += 1
+
+        data_idx = (data_idx + 1) % 2
+        result_idx = (result_idx + 1) % 2
+    return ''.join([str(d) for d in workspace[data_idx][offset:offset + 8]])
 
 """ MAIN FUNCTION """
 
