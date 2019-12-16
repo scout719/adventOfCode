@@ -17,9 +17,20 @@ sys.path.insert(0, FILE_DIR + "/../../")
 from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 WHITE_SQUARE = "█"
 WHITE_CIRCLE = "•"
+BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
+RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 """ DAY 1 """
 
@@ -1020,9 +1031,11 @@ def day15_discover(insts, stop_at_oxygen):
     oxygen_x, oxygen_y = 0, 0
     while unexplored:
         steps, x, y, curr_move, insts, pc, rel_base = heappop(unexplored)
-        # print(x,y,steps)
         code, insts, pc, rel_base = day15_int_run(
             insts, pc, rel_base, curr_move)
+        # grid2 = copy.deepcopy(grid)
+        # grid2[(x,y)] = RED_SMALL_SQUARE
+        # day15_print_grid(grid2)
         if code == 0:
             moves_made[(x, y)].add(curr_move)
             dx, dy = move_delta[curr_move]
@@ -1036,7 +1049,7 @@ def day15_discover(insts, stop_at_oxygen):
             moves_made[(x, y)].add((curr_move + 2) % 4)
             for move in range(0, 4):
                 if not move in moves_made[(x, y)]:
-                    heappush(unexplored, (steps, x, y,
+                    heappush(unexplored, (-steps, x, y,
                                           move, insts[:], pc, rel_base))
             if code == 2:
                 oxygen_x, oxygen_y = x, y
@@ -1045,7 +1058,6 @@ def day15_discover(insts, stop_at_oxygen):
 
     return steps, grid, oxygen_x, oxygen_y
 
-
 def day15_parse_input(data):
     data = [int(d) for d in data[0].split(",")]
     for _ in range(1000):
@@ -1053,16 +1065,17 @@ def day15_parse_input(data):
     return data
 
 max_t = -1
-def print_g(grid, t):
+def day15_print_grid(grid, t = None):
     global max_t
-    if t <= max_t:
-        return
-    max_t = t
+    if not t is None:
+        if t <= max_t:
+            return
+        max_t = t
     time.sleep(0.01)
     s = ""
-    for y in range(-21, 22):
+    for y in range(-21, 20):
         s += "\n"
-        for x in range(-21, 22):
+        for x in range(-21, 20):
             s += grid[(x, y)]
     clear()
     print(s)
@@ -1080,8 +1093,8 @@ def day15_2(data):
     max_minute = set()
     while unfilled:
         minute, x, y = unfilled.pop(0)
-        grid[(x, y)] = WHITE_CIRCLE
-        # print_g(grid,m)
+        grid[(x, y)] = BLUE_CIRCLE
+        # day15_print_grid(grid, minute)
         max_minute.add(minute)
         for dx in [-1, 0, 1]:
             for dy in [-1, 0, 1]:
