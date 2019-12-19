@@ -32,124 +32,30 @@ WHITE_CIRCLE = "•"
 BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
-def day19_parse_input(data):
-    return [int(d) for d in data[0].split(",")]
+def day20_parse_input(data):
+    return [int(d) for d in data]
 
-def day19_1(data):
-    #data = read_input(2019, 1901)
-    data = day19_parse_input(data)
-    grid = [[0 for _ in range(50)] for _ in range(50)]
-    count =0
-    def g_i():
-        #print(pos)
-        return pos.pop(0)
-    
-    for x in range(50):
-        for y in range(50):
-            pos = [x,y]
-            
-            grid[y][x] = int_run_19(data, [], g_i)[-1]
-            count += grid[y][x]
-    
-    # for r , row in enumerate(grid):
-    #     print()
-    #     for c, p in enumerate(row):
-    #         if p == 1:
-    #             print(WHITE_SQUARE, end="")
-    #         else:
-    #             print(".", end="")
-    
-    return count
+def day20_1(data):
+    #data = read_input(2019, 2001)
+    data = day20_parse_input(data)
+    return data
 
-def checkx(data, x, y):
-    def g_i():
-        return pos.pop(0)
-    q = [(x,y, -1), (x,y,1)]
-    count = 1
-    while q:
-        x,y,d = q.pop(0)
-        pos = [x+d,y]
-        v = int_run_19(data, [], g_i)[-1]
-        if v == 1:
-           count += 1
-           q.append((x+d, y, d))
-    return count 
-def checky(data, x, y):
-    def g_i():
-        return pos.pop(0)
-    q = [(x,y, -1), (x,y,1)]
-    count = 1
-    while q:
-        x,y,d = q.pop(0)
-        pos = [x+d,y]
-        v = int_run_19(data, [], g_i)[-1]
-        if v == 1:
-           count += 1
-           q.append((x+d, y, d))
-    return count 
-
-def c(data, x,y):
-    def g_i():
-        return pos.pop(0)
-    xx,yy = x,y
-    pos = [x,y]
-    while int_run_19(data, [], g_i)[-1] == 1:
-        x +=1
-        pos =[x,y]
-    width = x - xx
-    if(width >= 100):
-        xx = x-100
-        width = 100
-    #xx = xx + (width//2)
-    pos = [xx,y]
-    while int_run_19(data, [], g_i)[-1] == 1:
-        y +=1
-        pos =[xx,y]
-    height = y - yy
-    return height, width, xx, yy, xx*10000+yy
-    
-
-def day19_2(data):
-    #return
-    #data = read_input(2019, 1901)
-    data = day19_parse_input(data)
-    count =0
-    def g_i():
-        return pos.pop(0)
-    
-    q = [(0,0)]
-    while q:
-        x, y = q.pop(0)
-        pos=[x,y]
-        v = int_run_19(data, [], g_i)[-1]
-        if v == 1:
-            dims = c(data, x,y)
-            # print(x, y, dims, x*10000 + y)
-            y += 100 - dims[0]
-            if dims[0] == 100 and dims[1] == 100:
-                return dims[-1]
-            #if y == 0:
-                #y += 500
-            # y+=1
-            pos = [x,y]
-            while int_run_19(data, [], g_i)[-1] == 0:
-                x +=1
-                pos =[x,y]
-            q.append((x,y))
-           
-    return count
+def day20_2(data):
+    #data = read_input(2019, 2001)
+    data = day20_parse_input(data)
+    return data
 
 # IntCode logic:
-def int_run_19(insts, inputs, calculate_input=None):
-    insts = [insts[i] if i < len(insts) else 0 for i in range(10000)]
-    pc = 0
-    rel_base = 0
-    outputs = []
-    while not outputs or insts[pc] != 99:
-        op = insts[pc]
-        (pc, insts, rel_base) = ic_execute(
-            op, pc, insts, inputs, outputs, rel_base, calculate_input)
-    return outputs
+# def int_run_20(insts, inputs, calculate_input=None):
+#     insts = [insts[i] if i < len(insts) else 0 for i in range(10000)]
+#     pc = 0
+#     rel_base = 0
+#     outputs = []
+#     while not outputs or insts[pc] != 99:
+#         op = insts[pc]
+#         (pc, insts, rel_base) = ic_execute(
+#             op, pc, insts, inputs, outputs, rel_base, calculate_input)
+#     return outputs
 
 """ MAIN FUNCTION """
 
