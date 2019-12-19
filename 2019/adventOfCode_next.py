@@ -51,13 +51,13 @@ def day19_1(data):
             grid[y][x] = int_run_19(data, [], g_i)[-1]
             count += grid[y][x]
     
-    for r , row in enumerate(grid):
-        print()
-        for c, p in enumerate(row):
-            if p == 1:
-                print(WHITE_SQUARE, end="")
-            else:
-                print(".", end="")
+    # for r , row in enumerate(grid):
+    #     print()
+    #     for c, p in enumerate(row):
+    #         if p == 1:
+    #             print(WHITE_SQUARE, end="")
+    #         else:
+    #             print(".", end="")
     
     return count
 
@@ -97,13 +97,16 @@ def c(data, x,y):
         x +=1
         pos =[x,y]
     width = x - xx
-    xx = xx + (width//2)
+    if(width >= 100):
+        xx = x-100
+        width = 100
+    #xx = xx + (width//2)
     pos = [xx,y]
     while int_run_19(data, [], g_i)[-1] == 1:
         y +=1
         pos =[xx,y]
     height = y - yy
-    return height, width//2
+    return height, width, xx, yy, xx*10000+yy
     
 
 def day19_2(data):
@@ -121,19 +124,19 @@ def day19_2(data):
         v = int_run_19(data, [], g_i)[-1]
         if v == 1:
             dims = c(data, x,y)
-            print(y, dims)
-            x=x
-            if y == 0:
-                y += 640
-            y+=1
+            # print(x, y, dims, x*10000 + y)
+            y += 100 - dims[0]
+            if dims[0] == 100 and dims[1] == 100:
+                return dims[-1]
+            #if y == 0:
+                #y += 500
+            # y+=1
             pos = [x,y]
             while int_run_19(data, [], g_i)[-1] == 0:
                 x +=1
                 pos =[x,y]
             q.append((x,y))
            
-            
-    
     return count
 
 # IntCode logic:
