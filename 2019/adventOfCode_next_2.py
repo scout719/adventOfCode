@@ -27,178 +27,205 @@ def day18_parse_input(data):
 import itertools
 import math
 
-def n_pos(r, c, grid, seen, count, ks):
+def all_dist2(k, r,c, grid):
     D = [(0,1),(1,0),(-1,0),(0,-1)]
     m=[]
-    for d in range(0, 4):
-        rrr, ccc = r + D[d][0], c + D[d][1]
-        p = grid[rrr][ccc]
-        if not (rrr, ccc) in seen:
-            if p == '.' or p == "@" or p in ks or p.lower() in ks:
-                m += n_pos(rrr,ccc, grid, seen + [(r, c)], count +1, ks)
-            elif ord('a') <= ord(p) <= ord('z'):
-                m += [(rrr,ccc, count + 1)]
+    q = [(r,c, 0)]
+    seen = {(r,c):0}
+    dists = {}
+    while q:
+        rr,cc,count = heappop(q)
+
+        for d in range(0, 4):
+            rrr, ccc = rr + D[d][0], cc + D[d][1]
+            if not (rrr, ccc) in seen or seen[(rrr,ccc)] > count+1:
+                seen[(rrr,ccc)] = count+1
+                p = grid[rrr][ccc]
+                if p == '.' or p == "@":
+                    heappush(q, (rrr,ccc, count+1))
+                # elif ord('A') <= ord(p) <= ord('Z'):
+                    # q.append((rrr,ccc, count+1, doors + [p.lower()]))
+                elif p != "#":
+                    dists[p] = (rrr,ccc, count + 1)
+                    # m.append((rrr,ccc, count + 1))
+    return dists
+
+def n_pos2(p, grid, dists, ks):
+    D = [(0,1),(1,0),(-1,0),(0,-1)]
+    m=[]
+    q = [(p, 0)]
+    seen = set([p])
+    while q:
+        pp, steps = q.pop()
+        for ppp in dists[pp]:
+            if not ppp in seen:
+                seen.add(ppp)
+                r,c, s = dists[pp][ppp]
+                if ord('A') <= ord(ppp) <= ord('Z') and ppp.lower() in ks:
+                    q.append((ppp, steps +s))
+                elif ord('a') <= ord(ppp) <= ord('z'):
+                    if ppp in ks:
+                        q.append((ppp, steps +s))
+                    else:
+                        m.append((ppp, steps + s))
     return m
-            
-
-@total_ordering
-class Key:
-    def __init__(self, steps, keys, doors, grid, pos):
-        self.steps = steps
-        self.keys = sorted(keys)
-        self.doors = sorted(doors)
-        self.grid = grid
-        self.pos = pos
-
-    def _is_valid_operand(self, other):
-        return (hasattr(other, "steps") and
-                hasattr(other, "keys") and
-                hasattr(other, "doors"))
-    def __eq__(self, other):
-        if not self._is_valid_operand(other):
-            return NotImplemented
-        return ((self.steps, self.keys, self.doors) ==
-                (other.steps, other.keys, other.doors))
-    def __lt__(self, other):
-        if not self._is_valid_operand(other):
-            return NotImplemented
-        
-        if self.steps != other.steps:
-            return self.steps < other.steps
-        else:
-            return self.steps == other.steps
-            return len((self.keys)) > len((other.keys))
-            #return len((self.doors)) < len((other.doors)) and len((self.keys)) > len((other.keys))
-            self_count = sum([0 if d.lower() in self.keys else 1 for d in self.doors])
-            other_count = sum([0 if d.lower() in other.keys else 1 for d in other.doors])
-            if self_count != other_count:
-                return self_count < other_count
-            else:
-                return len((self.doors)) < len((other.doors)) and len((self.keys)) > len((other.keys))
-
 from timeit import default_timer as timer
-def day18__1(data):
-    data = read_input(2019, 1802)
+
+def day18_1(data):
+    # data = read_input(2019, 1801)   
     data = day18_parse_input(data)
-    keys = {}
+    total_keys = {}
     grid = []
-    doors = set()
+    doors = {}
     for r, row in enumerate(data):
         grid.append([])
         for c, p in enumerate(row):
             grid[r].append(p)
             if ord('a') <= ord(p) <= ord('z'):
-                keys[p] = (r, c)
+                total_keys[p] = (r, c)
             elif ord('A') <= ord(p) <= ord('Z'):
-                doors.add(p)
+                doors[p] = (r,c)
             elif p == '@':
+                total_keys[p] = (r, c)
                 start = r,c
     
-    seen = {}
-    seen_path = {}
-    q = [(Key(0, set(), doors, grid, start), start, [], [], doors)]
-    D = [(0,1),(1,0),(-1,0),(0,-1)]
+    dists = {}
+    for key in total_keys:
+        r,c = total_keys[key]
+        dists[key] = all_dist2(key,r,c,  grid)
+    for door in doors:
+        r,c = doors[door]
+        dists[door] = all_dist2(door,r,c,  grid)
+
+    q = [(0, "@", [])]
     
-    res = []
     min_res = None
-    paths = set()
-    start_t = timer()
+    seen3 = {}
+    total_keys_n = len(total_keys.keys())-1 # remove @
     while q:
-        key, pos, ks, path, doors = heappop(q)
-        steps = key.steps
-        if path:
-            seen_path[tuple(path)] = steps
-        seen[(pos, tuple(sorted(ks)))] = steps
-        rr, cc = pos
-        if len(keys.keys()) == len(ks):
+        steps, key, ks = heappop(q)
+        # print(steps, ks)
+        # paths.add(tuple(ks))
+        # k  =tuple([steps, key] + sorted(ks))
+        # seen2.add(k)
+        # k  =tuple([key] + sorted(ks))
+        # if k in seen3 and seen3[k] < steps:
+        #     continue
+
+        #k  =(tuple(sorted(ks)), steps)
+        # print(steps, ks, pos)
+        if total_keys_n == len(ks):
             #if tuple(path) in paths:
                 #assert False
             #paths.add(tuple(path))
-            end = timer()
-            if min_res is None:
-                min_res = steps
-                print("                                                                           ", end="\r")
-                print("New Min {0} ({1:.3f} secs)".format(min_res, end - start_t))
-            elif steps < min_res:
-                min_res = steps
-                print("                                                                           ", end="\r")
-                print("New Min {0} ({1:.3f} secs)".format(min_res, end - start_t))
-            if (math.floor(end - start_t)) % 10 == 0:
-                print("({1:.3f} secs)".format(min_res, end - start_t), end="\r")
-        for rrr, ccc, s in n_pos(rr,cc,grid,[],0, ks):
+            return steps
+        
+        for other_key, s in n_pos2(key, grid, dists, ks):
+
+            #m.append((other_key,steps))
             #print(rr,cc, rrr,ccc)
-            if ((rrr,ccc), tuple(sorted(ks))) in seen and seen[((rrr,ccc), tuple(sorted(ks)))] < steps+s:
-                #print(pos, ks, steps+s, seen)
+            # if ((rrr,ccc), tuple(sorted(ks))) in seen and seen[((rrr,ccc), tuple(sorted(ks)))] < steps+s:
+            #     #print(pos, ks, steps+s, seen)
+            #     continue
+            n_ks = ks + [other_key]
+            # if tuple(n_ks) in paths:
+            #     continue
+            # heappush(q, (steps + s, -len(n_pos(rrr,ccc,grid,[],0, n_ks)), (rrr,ccc), n_ks))
+            k  =tuple([other_key] + sorted(n_ks))
+            if k in seen3 and seen3[k] < steps+s:
                 continue
-            p = grid[rrr][ccc]
-            # print(len(ks), len(keys.keys()))
-            if ord('a') <= ord(p) <= ord('z'):
-                path2 = tuple(path + [p])
-                if not path2 in seen_path or seen_path[path2] > steps:
-                    heappush(q, (Key(steps+s, list(set(ks + [p])), doors, grid, (rrr,ccc)), (rrr,ccc), list(set(ks + [p])), path + [p], doors))
-            elif ord('A') <= ord(p) <= ord('Z'):
-                if p.lower() in ks:
-                    path2 = tuple(path + [p])
-                    if not path2 in seen_path or seen_path[path2] > steps:
-                        heappush(q, (Key(steps+s, ks, doors-set(p), grid, (rrr,ccc)), (rrr,ccc), ks, path + [p], doors-set(p)))
-            else:
-                heappush(q, (Key(steps+s, ks, doors, grid, (rrr,ccc)), (rrr,ccc), ks, path, doors))
+            seen3[k] = steps+s
+            heappush(q, (steps + s, other_key, n_ks))
+            #print(len(ks), len(total_keys.keys()))
         #print(q)
-    return min(res)
+    return min_res
 
-@total_ordering
-class Node:
-    def __hash__(self):
-        return ord(self.door)
-
-    def __init__(self, r,c,v):
-        self.connections = set()
-        self.door = v
-        self.is_door = ord('A') <= ord(v) <= ord('Z')
-        self.r = r
-        self.c = c
-
-    def __eq__(self, other):
-        return self.door == other.door
-
-    def __lt__(self, other):
-        return self.door < other.door
+# def day18_2(data):
+#     # data = read_input(2019, 1801)   
+#     data = day18_parse_input(data)
+#     total_keys = {}
+#     grid = []
+#     doors = {}
+#     for r, row in enumerate(data):
+#         grid.append([])
+#         for c, p in enumerate(row):
+#             grid[r].append(p)
+#             if ord('a') <= ord(p) <= ord('z'):
+#                 total_keys[p] = (r, c)
+#             elif ord('A') <= ord(p) <= ord('Z'):
+#                 doors[p] = (r,c)
+#             elif p == '@':
+#                 start = r,c
+#     D = [-1,0,1]
+#     count = 1
+#     robots = []
+#     for i in range(3):
+#         for j in range(3):
+#             rr,cc = start[0] + D[i], start[1] + D[j]
+#             if abs(i) + abs(j) == 2:
+#                 grid[rr][cc] = str(count)
+#                 total_keys[str(count)] = (rr,cc)
+#                 robots.append((rr,cc))
+#                 count += 1
+#             else:
+#                 grid[rr][cc] = "#"
+#     dists = {}
+#     for key in total_keys:
+#         r,c = total_keys[key]
+#         dists[key] = all_dist2(key,r,c,  grid)
+#     for door in doors:
+#         r,c = doors[door]
+#         dists[door] = all_dist2(door,r,c,  grid)
     
-    def connect(self, other, steps):
-        self.connections.add((other, steps))
-        other.connections.add((self, steps))
+#     for key in total_keys:
+#         r,c = total_keys[key]
+#         if r <=  robots[0][0] and  r <=  robots[0][0]
 
-    def __repr__(self):
-        return f"{self.door} - ({self.r},{self.c}) {[(other.door, steps) for other, steps in self.connections]}"
-        return super().__repr__()
 
-def adjacent_doors(door: Node, grid) -> [str]:
-    q = [((door.r, door.c), 0)]
-    seen = set()
-    doors = []
-    D = [(0,1),(1,0),(-1,0),(0,-1)]
-    while q:
-        pos, steps = q.pop(0)
-        seen.add(pos)
-        r,c = pos
-        for d in range(4):
-            rr,cc = r+D[d][0], c+D[d][1]
-            p = grid[rr][cc]
-            if p != "#" and not (rr,cc) in seen:
-                if p == ".":
-                    q.append(((rr,cc), steps+1))
-                else:
-                    doors.append(((rr,cc), p, steps))
-                    continue
-                # if ord('A') <= ord(p) <= ord('Z') or ord(p) == "@":
-                #     continue
-                # n_keys = keys
-                # if ord('a') <= ord(p) <= ord('z'):
-                #     n_keys.append(p)
+#     q = [(0, "@", [])]
     
-    return doors
+#     min_res = None
+#     seen3 = {}
+#     total_keys_n = len(total_keys.keys())-1 # remove @
+#     while q:
+#         steps, key, ks = heappop(q)
+#         # print(steps, ks)
+#         # paths.add(tuple(ks))
+#         # k  =tuple([steps, key] + sorted(ks))
+#         # seen2.add(k)
+#         # k  =tuple([key] + sorted(ks))
+#         # if k in seen3 and seen3[k] < steps:
+#         #     continue
 
-def day18_1(data):
+#         #k  =(tuple(sorted(ks)), steps)
+#         # print(steps, ks, pos)
+#         if total_keys_n == len(ks):
+#             #if tuple(path) in paths:
+#                 #assert False
+#             #paths.add(tuple(path))
+#             return steps
+        
+#         for other_key, s in n_pos2(key, grid, dists, ks):
+
+#             #m.append((other_key,steps))
+#             #print(rr,cc, rrr,ccc)
+#             # if ((rrr,ccc), tuple(sorted(ks))) in seen and seen[((rrr,ccc), tuple(sorted(ks)))] < steps+s:
+#             #     #print(pos, ks, steps+s, seen)
+#             #     continue
+#             n_ks = ks + [other_key]
+#             # if tuple(n_ks) in paths:
+#             #     continue
+#             # heappush(q, (steps + s, -len(n_pos(rrr,ccc,grid,[],0, n_ks)), (rrr,ccc), n_ks))
+#             k  =tuple([other_key] + sorted(n_ks))
+#             if k in seen3 and seen3[k] < steps+s:
+#                 continue
+#             seen3[k] = steps+s
+#             heappush(q, (steps + s, other_key, n_ks))
+#             #print(len(ks), len(total_keys.keys()))
+#         #print(q)
+#     return min_res
+
+def day18__1(data):
     data = read_input(2019, 1801)
     data = day18_parse_input(data)
     total_keys = {}
@@ -213,65 +240,40 @@ def day18_1(data):
             elif ord('A') <= ord(p) <= ord('Z'):
                 doors.add(p)
             elif p == '@':
+                #total_keys[p] = (r, c)
                 start = r,c
     
-    # doors = {"@": Node(start[0], start[1], "@")}
-    # q = [doors["@"]]
-    # while q:
-    #     door = q.pop(0)
-    #     n_doors = adjacent_doors(door, grid)
-    #     for (rr,cc), d, steps in n_doors:
-    #         if not d in doors:
-    #             doors[d] = Node(rr,cc, d)
-    #             q.append(doors[d])
-    #         door.connect(doors[d], steps)
-    # print(doors)
+    # dists = {} key] = all_dist(key, total_keys, grid)
 
-    # hq = [(0, set(), doors["@"])]
-    # seen = {}
-    # while hq:
-    #     total, keys, door = heappop(hq)
-    #     if door.door in seen:
-    #         combs = seen[door.door]
-    #         cont = False
-    #         for s, k in combs:
-    #             if s < steps and all([kk in k for kk in keys]):
-    #                 cont = True
-    #                 break
-    #         if cont:
-    #             continue
-    #     else:
-    #         seen[door.door] = []
-        
-    #     if len(keys) == len(total_keys):
-    #         return total
-    #     seen[door.door].append((steps, keys))
-        
-    #     for d, steps in door.connections:
-    #         if d.is_door:
-    #             if d.door.lower() in keys:
-    #                 print(d.door)
-    #                 heappush(hq, (total+steps, keys, d))
-    #         else:
-    #             heappush(hq, (total+steps, set(list(keys) + [d.door]), d))
-
-
-    # return
     seen = {}
     seen_path = {}
-    q = [(0, 0, start, [])]
+    q = [(0, 0, start, set())]
     D = [(0,1),(1,0),(-1,0),(0,-1)]
     
     res = []
     min_res = None
     paths = set()
     start_t = timer()
+    seen2 = set()
+    i = 0
+    total_keys_n = len(total_keys.keys())
     while q:
+        i += 1
         steps, ks_l, pos, ks = heappop(q)
-        paths.add(tuple(ks))
+        # paths.add(tuple(ks))
+        k  =tuple([steps] + sorted(ks) + list(pos))
+        seen2.add(k)
         rr, cc = pos
-        # print(steps, ks)
-        if len(total_keys.keys()) == len(ks):
+
+        if i% 10000 == 0:
+            end = timer()
+            print("                                                                           ", end="\r")
+            print("{0} {1} {2} ({3:.3f} secs)".format(len(ks),total_keys_n, len(q), end - start_t), end="\r")
+            print(len(ks),total_keys_n, len(q))
+
+        #k  =(tuple(sorted(ks)), steps)
+        # print(steps, ks, pos)
+        if total_keys_n == len(ks):
             #if tuple(path) in paths:
                 #assert False
             #paths.add(tuple(path))
@@ -293,32 +295,24 @@ def day18_1(data):
             #     #print(pos, ks, steps+s, seen)
             #     continue
             p = grid[rrr][ccc]
-            n_ks = ks + [p]
-            if tuple(n_ks) in paths:
+            n_ks = ks.union([p])
+            # if tuple(n_ks) in paths:
+            #     continue
+            # heappush(q, (steps + s, -len(n_pos(rrr,ccc,grid,[],0, n_ks)), (rrr,ccc), n_ks))
+            
+            k  =tuple([steps+s] + sorted(n_ks) + [rrr,ccc])
+            if k in seen2:
                 continue
-            heappush(q, (steps + s, -len(n_pos(rrr,ccc,grid,[],0, n_ks)), (rrr,ccc), n_ks))
-            # print(len(ks), len(keys.keys()))
+            seen2.add(k)
+            heappush(q, (steps + s, 0, (rrr,ccc), n_ks))
+            #print(len(ks), len(total_keys.keys()))
         #print(q)
     return min_res
-
-# IntCode logic:
-# def int_run(insts, inputs):
-#     def calculate_input():
-#         return 0
-#     pc = 0
-#     rel_base = 0
-#     outputs = []
-#     while insts[pc] != 99:
-#         op = insts[pc]
-#         (pc, insts, rel_base) = day2_execute(
-#             op, pc, insts, inputs, outputs, rel_base, calculate_input)
-#     return outputs
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
     main(sys.argv, globals(), 2019)
-
 
     
     # seen = {}
