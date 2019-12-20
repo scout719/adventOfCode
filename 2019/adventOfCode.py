@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
+from icComputer import ic_execute
 import _functools
 import math
 import os
@@ -12,6 +13,7 @@ import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
+sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
 from common.utils import read_input, main, clear  # NOQA: E402
@@ -1179,10 +1181,10 @@ def day16_2(data):
 def day17_parse_input(data):
     return [int(d) for d in data[0].split(",")]
 
-def day17_is_scaff(x,y,grid):
+def day17_is_scaff(x, y, grid):
     return y >= 0 and y < len(grid) and \
-            x >= 0 and x < len(grid[y]) and \
-            grid[y][x] != " "
+        x >= 0 and x < len(grid[y]) and \
+        grid[y][x] != " "
 
 def day17_get_grid(insts):
     output = int_run_17(insts, [])
@@ -1192,7 +1194,7 @@ def day17_get_grid(insts):
         if c == 35:
             view += WHITE_SQUARE
             grid[-1].append(WHITE_SQUARE)
-        elif c== 46:
+        elif c == 46:
             view += " "
             grid[-1].append(" ")
         elif c == 10:
@@ -1201,7 +1203,7 @@ def day17_get_grid(insts):
         else:
             view += f"{bcolors.FAIL}{bcolors.BOLD}{chr(c)}{bcolors.ENDC}"
             grid[-1].append(chr(c))
-    
+
     # print(view)
     return grid
 
@@ -1216,10 +1218,10 @@ def day17_1(data):
     for y, row in enumerate(grid):
         for x, pos in enumerate(row):
             if pos != " ":
-                adjacents = [(x-1, y), (x+1, y), (x,y-1), (x, y+1)]
-                if all([day17_is_scaff(a,b, grid) for a,b in adjacents]):
-                    inters += x*y
-    
+                adjacents = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+                if all([day17_is_scaff(a, b, grid) for a, b in adjacents]):
+                    inters += x * y
+
     return inters
 
 def day17_2(data):
@@ -1230,32 +1232,32 @@ def day17_2(data):
     view = ""
     grid = day17_get_grid(data)
 
-    robot_pos = (0,0)
+    robot_pos = (0, 0)
     for y, row in enumerate(grid):
         for x, pos in enumerate(row):
             if grid[y][x] != ' ' and grid[y][x] != WHITE_SQUARE:
-                robot_pos = (x,y)
+                robot_pos = (x, y)
                 break
-        if robot_pos != (0,0):
+        if robot_pos != (0, 0):
             break
-     
+
     seen = set()
-    x,y = robot_pos
+    x, y = robot_pos
     path2 = []
-    d = [(-1,0), (0,-1), (1,0), (0,1)]
+    d = [(-1, 0), (0, -1), (1, 0), (0, 1)]
     curr_d = 1
     d_s = ["L", "R"]
     moves = 0
     while True:
-        new_x, new_y = [sum(i) for i in zip(*[(x,y),d[curr_d]])]
+        new_x, new_y = [sum(i) for i in zip(*[(x, y), d[curr_d]])]
         if day17_is_scaff(new_x, new_y, grid):
             moves += 1
-            x,y = new_x, new_y
+            x, y = new_x, new_y
         else:
             d_l = (curr_d - 1) % 4
             d_r = (curr_d + 1) % 4
-            new_x_l, new_y_l = [sum(i) for i in zip(*[(x,y),d[d_l]])]
-            new_x_r, new_y_r = [sum(i) for i in zip(*[(x,y),d[d_r]])]
+            new_x_l, new_y_l = [sum(i) for i in zip(*[(x, y), d[d_l]])]
+            new_x_r, new_y_r = [sum(i) for i in zip(*[(x, y), d[d_r]])]
             if day17_is_scaff(new_x_l, new_y_l, grid):
                 if moves != 0:
                     path2.append(moves)
@@ -1273,14 +1275,15 @@ def day17_2(data):
                     path2.append(moves)
                 break
 
-    #[A  B B A  B C C B A]
+    # [A  B B A  B C C B A]
     data = data_backup
     data[0] = 2
     # [A, B, B, A, C, B, C, C, B, A]
     # A R,10,R,8,L,10,L,10
     # B R,8,L,6,L,6
     # C L,10,R,10,L,6
-    main = [ord(c) for c in "A|,|B|,|B|,|A|,|C|,|B|,|C|,|C|,|B|,|A".split("|")] + [10]
+    main = [ord(c)
+            for c in "A|,|B|,|B|,|A|,|C|,|B|,|C|,|C|,|B|,|A".split("|")] + [10]
     A = f"{ord('R')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|10".split("|")
     B = f"{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
     C = f"{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
@@ -1290,7 +1293,8 @@ def day17_2(data):
     B = [int(d) for d in B]
     C = [int(d) for d in C]
     response = [int(d) for d in response]
-    def calc():
+
+    def get_program():
         c = ""
         if len(main) > 0:
             c = main.pop(0)
@@ -1303,7 +1307,7 @@ def day17_2(data):
         else:
             c = response.pop(0)
         return c
-    output = int_run_17(data, [], calc)
+    output = int_run_17(data, [], get_program)
     return output[-1]
 
 # IntCode logic:
@@ -1329,76 +1333,65 @@ def day19_1(data):
     #data = read_input(2019, 1901)
     data = day19_parse_input(data)
     grid = [[0 for _ in range(50)] for _ in range(50)]
-    count =0
-    def g_i():
-        #print(pos)
+    count = 0
+
+    def get_next_input():
         return pos.pop(0)
-    
+
     for x in range(50):
         for y in range(50):
-            pos = [x,y]
-            
-            grid[y][x] = int_run_19(data, [], g_i)[-1]
+            pos = [x, y]
+            grid[y][x] = int_run_19(data, [], get_next_input)[-1]
             count += grid[y][x]
-    
-    # for r , row in enumerate(grid):
-    #     print()
-    #     for c, p in enumerate(row):
-    #         if p == 1:
-    #             print(WHITE_SQUARE, end="")
-    #         else:
-    #             print(".", end="")
-    
+
     return count
 
-def day19_calc_dims(data, x,y):
-    def g_i():
+def day19_calc_dims(data, x, y):
+    def get_next_input():
         return pos.pop(0)
-    xx,yy = x,y
-    pos = [x,y]
-    while int_run_19(data, [], g_i)[-1] == 1:
-        x +=1
-        pos =[x,y]
-    width = x - xx
+    orig_x, orig_y = x, y
+
+    pos = [x, y]
+    while int_run_19(data, [], get_next_input)[-1] == 1:
+        x += 1
+        pos = [x, y]
+    width = x - orig_x
     if(width >= 100):
-        xx = x-100
+        orig_x = x - 100
         width = 100
-    #xx = xx + (width//2)
-    pos = [xx,y]
-    while int_run_19(data, [], g_i)[-1] == 1:
-        y +=1
-        pos =[xx,y]
-    height = y - yy
-    return height, width, xx, yy, xx*10000+yy
+
+    pos = [orig_x, y]
+    while int_run_19(data, [], get_next_input)[-1] == 1:
+        y += 1
+        pos = [orig_x, y]
+    height = y - orig_y
+
+    return height, width, orig_x, orig_y
 
 def day19_2(data):
-    #return
     #data = read_input(2019, 1901)
     data = day19_parse_input(data)
-    count =0
-    def g_i():
+    count = 0
+
+    def get_next_input():
         return pos.pop(0)
-    
-    q = [(0,0)]
-    while q:
-        x, y = q.pop(0)
-        pos=[x,y]
-        v = int_run_19(data, [], g_i)[-1]
+
+    queue = [(0, 0)]
+    while queue:
+        x, y = queue.pop(0)
+        pos = [x, y]
+        v = int_run_19(data, [], get_next_input)[-1]
         if v == 1:
-            dims = day19_calc_dims(data, x,y)
-            # print(x, y, dims, x*10000 + y)
-            y += 100 - dims[0]
-            if dims[0] == 100 and dims[1] == 100:
-                return dims[-1]
-            #if y == 0:
-                #y += 500
-            # y+=1
-            pos = [x,y]
-            while int_run_19(data, [], g_i)[-1] == 0:
-                x +=1
-                pos =[x,y]
-            q.append((x,y))
-           
+            height, width, orig_x, orig_y = day19_calc_dims(data, x, y)
+            if height == 100 and width == 100:
+                return orig_x * 10000 + orig_y
+            y += 100 - height
+            pos = [x, y]
+            while int_run_19(data, [], get_next_input)[-1] == 0:
+                x += 1
+                pos = [x, y]
+            queue.append((x, y))
+
     return count
 
 # IntCode logic:
@@ -1412,6 +1405,217 @@ def int_run_19(insts, inputs, calculate_input=None):
         (pc, insts, rel_base) = ic_execute(
             op, pc, insts, inputs, outputs, rel_base, calculate_input)
     return outputs
+
+""" DAY 20 """
+
+def day20_1(data):
+    #data = read_input(2019, 2001)
+
+    grid = []
+    for r, row in enumerate(data):
+        grid.append([])
+        for c, tile in enumerate(row):
+            grid[-1].append(tile)
+
+    R = len(grid)
+    C = len(grid[0])
+    x = 3
+    while grid[R // 2][x] == "." or grid[R // 2][x] == "#":
+        x += 1
+    left = [(2, 2), (x - 1, R - 3)]
+    while grid[R // 2][x] != "." and grid[R // 2][x] != "#":
+        x += 1
+    right = [(x, 2), (C - 3, R - 3)]
+    y = 3
+    while grid[y][C // 2] == "." or grid[y][C // 2] == "#":
+        y += 1
+    top = [(2, 2), (C - 3, y - 1)]
+    while grid[y][C // 2] != "." and grid[y][C // 2] != "#":
+        y += 1
+    bottom = [(2, y), (C - 3, R - 3)]
+
+    ileftc = left[1][0]
+    irightc = right[0][0]
+    itopr = top[1][1]
+    ibottomr = bottom[0][1]
+
+    portals = defaultdict(lambda: [])
+    for r, row in enumerate(grid):
+        for c, t in enumerate(row):
+            if t == ".":
+                if r == 2:
+                    p = grid[r - 2][c] + grid[r - 1][c]
+                    portals[p].append((r, c))
+                if r == R - 3:
+                    p = grid[R - 2][c] + grid[R - 1][c]
+                    portals[p].append((r, c))
+                if c == 2:
+                    p = grid[r][c - 2] + grid[r][c - 1]
+                    portals[p].append((r, c))
+                if c == C - 3:
+                    p = grid[r][C - 2] + grid[r][C - 1]
+                    portals[p].append((r, c))
+                if r == itopr:
+                    p = grid[itopr + 1][c] + grid[itopr + 2][c]
+                    portals[p].append((r, c))
+                if r == ibottomr:
+                    p = grid[ibottomr - 2][c] + grid[ibottomr - 1][c]
+                    portals[p].append((r, c))
+                if c == ileftc:
+                    p = grid[r][ileftc + 1] + grid[r][ileftc + 2]
+                    portals[p].append((r, c))
+                if c == irightc:
+                    p = grid[r][irightc - 2] + grid[r][irightc - 1]
+                    portals[p].append((r, c))
+
+    rportals = {}
+    for key in portals:
+        if key != "AA" and key != "ZZ":
+            rportals[portals[key][0]] = key
+            rportals[portals[key][1]] = key
+
+    # del portals["##"]
+    #del portals["  "]
+    del portals[".."]
+    del portals[".#"]
+    del portals["#."]
+
+    q = [(0, portals["AA"][0])]
+    seen = {}
+    D = [(0, 1), (-1, 0), (0, -1), (1, 0)]
+    while q:
+        steps, pos = heappop(q)
+        if pos in seen and seen[pos] < steps:
+            continue
+        r, c = pos
+        if portals["ZZ"][0] == pos:
+            return steps
+        seen[pos] = steps
+        for d in range(4):
+            rr, cc = r + D[d][1], c + D[d][0]
+            if grid[rr][cc] == ".":
+                heappush(q, (steps + 1, (rr, cc)))
+        if pos in rportals:
+            p = rportals[pos]
+            for rr, cc in portals[p]:
+                if (rr, cc) != pos:
+                    heappush(q, (steps + 1, (rr, cc)))
+
+    print(portals["ZZ"])
+    return None
+
+def day20_2(data):
+    # data = read_input(2019, 2002)
+
+    grid = []
+    for r, row in enumerate(data):
+        grid.append([])
+        for c, tile in enumerate(row):
+            grid[-1].append(tile)
+
+    R = len(grid)
+    C = len(grid[0])
+    x = 3
+    while grid[R // 2][x] == "." or grid[R // 2][x] == "#":
+        x += 1
+    left = [(2, 2), (x - 1, R - 3)]
+    while grid[R // 2][x] != "." and grid[R // 2][x] != "#":
+        x += 1
+    right = [(x, 2), (C - 3, R - 3)]
+    y = 3
+    while grid[y][C // 2] == "." or grid[y][C // 2] == "#":
+        y += 1
+    top = [(2, 2), (C - 3, y - 1)]
+    while grid[y][C // 2] != "." and grid[y][C // 2] != "#":
+        y += 1
+    bottom = [(2, y), (C - 3, R - 3)]
+
+    ileftc = left[1][0]
+    irightc = right[0][0]
+    itopr = top[1][1]
+    ibottomr = bottom[0][1]
+
+    portals = defaultdict(lambda: [])
+    for r, row in enumerate(grid):
+        for c, t in enumerate(row):
+            if t == ".":
+                if r == 2:
+                    p = grid[r - 2][c] + grid[r - 1][c]
+                    portals[p].append((r, c, 1))
+                if r == R - 3:
+                    p = grid[R - 2][c] + grid[R - 1][c]
+                    portals[p].append((r, c, 1))
+                if c == 2:
+                    p = grid[r][c - 2] + grid[r][c - 1]
+                    portals[p].append((r, c, 1))
+                if c == C - 3:
+                    p = grid[r][C - 2] + grid[r][C - 1]
+                    portals[p].append((r, c, 1))
+                if r == itopr:
+                    p = grid[itopr + 1][c] + grid[itopr + 2][c]
+                    portals[p].append((r, c, -1))
+                if r == ibottomr:
+                    p = grid[ibottomr - 2][c] + grid[ibottomr - 1][c]
+                    portals[p].append((r, c, -1))
+                if c == ileftc:
+                    p = grid[r][ileftc + 1] + grid[r][ileftc + 2]
+                    portals[p].append((r, c, -1))
+                if c == irightc:
+                    p = grid[r][irightc - 2] + grid[r][irightc - 1]
+                    portals[p].append((r, c, -1))
+    # del portals["##"]
+    #del portals["  "]
+    try:
+        del portals[".."]
+    except:
+        pass
+    try:
+        del portals[".#"]
+    except:
+        pass
+    try:
+        del portals["#."]
+    except:
+        pass
+
+    rportals = {}
+    for key in portals:
+        if key != "AA" and key != "ZZ":
+            rportals[portals[key][0]] = key
+            rportals[portals[key][1]] = key
+
+    start = (portals["AA"][0][0], portals["AA"][0][1])
+    end = (portals["ZZ"][0][0], portals["ZZ"][0][1])
+    q = [(0, 0, start, [])]
+    seen = {}
+    D = [(0, 1), (-1, 0), (0, -1), (1, 0)]
+    while q:
+        steps, depth, pos, path = heappop(q)
+        if (pos, depth) in seen and seen[(pos, depth)] < steps:
+            continue
+        seen[(pos, depth)] = steps
+        r, c = pos
+        # print(steps, pos)
+        if depth == 0 and end == pos:
+            return steps
+        for d in range(4):
+            rr, cc = r + D[d][1], c + D[d][0]
+
+            if grid[rr][cc] == ".":
+                heappush(q, (steps + 1, depth, (rr, cc), path))
+        if (r, c, -1) in rportals:
+            p = rportals[(r, c, -1)]
+            for rr, cc, d_p in portals[p]:
+                if d_p == 1:
+                    heappush(q, (steps + 1, depth - 1,
+                                 (rr, cc), path + [(p, depth - 1)]))
+        if depth != 0:
+            if (r, c, 1) in rportals:
+                p = rportals[(r, c, 1)]
+                for rr, cc, d_p in portals[p]:
+                    if d_p == -1:
+                        heappush(q, (steps + 1, depth + 1,
+                                     (rr, cc), path + [(p, depth + 1)]))
 
 """ MAIN FUNCTION """
 
