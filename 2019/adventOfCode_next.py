@@ -35,12 +35,27 @@ BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 def day21_parse_input(data):
-    return [str(d) for d in data]
+    return [int(d) for d in data[0].split(",")]
 
 def day21_1(data):
     # data = read_input(2019, 2101)
     data = day21_parse_input(data)
-    return None
+    cmd = ["AND A J", "AND B T", "AND T J", "AND C T", "AND T J", "AND D J", "NOT J J", "WALK"]
+    cmd = [ "NOT C T", "NOT B T", "AND T J", "NOT D T", "AND T J","NOT A T", "OR T J",  "WALK"]
+    cmd2 = []
+    for c in cmd:
+        for c2 in c:
+            cmd2.append(ord(c2))
+        cmd2.append(10)
+    def g_i():
+        print(cmd2)
+        return cmd2.pop(0)
+    output = int_run_21(data, [], g_i)
+
+    w_r = [False, False]
+
+
+    return "".join([chr(o) for o in output])
 
 def day21_2(data):
     # data = read_input(2019, 2101)
@@ -48,16 +63,16 @@ def day21_2(data):
     return None
 
 # IntCode logic:
-# def int_run_21(insts, inputs, calculate_input=None):
-#     insts = [insts[i] if i < len(insts) else 0 for i in range(10000)]
-#     pc = 0
-#     rel_base = 0
-#     outputs = []
-#     while not outputs or insts[pc] != 99:
-#         op = insts[pc]
-#         (pc, insts, rel_base) = ic_execute(
-#             op, pc, insts, inputs, outputs, rel_base, calculate_input)
-#     return outputs
+def int_run_21(insts, inputs, calculate_input=None):
+    insts = [insts[i] if i < len(insts) else 0 for i in range(10000)]
+    pc = 0
+    rel_base = 0
+    outputs = []
+    while not outputs or insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = ic_execute(
+            op, pc, insts, inputs, outputs, rel_base, calculate_input)
+    return outputs
 
 """ MAIN FUNCTION """
 
