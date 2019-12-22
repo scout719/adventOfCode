@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
-from icComputer import ic_execute
 import _functools
 import math
 import os
@@ -17,6 +16,7 @@ sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
 from common.utils import read_input, main, clear  # NOQA: E402
+from icComputer import ic_execute  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
 class bcolors:
@@ -1586,36 +1586,105 @@ def day20_2(data):
 
     start = (portals["AA"][0][0], portals["AA"][0][1])
     end = (portals["ZZ"][0][0], portals["ZZ"][0][1])
-    q = [(0, 0, start, [])]
+    q = [(0, 0, start)]
     seen = {}
     D = [(0, 1), (-1, 0), (0, -1), (1, 0)]
     while q:
-        steps, depth, pos, path = heappop(q)
-        if (pos, depth) in seen and seen[(pos, depth)] < steps:
-            continue
+        steps, depth, pos = heappop(q)
         seen[(pos, depth)] = steps
         r, c = pos
-        # print(steps, pos)
         if depth == 0 and end == pos:
             return steps
-        for d in range(4):
-            rr, cc = r + D[d][1], c + D[d][0]
-
-            if grid[rr][cc] == ".":
-                heappush(q, (steps + 1, depth, (rr, cc), path))
         if (r, c, -1) in rportals:
             p = rportals[(r, c, -1)]
             for rr, cc, d_p in portals[p]:
                 if d_p == 1:
+                    if ((rr, cc), depth - 1) in seen and seen[((rr, cc), depth - 1)] < steps + 1:
+                        continue
                     heappush(q, (steps + 1, depth - 1,
-                                 (rr, cc), path + [(p, depth - 1)]))
+                                 (rr, cc)))
+        for d in range(4):
+            rr, cc = r + D[d][1], c + D[d][0]
+            if grid[rr][cc] == ".":
+                if ((rr, cc), depth) in seen and seen[((rr, cc), depth)] < steps + 1:
+                    continue
+                heappush(q, (steps + 1, depth, (rr, cc)))
         if depth != 0:
             if (r, c, 1) in rportals:
                 p = rportals[(r, c, 1)]
                 for rr, cc, d_p in portals[p]:
                     if d_p == -1:
+                        if ((rr, cc), depth + 1) in seen and seen[((rr, cc), depth + 1)] < steps + 1:
+                            continue
                         heappush(q, (steps + 1, depth + 1,
-                                     (rr, cc), path + [(p, depth + 1)]))
+                                     (rr, cc)))
+
+""" DAY 21 """
+
+def day21_parse_input(data):
+    return [int(d) for d in data[0].split(",")]
+
+def day21_1(data):
+    data = day21_parse_input(data)
+    program = [
+        "NOT A J",
+
+        "NOT C T",
+        "AND D T",
+        "OR T J",
+        "WALK"
+    ]
+    program = [inst + chr(10) for inst in program]
+    program = [ord(c) for inst in program for c in inst]
+
+    def get_char():
+        return program.pop(0)
+    output = int_run_21(data, [], get_char)
+
+    # print("".join([chr(o) for o in output[:-1]]))
+    return output[-1]
+
+def day21_2(data):
+    data = day21_parse_input(data)
+    cmd = [
+        "NOT A J",
+        "AND D J",
+
+        "NOT C T",
+        "AND D T",
+        "AND H T",
+        "OR T J",
+
+        "NOT B T",
+        "AND D T",
+        "AND H T",
+        "OR T J",
+
+        "RUN"
+    ]
+    program = [inst + chr(10) for inst in program]
+    program = [ord(c) for inst in program for c in inst]
+
+    def get_char():
+        return program.pop(0)
+    output = int_run_21(data, [], get_char)
+
+    # print("".join([chr(o) for o in output[:-1]]))
+    return output[-1]
+
+def int_run_21(insts, inputs, calculate_input=None):
+    insts = [insts[i] if i < len(insts) else 0 for i in range(10000)]
+    pc = 0
+    rel_base = 0
+    outputs = []
+    while not outputs or insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = ic_execute(
+            op, pc, insts, inputs, outputs, rel_base, calculate_input)
+    return outputs
+
+""" DAY 22 """
+
 
 """ MAIN FUNCTION """
 
