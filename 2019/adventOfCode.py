@@ -1685,6 +1685,129 @@ def int_run_21(insts, inputs, calculate_input=None):
 
 """ DAY 22 """
 
+""" DAY 23 """
+
+def day23_create_computers(data):
+    data = [int(i) for i in data[0].split(",")]
+    data = [data[i] if i < len(data) else 0 for i in range(1000000)]
+    return [[data[:], [i], [], 0, 0, False] for i in range(50)]
+
+def day23_1(data):
+    computers = day23_create_computers(data)
+
+    next_comp = 0
+    while True:
+        insts, inputs, outputs, pc, rel_base, finished = tuple(
+            computers[next_comp])
+        if finished:
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        outputs, pc, rel_base, finished, _ = int_run_23(
+            insts, pc, rel_base, inputs, outputs)
+        computers[next_comp] = [insts, inputs, outputs, pc, rel_base, finished]
+
+        if len(outputs) != 3:
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        addr = outputs.pop(0)
+        x = outputs.pop(0)
+        y = outputs.pop(0)
+        if addr == 255:
+            return y
+
+        computers[addr][1].append(x)
+        computers[addr][1].append(y)
+        next_comp = addr
+
+    return data
+
+def day23_2(data):
+    computers = day23_create_computers(data)
+
+    next_comp = 0
+    stuck_comps = set()
+    last_x = -1
+    last_y = -1
+    last_y_send = 0
+    active_network = True
+    while True:
+        if next_comp in stuck_comps:
+            next_comp = (next_comp + 1) % 50
+            continue
+        insts, inputs, outputs, pc, rel_base, finished = tuple(
+            computers[next_comp])
+        if finished:
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        outputs, pc, rel_base, finished, stuck = int_run_23(
+            insts, pc, rel_base, inputs, outputs)
+        computers[next_comp] = [insts, inputs, outputs, pc, rel_base, finished]
+
+        if stuck:
+            stuck_comps.add(next_comp)
+
+            if len(stuck_comps) == 50:
+                if not active_network:
+                    assert last_x >= 0 or last_y >= 0
+                    if last_y_send == last_y:
+                        return last_y
+
+                    last_y_send = last_y
+
+                    computers[0][1].append(last_x)
+                    computers[0][1].append(last_y)
+                    next_comp = 0
+
+                stuck_comps.clear()
+                active_network = False
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        active_network = True
+
+        if len(outputs) != 3:
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        addr = outputs.pop(0)
+        x = outputs.pop(0)
+        y = outputs.pop(0)
+        if addr == 255:
+            last_x = x
+            last_y = y
+            next_comp = (next_comp + 1) % 50
+            continue
+
+        computers[addr][1].append(x)
+        computers[addr][1].append(y)
+        next_comp = addr
+
+    return data
+
+# IntCode logic:
+def int_run_23(insts, pc, rel_base, inputs, outputs):
+    is_stuck = False
+
+    def next_input():
+        nonlocal is_stuck
+        if inputs:
+            return inputs.pop(0)
+        is_stuck = True
+        return -1
+
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = ic_execute(
+            op, pc, insts, [], outputs, rel_base, next_input)
+        if len(outputs) == 3:
+            return outputs, pc, rel_base, False, False
+        if is_stuck:
+            return outputs, pc, rel_base, False, True
+    return outputs, pc, rel_base, True, False
+
 
 """ MAIN FUNCTION """
 
