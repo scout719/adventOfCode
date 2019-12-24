@@ -213,6 +213,150 @@ def day22_2(data):
     print(pos)
     return nn
 
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def modinv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+def day22_2(data):
+    # 119315717514047
+    #data = read_input(2019, 2203)
+    data = day22_parse_input(data)
+    # deck = [i for i in range(119315717514047)]
+    # deck = [i for i in range(10007)]
+    # deck = [i for i in range(10)]
+    mem = []
+    mem_m = set()
+    l = 119315717514047
+    it = 101741582076661
+    nn = 2020
+    # l = 10007
+    it = 1
+    # nn = 4703
+    correct = [9769, 5723, 3336, 3340, 724, 9282, 3166, 4296, 1855, 6347, 3659, 9202, 3692, 9981, 9331, 3311, 1757, 837, 5170, 1225, 4693, 4284, 8271, 8928, 7763, 7957, 2049, 7944, 3510, 3154, 6852, 2704, 7302, 2432, 5543, 4463, 7459, 8323, 714, 9292, 4287, 5719, 7190, 114, 9892, 2187, 2524, 7572, 2476,
+               1343, 2327, 8370, 8274, 8052, 2455, 3601, 9651, 5062, 3902, 6104, 7601, 4848, 1738, 649, 7788, 1599, 7582, 6154, 5297, 4709, 7511, 207, 2481, 4049, 5384, 1408, 4254, 5752, 3230, 3518, 1716, 8290, 3725, 4893, 216, 8856, 1150, 4249, 9451, 6206, 5280, 2239, 5300, 3577, 8731, 1275, 6258, 5440, 5303, 4703]
+    # pos = []
+    seen = set()
+    seen2 = []
+    m = {}
+    r_data = list(reversed(data))
+    for i in range(it):
+        if nn in seen:
+            ii = seen2.index(nn)
+            iii = (it - i) % (i - ii)
+            print(ii, iii)
+            return seen2[ii + iii]
+        assert not (nn in seen)
+        seen.add(nn)
+        seen2.append(nn)
+        if i % 1000 == 0:
+            print(i, it)
+        # start = timer()
+        a,b = 1,0
+        nn2 = nn
+        nn3 = nn
+        nn4 = nn
+        nn4_l = []
+        a2,b2 = 1,0
+        for d, n in r_data:
+            if l == 10007:
+                true_n = correct.pop()
+                assert true_n == nn
+            # pos.insert(0, nn)
+            if d == 0:
+                nn = new_stack2(l, nn)
+                a,b = -a, l-1-b
+                a2,b2 = -a2, l-1-b2
+                nn2 = (nn2*a + b)%l
+                nn3 = (nn3*a + b)
+            elif d == 1:
+                nn = cutN2(l, n, nn)
+                if n < 0:
+                    n = l + n
+                a,b = a,b + n
+                a2,b2 = a2, b2+n
+                nn2 = (nn2*a + b)%l
+                nn3 = (nn3*a + b)
+            else:
+                nn = incs2(l, n, nn)
+                a,b = a*n,b
+                a2,b2 = a2*modinv(n,l), b2*modinv(n,l)
+                nn2 = (nn2*a + b)%l
+                nn3 = (nn3*a + b)
+            # print(nn, nn2, nn3)
+            # print(nn)
+            nn4_l.insert(0, (4703*a2 + b2)%l)
+        print(" " ,nn4_l)
+        print(a2,b2)
+        print()
+        nn2, nn3 = nn, nn
+        a,b = 1,0
+        nn4 = 4703
+        print(nn)
+        nn2_l = []
+        for d, n in data:
+            if d == 0:
+                a,b = -a, l-1-b
+                nn2 = (nn*a + b)%l
+                nn3 = (nn3*a + b)
+            elif d == 1:
+                if n < 0:
+                    n = l + n
+                a,b = a,b - n
+                nn2 = (nn*a + b)%l
+                nn3 = (nn3*a + b)
+            else:
+                a,b = a*n,b*n
+                nn2 = (nn*a + b)%l
+                nn3 = (nn3*a + b)
+            nn2_l.append(nn2)
+            # print(nn, nn2, nn3)
+        print(nn2_l)
+        print(nn, nn2, nn3%l)
+        # print((timer() - start)/1000)
+    # print(pos)
+    print("hehe")
+    import math
+    print(((2020*a2 + b2) ** 101741582076661) % l)
+    from decimal import Decimal
+    print(Decimal(2020*a2 + b2) ** 101741582076661 % l)
+    print("hehe")
+    print(power(2020*a2 + b2, 101741582076661, l))
+    print((2020*a2 + b2)**101741582076661)
+    return nn
+
+
+# Iterative Function to calculate 
+# (x^y)%p in O(log y)  
+def power(x, y, p) : 
+    res = 1     # Initialize result 
+  
+    # Update x if it is more 
+    # than or equal to p 
+    x = x % p  
+  
+    while (y > 0) : 
+          
+        # If y is odd, multiply 
+        # x with result 
+        if ((y & 1) == 1) : 
+            res = (res * x) % p 
+  
+        # y must be even now 
+        y = y >> 1      # y = y/2 
+        x = (x * x) % p 
+          
+    return res 
+      
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
