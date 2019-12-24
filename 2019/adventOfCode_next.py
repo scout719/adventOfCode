@@ -35,19 +35,19 @@ WHITE_CIRCLE = "•"
 BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
-def day24_parse_input(data):
+def day25_parse_input(data):
     data = [int(i) for i in data[0].split(",")]
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
     return data
 
-def day24_1(data):
-    #data = read_input(2019, 2401)
-    data = day24_parse_input(data)
+def day25_1(data):
+    #data = read_input(2019, 2501)
+    data = day25_parse_input(data)
     return data
 
-def day24_2(data):
-    #data = read_input(2019, 2401)
-    data = day24_parse_input(data)
+def day25_2(data):
+    #data = read_input(2019, 2501)
+    data = day25_parse_input(data)
     return data
 
 # # IntCode logic:

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
-import _functools
+import functools
 import math
 import os
 import sys
 import time
-from _collections import defaultdict
+from collections import defaultdict
 from heapq import *
 import copy
 
@@ -40,7 +40,7 @@ def day1_calc_fuel(mod):
     return math.floor(mod / 3) - 2
 
 def day1_1(data):
-    return _functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
+    return functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
 
 def day1_2(data):
     total = 0
@@ -1662,7 +1662,7 @@ def day21_2(data):
 
         "RUN"
     ]
-    program = [inst + chr(10) for inst in program]
+    program = [inst + chr(10) for inst in cmd]
     program = [ord(c) for inst in program for c in inst]
 
     def get_char():
@@ -1806,8 +1806,154 @@ def int_run_23(insts, pc, rel_base, inputs, outputs):
             return outputs, pc, rel_base, False, False
         if is_stuck:
             return outputs, pc, rel_base, False, True
-    return outputs, pc, rel_base, True, False
 
+""" DAY 24 """
+
+def day24_parse_input(data):
+    data = [[c for c in l] for l in data]
+    return data
+
+def day24_layout(grid):
+    layout = ""
+    for r, row in enumerate(grid):
+        layout_r = []
+        for c, p in enumerate(row):
+            layout_r.append(p)
+        layout += "".join(layout_r)
+    return layout
+
+def day24_1(data):
+    # data = read_input(2019, 2401)
+    data = day24_parse_input(data)
+    grid = data
+    D = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+    R = len(grid)
+    C = len(grid[0])
+    seen = set()
+    while True:
+        l = day24_layout(grid)
+        # print(l)
+        if l in seen:
+            total = 0
+            for i in range(len(l)):
+                if l[i] == "#":
+                    total += 2**i
+            return total
+        seen.add(l)
+        new_grid = [[c for c in row] for row in grid]
+        for r, row in enumerate(grid):
+            for c, p in enumerate(row):
+                count = 0
+                for dr, dc in D:
+                    rr, cc = r + dr, c + dc
+                    if 0 <= rr < R and 0 <= cc < C and grid[rr][cc] == "#":
+
+                        count += 1
+                if grid[r][c] == "#" and count != 1:
+                    new_grid[r][c] = "."
+                elif grid[r][c] == "." and 1 <= count <= 2:
+                    new_grid[r][c] = "#"
+        grid = new_grid
+
+    return data
+
+def day24_get_adj(r, c, R, C, l, grid):
+    D = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+    count = 0
+    for dr, dc in D:
+        rr, cc = r + dr, c + dc
+        next_level_grid = grid[l - 1]
+        pos = []
+        if (rr, cc) == (2, 2):
+            next_level_grid = grid[l + 1]
+            # center tile
+            if r < rr:
+                # Upper row
+                pos = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
+            elif r > rr:
+                # lower row
+                pos = [(4, 4), (4, 3), (4, 2), (4, 1), (4, 0)]
+            elif c < cc:
+                # Left column
+                pos = [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+            elif c > cc:
+                # Righ column
+                pos = [(0, 4), (1, 4), (2, 4), (3, 4), (4, 4)]
+        elif rr < 0:
+            # Upper outer tile
+            pos = [(1, 2)]
+        elif rr >= R:
+            # lower outer tile
+            pos = [(3, 2)]
+        elif cc < 0:
+            # Left outer tile
+            pos = [(2, 1)]
+        elif cc >= C:
+            # Righ outer tile
+            pos = [(2, 3)]
+        else:
+            if (rr, cc) in grid[l]:
+                count += 1
+
+        for rrr, ccc in pos:
+            if (rrr, ccc) in next_level_grid:
+                count += 1
+    return count
+
+def day24_2(data):
+    # data = read_input(2019, 2401)
+    data = day24_parse_input(data)
+    D = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+    R = len(data)
+    C = len(data[0])
+    grid = defaultdict(set)
+    for r, row in enumerate(data):
+        for c, p in enumerate(row):
+            if p == "#":
+                grid[0].add((r, c))
+    lo = -1
+    hi = 1
+    seen = set()
+    t = 0
+    while t < 200:
+        new_grid = copy.deepcopy(grid)
+        for l in range(lo, hi + 1):
+            for r in range(R):
+                for c in range(C):
+                    if r == 2 and c == 2:
+                        continue
+                    changed = False
+                    count = day24_get_adj(r, c, R, C, l, grid)
+                    if (r, c) in grid[l] and count != 1:
+                        changed = True
+                        new_grid[l].remove((r, c))
+                    elif not (r, c) in grid[l] and 1 <= count <= 2:
+                        changed = True
+                        new_grid[l].add((r, c))
+                    if r == 0 or r == R - 1 or c == 0 or c == C - 1 and changed:
+                        if l == lo:
+                            lo = lo - 1
+                        if l == hi:
+                            hi = hi + 1
+        grid = new_grid
+
+        t += 1
+    cc = 0
+    for k in sorted(grid.keys()):
+        # print()
+        # print("Level #" + str(k))
+        # for r in range(R):
+        #     for c in range(C):
+        #         if c == 2 and r == 2:
+        #             print("?", end="")
+        #         elif (r,c) in grid[k]:
+        #             print("#", end="")
+        #             # count += 1
+        #         else:
+        #             print(".", end="")
+        #     print()
+        cc += len(grid[k])
+    return cc
 
 """ MAIN FUNCTION """
 

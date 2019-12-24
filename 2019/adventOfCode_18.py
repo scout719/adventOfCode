@@ -168,9 +168,9 @@ def day18_2(data):
         if r <= robots[2][0] and c >= robots[2][1]:
             total_keys[key] = (r, c, 2)
         if r >= robots[0][0] and c >= robots[0][1]:
-            total_keys[key] = (r, c, 4)    
-            
-    q = [(0, ["1", "2", "3", "4"], [[],[],[],[]], [])]
+            total_keys[key] = (r, c, 4)
+
+    q = [(0, ["1", "2", "3", "4"], [[], [], [], []], [])]
 
     min_res = None
     seen3 = {}
@@ -180,8 +180,9 @@ def day18_2(data):
     seen = set()
     while q:
         steps, robots, ks_r, ks = heappop(q)
-        
-        k2 = tuple([steps, tuple(robots), tuple(ks_r[0]), tuple(ks_r[1]), tuple(ks_r[2]), tuple(ks_r[3])])
+
+        k2 = tuple([steps, tuple(robots), tuple(ks_r[0]),
+                    tuple(ks_r[1]), tuple(ks_r[2]), tuple(ks_r[3])])
         if k2 in seen:
             continue
         seen.add(k2)
@@ -193,12 +194,12 @@ def day18_2(data):
         #             d_ks.append(k)
         #     for k in d_ks:
         #         del seen3[k]
-        c+=1
+        c += 1
         if c % 10000 == 0:
             print(steps, ks, len(ks), total_keys_n, len(seen3), t)
         if total_keys_n == len(ks):
             return steps
-        
+
         for i in range(4):
             key = robots[i]
             # start = timer()
@@ -215,7 +216,7 @@ def day18_2(data):
                     continue
                 seen3[k] = steps + s
                 #q.append((steps + s, n_robots, n_ks))
-                heappush(q, (steps + s, n_robots, ks_r , n_ks))
+                heappush(q, (steps + s, n_robots, ks_r, n_ks))
     return min_res
 
 """ MAIN FUNCTION """
