@@ -152,14 +152,15 @@ def day22_1(data):
     deck = [i for i in range(10007)]
     # deck = [i for i in range(10)]
     pos = []
-    for d, n in data:
-        if d == 0:
-            new_stack(deck)
-        elif d == 1:
-            deck = cutN(deck, n)
-        else:
-            deck = incs(deck, n)
-        pos.append(deck.index(2019))
+    for _ in range(5):
+        for d, n in data:
+            if d == 0:
+                new_stack(deck)
+            elif d == 1:
+                deck = cutN(deck, n)
+            else:
+                deck = incs(deck, n)
+            pos.append(deck.index(2019))
     print(pos)
     return deck.index(2019)
 
@@ -239,9 +240,10 @@ def day22_2(data):
     l = 119315717514047
     it = 101741582076661
     nn = 2020
-    # l = 10007
-    it = 1
-    # nn = 4703
+    #l = 10007
+    it = 5
+    #nn = 7798#4703
+    nn_back = nn
     correct = [9769, 5723, 3336, 3340, 724, 9282, 3166, 4296, 1855, 6347, 3659, 9202, 3692, 9981, 9331, 3311, 1757, 837, 5170, 1225, 4693, 4284, 8271, 8928, 7763, 7957, 2049, 7944, 3510, 3154, 6852, 2704, 7302, 2432, 5543, 4463, 7459, 8323, 714, 9292, 4287, 5719, 7190, 114, 9892, 2187, 2524, 7572, 2476,
                1343, 2327, 8370, 8274, 8052, 2455, 3601, 9651, 5062, 3902, 6104, 7601, 4848, 1738, 649, 7788, 1599, 7582, 6154, 5297, 4709, 7511, 207, 2481, 4049, 5384, 1408, 4254, 5752, 3230, 3518, 1716, 8290, 3725, 4893, 216, 8856, 1150, 4249, 9451, 6206, 5280, 2239, 5300, 3577, 8731, 1275, 6258, 5440, 5303, 4703]
     # pos = []
@@ -249,7 +251,7 @@ def day22_2(data):
     seen2 = []
     m = {}
     r_data = list(reversed(data))
-    for i in range(it):
+    for i in range(1):
         if nn in seen:
             ii = seen2.index(nn)
             iii = (it - i) % (i - ii)
@@ -268,7 +270,7 @@ def day22_2(data):
         nn4_l = []
         a2,b2 = 1,0
         for d, n in r_data:
-            if l == 10007:
+            if False and l == 10007:
                 true_n = correct.pop()
                 assert true_n == nn
             # pos.insert(0, nn)
@@ -324,16 +326,23 @@ def day22_2(data):
         print(nn, nn2, nn3%l)
         # print((timer() - start)/1000)
     # print(pos)
+    x = 2019
+    for _ in range(it):
+        x = (x*a + b )% l
+    print(x)
+    print(p(a, b, it, l, 2019))
+    print(p(a2, b2, it, l ,x))
     print("hehe")
-    import math
-    print(((2020*a2 + b2) ** 101741582076661) % l)
-    from decimal import Decimal
-    print(Decimal(2020*a2 + b2) ** 101741582076661 % l)
-    print("hehe")
-    print(power(2020*a2 + b2, 101741582076661, l))
-    print((2020*a2 + b2)**101741582076661)
-    return nn
+    print((4703*a2 + b2)%l)
+    a2, b2 = a2%l, b2%l
+    print(a2,b2)
+    print(p(a2,b2, 101741582076661, l, 2020))
+    return (p(a2,b2, it, l, nn_back)*a + b )%l
+#57949829576116
+#59312129219073
 
+def p(a, b, it, l, x):
+    return (power(a,it,l)*x + b*(power(a,it,l)-1)*modinv(a-1, l) )% l
 
 # Iterative Function to calculate 
 # (x^y)%p in O(log y)  
