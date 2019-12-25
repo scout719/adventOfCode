@@ -1051,7 +1051,7 @@ def day15_discover(insts, stop_at_oxygen):
             moves_made[(x, y)].add((curr_move + 2) % 4)
             for move in range(0, 4):
                 if not move in moves_made[(x, y)]:
-                    heappush(unexplored, (-steps, x, y,
+                    heappush(unexplored, (steps, x, y,
                                           move, insts[:], pc, rel_base))
             if code == 2:
                 oxygen_x, oxygen_y = x, y
@@ -1323,6 +1323,201 @@ def int_run_17(insts, inputs, calculate_input=None):
     return outputs
 
 """ DAY 18 """
+
+def day18_parse_input(data):
+    return [str(d) for d in data]
+
+def all_dist2(k, r, c, grid):
+    D = [(0, 1), (1, 0), (-1, 0), (0, -1)]
+    m = []
+    q = [(r, c, 0)]
+    seen = {(r, c): 0}
+    dists = {}
+    while q:
+        rr, cc, count = heappop(q)
+
+        for d in range(0, 4):
+            rrr, ccc = rr + D[d][0], cc + D[d][1]
+            if not (rrr, ccc) in seen or seen[(rrr, ccc)] > count + 1:
+                seen[(rrr, ccc)] = count + 1
+                p = grid[rrr][ccc]
+                if p == '.' or p == "@" or p == "1" or p == "2" or p == "3" or p == "4":
+                    heappush(q, (rrr, ccc, count + 1))
+                elif p != "#":
+                    dists[p] = (rrr, ccc, count + 1)
+    return dists
+
+def n_pos2(p, grid, dists, ks):
+    D = [(0, 1), (1, 0), (-1, 0), (0, -1)]
+    m = []
+    q = [(p, 0)]
+    seen = set([p])
+    while q:
+        pp, steps = q.pop()
+        for ppp in dists[pp]:
+            if not ppp in seen:
+                seen.add(ppp)
+                r, c, s = dists[pp][ppp]
+                if ord('A') <= ord(ppp) <= ord('Z') and ppp.lower() in ks:
+                    q.append((ppp, steps + s))
+                elif ord('a') <= ord(ppp) <= ord('z'):
+                    if ppp in ks:
+                        q.append((ppp, steps + s))
+                    else:
+                        m.append((ppp, steps + s))
+    return m
+
+def day18_1(data):
+    # data = read_input(2019, 1801)
+    data = day18_parse_input(data)
+    total_keys = {}
+    grid = []
+    doors = {}
+    for r, row in enumerate(data):
+        grid.append([])
+        for c, p in enumerate(row):
+            grid[r].append(p)
+            if ord('a') <= ord(p) <= ord('z'):
+                total_keys[p] = (r, c)
+            elif ord('A') <= ord(p) <= ord('Z'):
+                doors[p] = (r, c)
+            elif p == '@':
+                total_keys[p] = (r, c)
+                start = r, c
+
+    dists = {}
+    for key in total_keys:
+        r, c = total_keys[key]
+        dists[key] = all_dist2(key, r, c, grid)
+    for door in doors:
+        r, c = doors[door]
+        dists[door] = all_dist2(door, r, c, grid)
+
+    q = [(0, "@", [])]
+
+    min_res = None
+    seen3 = {}
+    total_keys_n = len(total_keys.keys()) - 1  # remove @
+    seen = set()
+    while q:
+        steps, key, ks = heappop(q)
+
+        k2 = tuple([steps, key, tuple(ks)])
+        if k2 in seen:
+            continue
+        seen.add(k2)
+
+        if total_keys_n == len(ks):
+            return steps
+
+        for other_key, s in n_pos2(key, grid, dists, ks):
+            n_ks = sorted(ks + [other_key])
+            k = tuple([other_key] + n_ks)
+            if k in seen3 and seen3[k] < steps + s:
+                continue
+            seen3[k] = steps + s
+            heappush(q, (steps + s, other_key, n_ks))
+    return min_res
+
+def day18_2(data):
+    if len(sys.argv) > 1:
+        data = read_input(2019, str(sys.argv[1]))
+    data = day18_parse_input(data)
+    total_keys = {}
+    grid = []
+    doors = {}
+    for r, row in enumerate(data):
+        grid.append([])
+        for c, p in enumerate(row):
+            grid[r].append(p)
+            if ord('a') <= ord(p) <= ord('z'):
+                total_keys[p] = (r, c)
+            elif ord('A') <= ord(p) <= ord('Z'):
+                doors[p] = (r, c)
+            elif p == '@':
+                start = r, c
+    D = [-1, 0, 1]
+    count = 1
+    robots = []
+    for i in range(3):
+        for j in range(3):
+            rr, cc = start[0] + D[i], start[1] + D[j]
+            if abs(D[i]) + abs(D[j]) == 2:
+                grid[rr][cc] = str(count)
+                total_keys[str(count)] = (rr, cc)
+                robots.append((rr, cc))
+                count += 1
+            else:
+                grid[rr][cc] = "#"
+    dists = {}
+    for key in total_keys:
+        r, c = total_keys[key]
+        dists[key] = all_dist2(key, r, c, grid)
+    for door in doors:
+        r, c = doors[door]
+        dists[door] = all_dist2(door, r, c, grid)
+    # 1, 2
+    # 3, 4
+
+    for key in total_keys:
+        r, c = total_keys[key]
+        if r <= robots[0][0] and c <= robots[0][1]:
+            total_keys[key] = (r, c, 1)
+        if r >= robots[1][0] and c <= robots[1][1]:
+            total_keys[key] = (r, c, 3)
+        if r <= robots[2][0] and c >= robots[2][1]:
+            total_keys[key] = (r, c, 2)
+        if r >= robots[0][0] and c >= robots[0][1]:
+            total_keys[key] = (r, c, 4)
+
+    q = [(0, ["1", "2", "3", "4"], [[], [], [], []], [])]
+
+    min_res = None
+    seen3 = {}
+    total_keys_n = len(total_keys.keys()) - 4  # remove @
+    cc = 0
+    t = 0
+    seen = set()
+    while q:
+        steps, robots, ks_r, ks = heappop(q)
+
+        k2 = tuple([steps, tuple(robots), tuple(ks_r[0]),
+                    tuple(ks_r[1]), tuple(ks_r[2]), tuple(ks_r[3])])
+        if k2 in seen:
+            continue
+        seen.add(k2)
+
+        # if len(seen3) > 2000:
+        #     d_ks = []
+        #     for k in seen3:
+        #         if len(k) < len(ks)-4:
+        #             d_ks.append(k)
+        #     for k in d_ks:
+        #         del seen3[k]
+        c += 1
+        if c % 10000 == 0:
+            print(steps, ks, len(ks), total_keys_n, len(seen3), t)
+        if total_keys_n == len(ks):
+            return steps
+
+        for i in range(4):
+            key = robots[i]
+            # start = timer()
+            for other_key, s in n_pos2(key, grid, dists, ks):
+                # t = (timer() - start)*1000
+                n_ks = sorted(ks + [other_key])
+                # n_ks2 = ks_r[i] + [other_key]
+                # n_ks_r = ks_r[:]
+                # n_ks_r[i] = n_ks2
+                n_robots = robots[:]
+                n_robots[i] = other_key
+                k = tuple(n_robots + n_ks)
+                if k in seen3 and seen3[k] < steps + s:
+                    continue
+                seen3[k] = steps + s
+                #q.append((steps + s, n_robots, n_ks))
+                heappush(q, (steps + s, n_robots, ks_r, n_ks))
+    return min_res
 
 """ DAY 19 """
 
@@ -1685,6 +1880,282 @@ def int_run_21(insts, inputs, calculate_input=None):
 
 """ DAY 22 """
 
+# To deal into new stack, create a new stack of cards by dealing the top card of the deck onto the top of the new stack repeatedly until you run out of cards:
+def new_stack(deck):
+    # print("NS")
+    i = 0
+    l = len(deck)
+    l2 = l // 2
+    while i < l2:
+        i += 1
+        tmp = deck[i]
+        deck[i] = deck[l - 1 - i]
+        deck[l - 1 - i] = tmp
+
+# To cut N cards, take the top N cards off the top of the deck and move them as a single unit to the bottom of the deck, retaining their order. For example, to cut 3:
+def cutN(deck, n):
+    # print("CUT")
+    if n >= 0:
+        cut = deck[0:n]
+        remaining = deck[n:]
+        return remaining + cut
+    else:
+        cut = deck[n:]
+        remaining = deck[0:n]
+        return cut + remaining
+
+# To deal with increment N, start by clearing enough space on your table to lay out all of the cards individually in a long line. Deal the top card into the leftmost position. Then, move N positions to the right and deal the next card there. If you would move into a position past the end of the space on your table, wrap around and keep counting from the leftmost card again. Continue this process until you run out of cards.
+def incs(deck, n):
+    # print("INCS")
+    l = len(deck)
+    n_d = [0 for _ in range(l)]
+    i = 0
+    for c in deck:
+        n_d[i] = c
+        i = (i + n) % l
+    return n_d
+
+# To deal into new stack, create a new stack of cards by dealing the top card of the deck onto the top of the new stack repeatedly until you run out of cards:
+def new_stack2(l, n):
+    # print("NS")
+    return l - 1 - n
+
+# To cut N cards, take the top N cards off the top of the deck and move them as a single unit to the bottom of the deck, retaining their order. For example, to cut 3:
+def cutN2(l, n, n2):
+    # print("CUT", n, n2)
+    if n < 0:
+        n = l + n
+    # if n >= 0:
+    if n2 >= l - n:
+        return n2 - (l - n)
+    else:
+        return n2 + n
+    # else:
+        # n = abs(n)
+        # if n2 < n:
+        #     return l - 1 - n2
+        # else:
+        #     return n2 - n
+
+# To deal with increment N, start by clearing enough space on your table to lay out all of the cards individually in a long line. Deal the top card into the leftmost position. Then, move N positions to the right and deal the next card there. If you would move into a position past the end of the space on your table, wrap around and keep counting from the leftmost card again. Continue this process until you run out of cards.
+def incs2(l, n, n2):
+    # print("INCS", n, n2)
+    i = 0
+    count = 0
+
+    if n2 > n:
+        count += n2 // n
+        i = count * n
+    # print(i, count)
+    while True:
+        assert count < l, count
+        if n2 > i:
+            x = ((n2 - i) // n)
+            count += x
+            i = i + x * n
+        # print(2, i, count)
+        if i == n2:
+            return count
+        # count += 1
+        # i += n
+        # print("next", i, count)
+        # if i == n2:
+            # return count
+        x = (l // n) - 1
+        count += x
+        i = (i + n * x) % l
+        # print ("wrap", x, i, count)
+
+    # while i != n2:
+
+    #     count += 1
+    #     i = (i + n)%l
+    return count
+
+def day22_parse_input(data):
+    insts = []
+    for line in data:
+        if line == "deal into new stack":
+            insts .append((0, 0))
+        elif "cut " in line:
+            n = line.split("cut ")[-1]
+            insts .append((1, int(n)))
+        else:
+            n = line.split("deal with increment ")[-1]
+            insts .append((2, int(n)))
+    return insts
+
+def day22_1(data):
+    #data = read_input(2019, 2203)
+    data = day22_parse_input(data)
+    deck = [i for i in range(10007)]
+    # deck = [i for i in range(10)]
+    pos = []
+    for _ in range(5):
+        for d, n in data:
+            if d == 0:
+                new_stack(deck)
+            elif d == 1:
+                deck = cutN(deck, n)
+            else:
+                deck = incs(deck, n)
+            pos.append(deck.index(2019))
+    # print(pos)
+    return deck.index(2019)
+
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def modinv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+def day22_2(data):
+    # 119315717514047
+    #data = read_input(2019, 2203)
+    data = day22_parse_input(data)
+    # deck = [i for i in range(119315717514047)]
+    # deck = [i for i in range(10007)]
+    # deck = [i for i in range(10)]
+    mem = []
+    mem_m = set()
+    l = 119315717514047
+    it = 101741582076661
+    nn = 2020
+    #l = 10007
+    it = 5
+    # nn = 7798#4703
+    nn_back = nn
+    correct = [9769, 5723, 3336, 3340, 724, 9282, 3166, 4296, 1855, 6347, 3659, 9202, 3692, 9981, 9331, 3311, 1757, 837, 5170, 1225, 4693, 4284, 8271, 8928, 7763, 7957, 2049, 7944, 3510, 3154, 6852, 2704, 7302, 2432, 5543, 4463, 7459, 8323, 714, 9292, 4287, 5719, 7190, 114, 9892, 2187, 2524, 7572, 2476,
+               1343, 2327, 8370, 8274, 8052, 2455, 3601, 9651, 5062, 3902, 6104, 7601, 4848, 1738, 649, 7788, 1599, 7582, 6154, 5297, 4709, 7511, 207, 2481, 4049, 5384, 1408, 4254, 5752, 3230, 3518, 1716, 8290, 3725, 4893, 216, 8856, 1150, 4249, 9451, 6206, 5280, 2239, 5300, 3577, 8731, 1275, 6258, 5440, 5303, 4703]
+    # pos = []
+    seen = set()
+    seen2 = []
+    m = {}
+    r_data = list(reversed(data))
+    for i in range(1):
+        if nn in seen:
+            ii = seen2.index(nn)
+            iii = (it - i) % (i - ii)
+            # print(ii, iii)
+            return seen2[ii + iii]
+        assert not (nn in seen)
+        seen.add(nn)
+        seen2.append(nn)
+        # if i % 1000 == 0:
+            # print(i, it)
+        # start = timer()
+        a, b = 1, 0
+        nn2 = nn
+        nn3 = nn
+        nn4 = nn
+        nn4_l = []
+        a2, b2 = 1, 0
+        for d, n in r_data:
+            if False and l == 10007:
+                true_n = correct.pop()
+                assert true_n == nn
+            # pos.insert(0, nn)
+            if d == 0:
+                nn = new_stack2(l, nn)
+                a, b = -a, l - 1 - b
+                a2, b2 = -a2, l - 1 - b2
+                nn2 = (nn2 * a + b) % l
+                nn3 = (nn3 * a + b)
+            elif d == 1:
+                nn = cutN2(l, n, nn)
+                if n < 0:
+                    n = l + n
+                a, b = a, b + n
+                a2, b2 = a2, b2 + n
+                nn2 = (nn2 * a + b) % l
+                nn3 = (nn3 * a + b)
+            else:
+                nn = incs2(l, n, nn)
+                a, b = a * n, b
+                a2, b2 = a2 * modinv(n, l), b2 * modinv(n, l)
+                nn2 = (nn2 * a + b) % l
+                nn3 = (nn3 * a + b)
+            # print(nn, nn2, nn3)
+            # print(nn)
+            nn4_l.insert(0, (4703 * a2 + b2) % l)
+        # print(" ", nn4_l)
+        # print(a2, b2)
+        # print()
+        nn2, nn3 = nn, nn
+        a, b = 1, 0
+        nn4 = 4703
+        # print(nn)
+        nn2_l = []
+        for d, n in data:
+            if d == 0:
+                a, b = -a, l - 1 - b
+                nn2 = (nn * a + b) % l
+                nn3 = (nn3 * a + b)
+            elif d == 1:
+                if n < 0:
+                    n = l + n
+                a, b = a, b - n
+                nn2 = (nn * a + b) % l
+                nn3 = (nn3 * a + b)
+            else:
+                a, b = a * n, b * n
+                nn2 = (nn * a + b) % l
+                nn3 = (nn3 * a + b)
+            nn2_l.append(nn2)
+            # print(nn, nn2, nn3)
+        # print(nn2_l)
+        # print(nn, nn2, nn3 % l)
+        # print((timer() - start)/1000)
+    # print(pos)
+    x = 2019
+    for _ in range(it):
+        x = (x * a + b) % l
+    # print(x)
+    # print(p(a, b, it, l, 2019))
+    # print(p(a2, b2, it, l, x))
+    # print("hehe")
+    # print((4703 * a2 + b2) % l)
+    # a2, b2 = a2 % l, b2 % l
+    # print(a2, b2)
+    # print(p(a2, b2, 101741582076661, l, 2020))
+    # print(nn_back, (p(a2, b2, it, l, nn_back) * a + b) % l)
+    return p(a2, b2, 101741582076661, l, 2020)
+# 57949829576116
+# 59312129219073
+
+def p(a, b, it, l, x):
+    return (power(a, it, l) * x + b * (power(a, it, l) - 1) * modinv(a - 1, l)) % l
+
+# Iterative Function to calculate
+# (x^y)%p in O(log y)
+def power(x, y, p):
+    res = 1     # Initialize result
+
+    # Update x if it is more
+    # than or equal to p
+    x = x % p
+
+    while (y > 0):
+
+        # If y is odd, multiply
+        # x with result
+        if ((y & 1) == 1):
+            res = (res * x) % p
+
+        # y must be even now
+        y = y >> 1      # y = y/2
+        x = (x * x) % p
+
+    return res
+
 """ DAY 23 """
 
 def day23_create_computers(data):
@@ -1954,6 +2425,72 @@ def day24_2(data):
         #     print()
         cc += len(grid[k])
     return cc
+
+""" DAY 25 """
+
+def day25_parse_input(data):
+    data = [int(i) for i in data[0].split(",")]
+    data = [data[i] if i < len(data) else 0 for i in range(100000)]
+    return data
+
+def day25_1(data):
+    insts = day25_parse_input(data)
+
+    command = ""
+    cmds = [
+        "n",
+        "w",
+        "take antenna",
+        "s",
+        "take hologram",
+        "w",
+        "take astronaut ice cream",
+        "e",
+        "n",
+        "n",
+        "n",
+        "n",
+        "take space heater",
+        "n",
+        "e",
+        "e"
+    ]
+
+    def calculate_input():
+        nonlocal command
+        if not command:
+            if cmds:
+                comm = cmds.pop(0)
+            else:
+                comm = input()
+            if comm == "n":
+                comm = "north"
+            elif comm == "s":
+                comm = "south"
+            elif comm == "e":
+                comm = "east"
+            elif comm == "w":
+                comm = "west"
+            command = comm + chr(10)
+            command = list(command)
+        return ord(command.pop(0))
+
+    pc = 0
+    rel_base = 0
+    outputs = []
+    text = ""
+
+    while insts[pc] != 99:
+        op = insts[pc]
+        (pc, insts, rel_base) = ic_execute(
+            op, pc, insts, [], outputs, rel_base, calculate_input)
+        if outputs:
+            c = outputs.pop()
+            text += chr(c)
+            # print(chr(c), end="")
+
+    print("\n".join(text.splitlines()[-3:]))
+    return int(text.splitlines()[-1].split("typing ")[-1].split(" ")[0])
 
 """ MAIN FUNCTION """
 
