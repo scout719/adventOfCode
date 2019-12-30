@@ -1167,6 +1167,167 @@ def day14_2(data):
     nr_recipes = int(data[0])
     return day14_solve2(nr_recipes, data[0])
 
+""" DAY 15 """
+
+def day15_parse_input(data):
+    data = [[c for c in line] for line in data]
+    return data
+
+def day15_print(grid):
+    for rr, row in enumerate(grid):
+        for cc, p in enumerate(row):
+            print(p, end="")
+        print()
+
+def day15_solve(data, part1):
+    data = day15_parse_input(data)
+    data_back = [row[:] for row in data]
+
+    power = 3
+    if not part1:
+        power = 30
+    while True:
+        data = [row[:] for row in data_back]
+        healths = {}
+        for rr, row in enumerate(data):
+            for cc, p in enumerate(row):
+                if p != "." and p != "#":
+                    healths[(rr, cc)] = 200
+        stalled = False
+        t = 0
+        while not stalled:
+            stalled = True
+            units = []
+            # print(t)
+            for rr, row in enumerate(data):
+                for cc, p in enumerate(row):
+                    if p != "." and p != "#":
+                        units.append((rr, cc))
+            abort = False
+            for r, c in units:
+                data, healths, acted, elf_died = day15_turn(
+                    data, healths, r, c, power)
+                if elf_died and not part1:
+                    abort = True
+                    break
+                p = data[r][c]
+                if not acted:
+                    if p == "G" and not part1:
+                        abort = True
+                        break
+                    print(t, power)
+                    day15_print(data)
+                    print(t, sum(healths.values()))
+                    return (t) * sum(healths.values())
+                stalled = stalled and not acted
+            if abort:
+                break
+            t += 1
+        power += 1
+
+def day15_1(data):
+    return day15_solve(data, True)
+
+def day15_2(data):
+    return day15_solve(data, False)
+
+def day15_adj(grid, targets, r, c):
+    # Find open adj targets
+    R = len(grid)
+    C = len(grid[0])
+    adj_pos = set()
+    in_range = set()
+    D = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    for rr, cc in targets:
+        for dr, dc in D:
+            rrr, ccc = rr + dr, cc + dc
+            if (rrr, ccc) == (r, c):
+                in_range.add((rr, cc))
+            if 0 <= rrr < R and 0 <= ccc < C and grid[rrr][ccc] == ".":
+                adj_pos.add((rrr, ccc))
+    return adj_pos, in_range
+
+def day15_turn(grid, healths, r, c, power):
+    R = len(grid)
+    C = len(grid[0])
+    D = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    curr = grid[r][c]
+    if curr == ".":
+        # died already
+        # print(r,c, "died")
+        return grid, healths, True, False
+
+    targets = set()
+    # find targerts
+    for rr, row in enumerate(grid):
+        for cc, p in enumerate(row):
+            if p != "." and p != "#" and p != curr:
+                targets.add((rr, cc))
+    if len(targets) == 0:
+        # print("no targets")
+        return grid, healths, False, False
+
+    # Find open adj targets
+    adj_pos, in_range = day15_adj(grid, targets, r, c)
+
+    moved = False
+    if not in_range:
+        # Move
+        reach = set()
+        seen = set()
+        q = [(0, (r, c), [])]
+        # print(adj_pos)
+        while q:
+            steps, pos, path = q.pop(0)
+            # print(pos)
+            if len(path) > 0:
+                if (pos, path[0]) in seen:
+                    # print(pos, path)
+                    continue
+                seen.add((pos, path[0]))
+            rr, cc = pos
+            if pos in adj_pos:
+                reach.add((steps, pos, path[0]))
+            for dr, dc in D:
+                rrr, ccc = rr + dr, cc + dc
+                if grid[rrr][ccc] == ".":
+                    q.append((steps + 1, (rrr, ccc), path + [(rrr, ccc)]))
+        if reach:
+            moved = True
+            min_steps = min(reach)[0]
+            nearest = [c[2] for c in reach if c[0] == min_steps]
+            grid[r][c] = "."
+            health = healths[(r, c)]
+            healths[(r, c)] = 0
+            # print(r,c, reach, nearest, min(nearest))
+            r, c = min(nearest)
+            healths[(r, c)] = health
+            grid[r][c] = curr
+
+    # Find open adj targets
+    adj_pos, in_range = day15_adj(grid, targets, r, c)
+
+    # day26_print(grid)
+    # Attack
+    # print("range", r,c, in_range)
+    elf_died = False
+    if in_range:
+        ts = [(healths[(rr, cc)], rr, cc) for rr, cc in in_range]
+        hp, rr, cc = min(ts)
+        # print(r,c,rr,cc,hp)
+        p = power
+        if grid[r][c] == "G":
+            p = 3
+        hp -= p
+        hp = max([0, hp])
+        healths[rr, cc] = hp
+        if hp == 0:
+            if grid[rr][cc] == "E":
+                elf_died = True
+            grid[rr][cc] = "."
+
+    return grid, healths, True, elf_died
+
 """ DAY 16 """
 
 class Inst16:

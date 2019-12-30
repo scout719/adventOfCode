@@ -2050,7 +2050,7 @@ def day22_2(data):
         seen.add(nn)
         seen2.append(nn)
         # if i % 1000 == 0:
-            # print(i, it)
+        # print(i, it)
         # start = timer()
         a, b = 1, 0
         nn2 = nn
