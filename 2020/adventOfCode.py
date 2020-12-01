@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
+# pylint: disable=unused-import
+# pylint: disable=wildcard-import
 # pylint: disable=wrong-import-position
+# pylint: disable=consider-using-enumerate
 import functools
 import math
 import os
@@ -35,21 +38,25 @@ RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 """ DAY 1 """
 
-def day1_calc_fuel(mod):
-    return math.floor(mod / 3) - 2
-
 def day1_1(data):
-    return functools.reduce(lambda a, v: a + v, [day1_calc_fuel(int(m)) for m in data])
+    for i in range(len(data)):
+        for j in range(i+1, len(data)):
+            a = int(data[i])
+            b = int(data[j])
+            if a+b == 2020:
+                return a*b
+    return None
 
 def day1_2(data):
-    total = 0
-    for mod_s in data:
-        mod = int(mod_s)
-        temp_fuel = day1_calc_fuel(mod)
-        while temp_fuel > 0:
-            total += temp_fuel
-            temp_fuel = day1_calc_fuel(temp_fuel)
-    return total
+    for i in range(len(data)):
+        for j in range(i+1, len(data)):
+            for k in range(j+1, len(data)):
+                a = int(data[i])
+                b = int(data[j])
+                c = int(data[k])
+                if a+b+c == 2020:
+                    return a*b*c
+    return None
 
 """ MAIN FUNCTION """
 
