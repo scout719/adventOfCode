@@ -1,6 +1,9 @@
-# pylint: disable=unused-import
+# -*- coding: utf-8 -*-
 # pylint: disable=import-error
+# pylint: disable=unused-import
+# pylint: disable=wildcard-import
 # pylint: disable=wrong-import-position
+# pylint: disable=consider-using-enumerate
 import functools
 import math
 import multiprocessing as mp
