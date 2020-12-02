@@ -58,6 +58,44 @@ def day1_2(data):
                     return a*b*c
     return None
 
+""" DAY 2 """
+
+def day2_1(data):
+    count = 0
+    for line in data:
+        # 6-10 w: wwwwwhwwwwwrpww
+        policy = line.split(": ")[0]
+        password = line.split(": ")[1]
+        letter = policy.split(" ")[1][0]
+        range_ = policy.split(" ")[0]
+        min_ = int(range_.split("-")[0])
+        max_ = int(range_.split("-")[1])
+        count_letter = 0
+        for c in password:
+            if c == letter:
+                count_letter += 1
+        
+        if min_ <= count_letter <= max_:
+            count += 1
+    
+    return count
+
+def day2_2(data):
+    count = 0
+    for line in data:
+        # 6-10 w: wwwwwhwwwwwrpww
+        policy = line.split(": ")[0]
+        password = line.split(": ")[1]
+        letter = policy.split(" ")[1][0]
+        range_ = policy.split(" ")[0]
+        min_ = int(range_.split("-")[0])
+        max_ = int(range_.split("-")[1])
+
+        if (password[min_-1] == letter and password[max_-1] != letter) or \
+           (password[min_-1] != letter and password[max_-1] == letter):
+            count += 1
+    return count
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
