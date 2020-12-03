@@ -22,26 +22,25 @@ move (x, y) (dx, dy) steps = (x + dx*steps, y + dy*steps)
 
 solve [] (x, y) (dx, dy) = (x,y)
 solve ((d:steps):ls) (x, y) (dx, dy) =
-    solve ls (move (x, y) (new_dir d (dx, dy)) (read steps)) (new_dir d (dx, dy))
+    let new_d = new_dir d (dx, dy)
+        new_pos = move (x, y) new_d (read steps)
+    in solve ls new_pos new_d
 
 result (x, y) = (abs x) + (abs y)
 
 twice (x,y) [] = False
 twice (x1,y1) ((x2,y2):ps) = if ((x1 == x2) && (y1 == y2)) then True else twice (x1, y1) ps
 
-move2 (x, y) (dx, dy) 0 visited = (x, y)
+move2 (x, y) (dx, dy) 0 visited = ((x, y), visited)
 move2 (x, y) (dx, dy) steps visited = 
-    if ((steps == 0) || (twice (x, y) visited)) then ((x, y))
+    if ((steps == 0) || (twice (x, y) visited)) then ((x, y), visited)
     else (move2 (x+dx, y+dy) (dx, dy) (steps-1) ((x, y):visited))
-
-movev2 (x, y) (dx, dy) 0 visited = visited
-movev2 (x, y) (dx, dy) steps visited =
-    if ((steps == 0) || (twice (x, y) visited)) then visited
-    else (movev2 (x+dx, y+dy) (dx, dy) (steps-1) ((x, y):visited))
 
 solve2 [] (x, y) (dx, dy) visited = (x,y)
 solve2 ((d:steps):ls) (x, y) (dx, dy) visited =
-    solve2 ls (move2 (x, y) (new_dir d (dx, dy)) (read steps) visited) (new_dir d (dx, dy)) ((movev2 (x, y) (new_dir d (dx, dy)) (read steps) visited))
+    let new_d = new_dir d (dx, dy)
+        (new_pos, new_visited) = (move2 (x, y) new_d (read steps) visited)
+    in solve2 ls new_pos new_d new_visited
 
 main = do 
     contents <- loadInput
