@@ -10,7 +10,7 @@ import os
 import sys
 import time
 from collections import defaultdict
-from heapq import *
+from heapq import heappop, heappush
 import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -111,7 +111,6 @@ def day3_solve(data, dx, dy):
         x += dx
         x = x % len(data[0])
         y += dy
-        y = y
     return counter
 
 def day3_1(data):
@@ -128,6 +127,71 @@ def day3_2(data):
         (1, 2)
     ]
     return functools.reduce(lambda a, b: a * b, [day3_solve(data, dx, dy) for (dx, dy) in slopes])
+
+
+""" DAY 3 """
+
+def day4_process(data, f):
+    #data = read_input(2020, 401)
+    fields = {}
+    expected = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+    count = 0
+    for line in data:
+        if line == "":
+            valid = all([k in fields for k in expected])
+            if valid and f(fields):
+                count += 1
+            fields = {}
+            continue
+        for part in line.split(" "):
+            fields[part.split(":")[0]] = part.split(":")[1]
+
+    valid = all([k in fields for k in expected])
+    if valid and f(fields):
+        count += 1
+    return count
+
+def day4_valid(fields):
+    valid = True
+    for f in fields:
+        a = fields[f]
+        try:
+            if f == "byr":
+                valid &= len(a) == 4 and 1920 <= int(a) <= 2002
+            if f == "iyr":
+                valid &= len(a) == 4 and 2010 <= int(a) <= 2020
+            if f == "eyr":
+                valid &= len(a) == 4 and 2020 <= int(a) <= 2030
+            if f == "hgt":
+                s = a[-2:]
+                if s == "cm":
+                    valid &= 150 <= int(a[:-2]) <= 193
+                elif s == "in":
+                    valid &= 59 <= int(a[:-2]) <= 76
+                else:
+                    valid = False
+            if f == "hcl":
+                valid &= a[0] == "#" and len(a) == 7
+                _ = int(a[1:], 16)
+            if f == "ecl":
+                valid &= a in ("amb", "blu", "brn", "gry", "grn", "hzl", "oth")
+            if f == "pid":
+                valid &= len(a) == 9 and a.isnumeric()
+            if not valid:
+                # print(f, a)
+                break
+        except ValueError:
+            valid = False
+            break
+    return valid
+
+def day4_1(data):
+    #data = read_input(2020, 401)
+    return day4_process(data, lambda a: True)
+
+def day4_2(data):
+    #data = read_input(2020, 401)
+    return day4_process(data, day4_valid)
 
 
 """ MAIN FUNCTION """
