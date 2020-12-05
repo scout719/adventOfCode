@@ -114,11 +114,11 @@ def day3_solve(data, dx, dy):
     return counter
 
 def day3_1(data):
-    #data = read_input(2020, 301)
+    # data = read_input(2020, 301)
     return day3_solve(data, 3, 1)
 
 def day3_2(data):
-    #data = read_input(2020, 301)
+    # data = read_input(2020, 301)
     slopes = [
         (3, 1),
         (1, 1),
@@ -132,7 +132,7 @@ def day3_2(data):
 """ DAY 3 """
 
 def day4_process(data, f):
-    #data = read_input(2020, 401)
+    # data = read_input(2020, 401)
     fields = {}
     expected = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
     count = 0
@@ -186,12 +186,52 @@ def day4_valid(fields):
     return valid
 
 def day4_1(data):
-    #data = read_input(2020, 401)
+    # data = read_input(2020, 401)
     return day4_process(data, lambda a: True)
 
 def day4_2(data):
-    #data = read_input(2020, 401)
+    # data = read_input(2020, 401)
     return day4_process(data, day4_valid)
+
+
+""" DAY 5 """
+
+def day5_get_id(l):
+    lo = 0
+    hi = 127
+    le = 0
+    ri = 7
+    for i in l:
+        mid_r = lo + ((hi - lo) // 2)
+        mid_s = le + ((ri - le) // 2)
+        if i == "F":
+            hi = mid_r
+        elif i == "B":
+            lo = mid_r + 1
+        elif i == "L":
+            ri = mid_s
+        elif i == "R":
+            le = mid_s + 1
+    r = lo
+    s = le
+
+    return r * 8 + s
+
+def day5_1(data):
+    #data = read_input(2020, 501)
+    return max([day5_get_id(l) for l in data])
+
+def day5_2(data):
+    #data = read_input(2020, 401)
+    ids = [day5_get_id(l) for l in data]
+    for r in range(128):
+        for s in range(8):
+            seat_id = r * 8 + s
+            if ((seat_id - 1) in ids) and \
+               ((seat_id + 1) in ids) and \
+               (not seat_id in ids):
+                return seat_id
+    return None
 
 
 """ MAIN FUNCTION """
