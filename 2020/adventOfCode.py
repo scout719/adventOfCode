@@ -234,6 +234,44 @@ def day5_2(data):
     return None
 
 
+""" DAY 6 """
+
+def day6_solve(data):
+    group = []
+    count1 = 0
+    count2 = 0
+
+    # Add an extra line to process last group
+    data.append("")
+    for line in data:
+        if line == "":
+            ansMap = {}
+            for person in group:
+                for answer in person:
+                    if answer in ansMap:
+                        ansMap[answer] += 1
+                    else:
+                        ansMap[answer] = 1
+            for answer in ansMap:
+                count1 += 1
+                if ansMap[answer] == len(group):
+                    count2 += 1
+
+            group = []
+        else:
+            assert len(line) <= 26
+            group.append(line)
+
+    return count1, count2
+
+def day6_1(data):
+    #data = read_input(2020, 601)
+    return day6_solve(data)[0]
+
+def day6_2(data):
+    return day6_solve(data)[1]
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
