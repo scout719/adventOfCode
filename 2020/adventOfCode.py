@@ -218,11 +218,11 @@ def day5_get_id(l):
     return r * 8 + s
 
 def day5_1(data):
-    #data = read_input(2020, 501)
+    # data = read_input(2020, 501)
     return max([day5_get_id(l) for l in data])
 
 def day5_2(data):
-    #data = read_input(2020, 401)
+    # data = read_input(2020, 401)
     ids = [day5_get_id(l) for l in data]
     for r in range(128):
         for s in range(8):
@@ -265,11 +265,70 @@ def day6_solve(data):
     return count1, count2
 
 def day6_1(data):
-    #data = read_input(2020, 601)
+    # data = read_input(2020, 601)
     return day6_solve(data)[0]
 
 def day6_2(data):
     return day6_solve(data)[1]
+
+
+""" DAY 7 """
+
+def day7_parse(data):
+    holds = {}
+    for rule in data:
+        outer_bag, rest = tuple(rule.split(" contain"))
+        outer_bag = outer_bag.replace("bags", "bag")
+        contents = {}
+        if rest != " no other bags.":
+            rest = rest[1:-1]  # strip white space and period
+            for inner_rule in rest.split(", "):
+                ammount = int(inner_rule.split(" ")[0])
+                inner_bag = inner_rule.replace(
+                    str(ammount) + " ", "").replace("bags", "bag")
+                contents[inner_bag] = ammount
+        holds[outer_bag] = contents
+    return holds
+
+def day7_1(data):
+    # data = read_input(2020, 701)
+    holds = day7_parse(data)
+    can_be_in = {}
+    for bag in holds:
+        for inner_bag in holds[bag]:
+            if inner_bag not in can_be_in:
+                can_be_in[inner_bag] = set()
+            can_be_in[inner_bag].add(bag)
+    return day7_solve1(can_be_in)
+
+def day7_solve1(can_be_in):
+    stack = set(can_be_in["shiny gold bag"])
+    result = set()
+    while stack:
+        bag = stack.pop()
+        result.add(bag)
+        if bag in can_be_in:
+            for outer_bag in can_be_in[bag]:
+                stack.add(outer_bag)
+    return len(result)
+
+def day7_size(holds, mem, bag):
+    if bag in mem:
+        return mem[bag]
+
+    total = 1
+    for inner_bag in holds[bag]:
+        total += holds[bag][inner_bag] * (day7_size(holds, mem, inner_bag))
+
+    mem[bag] = total
+    return total
+
+def day7_2(data):
+    # data = read_input(2020, 702)
+    holds = day7_parse(data)
+
+    # outer_bag will include itself so decrease 1
+    return day7_size(holds, {}, "shiny gold bag") - 1
 
 
 """ MAIN FUNCTION """
