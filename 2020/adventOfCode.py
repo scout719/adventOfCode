@@ -18,6 +18,7 @@ print(FILE_DIR)
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
 sys.path.insert(0, FILE_DIR + "/../../")
+import computer  # NOQA: E402
 from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
@@ -329,6 +330,46 @@ def day7_2(data):
 
     # outer_bag will include itself so decrease 1
     return day7_size(holds, {}, "shiny gold bag") - 1
+
+
+""" DAY 8 """
+
+def day8_run_program(program):
+    program_counter = 0
+    acc = 0
+    seen = set([0])
+    while True:
+        inst, value = program[program_counter]
+        next_pc, acc = computer.comp_exec(inst, program_counter, value, acc)
+        if next_pc in seen or next_pc >= len(program):
+            # Stop if repeated inst or if reached end of program
+            return acc, next_pc in seen
+        seen.add(next_pc)
+        program_counter = next_pc
+
+def day8_1(data):
+    program = computer.parse_program(data)
+    return day8_run_program(program)[0]
+
+def day8_2(data):
+    program = computer.parse_program(data)
+    idx = -1
+    while True:
+        idx += 1
+        old_inst = program[idx][0]
+        if old_inst == "jmp":
+            program[idx][0] = "nop"
+        elif old_inst == "nop":
+            program[idx][0] = "jmp"
+        else:
+            continue
+
+        acc, infinite = day8_run_program(program)
+        if not infinite:
+            return acc
+
+        program[idx][0] = old_inst
+    return None
 
 
 """ MAIN FUNCTION """
