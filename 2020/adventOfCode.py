@@ -372,6 +372,50 @@ def day8_2(data):
     return None
 
 
+""" DAY 9 """
+
+def day9_1(data):
+    # data = read_input(2020, 901)
+    preamble = 25
+    buffer = set()
+    for i, elem in enumerate(data):
+        elem = int(elem)
+        if i < preamble:
+            buffer.add(elem)
+            continue
+        found = False
+        for _, a1 in enumerate(buffer):
+            for _, a2 in enumerate(buffer):
+                if (a1 != a2) and (a1 + a2 == elem):
+                    found = True
+                    break
+        if not found:
+            return elem
+        buffer = set(list(buffer)[1:])
+        buffer.add(int(elem))
+    return None
+
+def day9_2(data):
+    target = day9_1(data)
+    # data = read_input(2020, 901)
+    # val = 127
+    data = [int(n) for n in data]
+    lo, hi = 0, 1
+    total = data[0] + data[1]
+    while True:
+        if total < target:
+            hi += 1
+            total += data[hi]
+        elif total > target:
+            total -= data[lo]
+            lo += 1
+        else:
+            buffer = data[lo:hi + 1]
+            return min(buffer) + max(buffer)
+
+    return None
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
