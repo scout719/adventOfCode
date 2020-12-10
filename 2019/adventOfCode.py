@@ -7,7 +7,7 @@ import os
 import sys
 import time
 from collections import defaultdict
-from heapq import *
+from heapq import heappop, heappush
 import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -1234,7 +1234,7 @@ def day17_2(data):
 
     robot_pos = (0, 0)
     for y, row in enumerate(grid):
-        for x, pos in enumerate(row):
+        for x, _ in enumerate(row):
             if grid[y][x] != ' ' and grid[y][x] != WHITE_SQUARE:
                 robot_pos = (x, y)
                 break
