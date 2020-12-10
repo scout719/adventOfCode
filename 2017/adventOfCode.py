@@ -83,7 +83,7 @@ def day20_closest(particles):
                      abs(particle[I.pz]) for particle in particles]
         minimum = min(distances)
         keep_going = len([x for x in distances if x == minimum]) != 1
-        #keep_going = False
+        # keep_going = False
         for i in range(len(particles)):
             if old_distances[i] > distances[i]:
                 keep_going = True
@@ -131,12 +131,12 @@ def day20_left(particles):
     return alive_count
 
 def day20_1(data):
-    #data = read_input(2017, 2001)
+    # data = read_input(2017, 2001)
     particles = day20_parse_input(data)
     return day20_closest(particles)
 
 def day20_2(data):
-    #data = read_input(2017, 2001)
+    # data = read_input(2017, 2001)
     particles = day20_parse_input(data)
     return day20_left(particles)
 
@@ -257,7 +257,8 @@ def day21_join(subpatterns):
             nr = r * total_pattern_size + c
             subpattern = ((nr % (square_size * square_size * size)) %
                           (size * square_size)) // square_size
-            subpattern = ((nr // (square_size*square_size*size))*size)+ ((nr%(square_size*size))//square_size)
+            subpattern = ((nr // (square_size * square_size * size))
+                          * size) + ((nr % (square_size * size)) // square_size)
             p = subpatterns[subpattern]
             cc = (nr % (square_size * size)) % square_size
             rr = (nr % (square_size * square_size * size)
@@ -287,8 +288,8 @@ def day21_solve(rules, start, iters):
 
 def day21_1(data):
     iters = 5
-    #data = read_input(2017, 2101)
-    #iters = 2
+    # data = read_input(2017, 2101)
+    # iters = 2
     rules = day21_parse_input(data)
     start = ".#./..#/###"
     start = [[".", "#", "."],
@@ -304,8 +305,8 @@ def day21_1(data):
 
 def day21_2(data):
     iters = 18
-    #data = read_input(2017, 2101)
-    #iters = 2
+    # data = read_input(2017, 2101)
+    # iters = 2
     rules = day21_parse_input(data)
     start = ".#./..#/###"
     start = [[".", "#", "."],
@@ -320,7 +321,134 @@ def day21_2(data):
     return count
 
 
-start_day = 21
+""" Day 22 """
+
+def day22_turn(pos, dr, dc):
+    if pos == "#":
+        return (dc, -dr)
+    elif pos == ".":
+        return (-dc, dr)
+    elif pos == "W":
+        return (dr, dc)
+    elif pos == "F":
+        return (-dr, -dc)
+
+# If the current node is infected, it turns to its right.
+#  Otherwise, it turns to its left. (Turning is done in-place; the current node does not change.)
+# If the current node is clean, it becomes infected.
+#  Otherwise, it becomes cleaned. (This is done after the node is considered for the purposes of changing direction.)
+# The virus carrier moves forward one node in the direction it is facing.
+
+def day22_print(grid, R, C, v_r, v_c):
+    print()
+    m = ""
+    for r in range(R):
+        line = ""
+        for c in range(C):
+            pos_r, pos_c = r - (R // 2), c - (C // 2)
+            if (pos_r, pos_c) == (v_r, v_c):
+                line += "."
+            elif (pos_r, pos_c) in grid:
+                line += WHITE_SQUARE
+            else:
+                line += " "
+        m += line + "\n"
+    print(m)
+    time.sleep(.1)
+
+def day22_1(data):
+    # 25x25, starts on 12,12 face up
+    R, C = (25, 25)
+    print_R, print_C = 25, 25
+    iters = 10000
+
+    # data = read_input(2017, 2201)
+    # R, C = (3, 3)
+    # print_R, print_C = 9, 9
+    # iters = 70
+
+    grid = set()
+    for r in range(R):
+        for c in range(C):
+            if data[r][c] == "#":
+                # print(data[r][c])
+                grid.add((r - (R // 2), c - (C // 2)))
+    # print(grid)
+    r, c = (0, 0)
+    dr, dc = (-1, 0)
+    count = 0
+    for _ in range(iters):
+        # day22_print(grid, print_R, print_C, r, c)
+        pos = "#" if (r, c) in grid else "."
+        dr, dc = day22_turn(pos, dr, dc)
+        if pos == "#":
+            grid.remove((r, c))
+        else:
+            count += 1
+            grid.add((r, c))
+        r, c = r + dr, c + dc
+        # print(r, c, dr, dc)
+
+    return count
+
+def day22_2(data):
+    # 25x25, starts on 12,12 face up
+    R, C = (25, 25)
+    print_R, print_C = 40, 40
+    iters = 10000000
+
+    # data = read_input(2017, 2201)
+    # R, C = (3, 3)
+    # print_R, print_C = 9, 9
+    # iters = 10000000
+
+    grid = set()
+    weak = set()
+    flagged = set()
+    for r in range(R):
+        for c in range(C):
+            if data[r][c] == "#":
+                # print(data[r][c])
+                grid.add((r - (R // 2), c - (C // 2)))
+    # print(grid)
+    r, c = (0, 0)
+    dr, dc = (-1, 0)
+    count = 0
+    for _ in range(iters):
+        # day22_print(grid, print_R, print_C, r, c)
+
+        # Decide which way to turn based on the current node:
+        # If it is clean, it turns left.
+        # If it is weakened, it does not turn, and will continue moving in the same direction.
+        # If it is infected, it turns right.
+        # If it is flagged, it reverses direction, and will go back the way it came.
+
+        # Clean nodes become weakened.
+        # Weakened nodes become infected.
+        # Infected nodes become flagged.
+        # Flagged nodes become clean.
+
+        pos = "#" if (r, c) in grid else "W" if (
+            r, c) in weak else "F" if(r, c) in flagged else "."
+        dr, dc = day22_turn(pos, dr, dc)
+        if pos == "#":
+            grid.remove((r, c))
+            flagged.add((r, c))
+        elif pos == "W":
+            count += 1
+            weak.remove((r, c))
+            grid.add((r, c))
+        elif pos == "F":
+            flagged.remove((r, c))
+        else:
+            weak.add((r, c))
+        r, c = r + dr, c + dc
+        # print(r, c, dr, dc)
+
+    return count
+
+
+start_day = 22
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i_ in range(start_day, 26):
