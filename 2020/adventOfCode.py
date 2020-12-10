@@ -418,143 +418,64 @@ def day9_2(data):
 
 """ DAY 10 """
 
-# def day10_solve(data, curr, list_):
-#     for e in data:
-#         if abs(e - curr) <= 3:
-#             new_l = list_[:]
-#             new_l.append((curr, e))
-#             [d for d in data if d != e]
-#             day10_solve(, e, )
 def day10_1(data):
     #data = read_input(2020, 1001)
     data = [int(x) for x in data]
     data = sorted(data)
-    built_volt = max(data)
-    # x = [d for d in data if d != built_volt]
     q = [(0, 0, data, [])]
-    t = 0
-    seen = set()
-    count = 0
+    final_chain = []
     while q:
-        # t += 1
-        if t > 40:
-            break
-        _, curr, rest, l = heappop(q)
-        # del q[-1]
-        # seen.add(tuple(l))
-        # print(len(q), len(seen))
+        _, curr, remaining, chain = heappop(q)
         a = curr
-        # print(rest)
-        if len(rest) == 0 and a == built_volt:
-            count += 1
-            diff_1 = 0
-            diff_3 = 0
-            for e1, e2 in l:
-                if abs(e1 - e2) == 1:
-                    diff_1 += 1
-                elif abs(e1 - e2) == 3:
-                    diff_3 += 1
-            return (diff_1 * (diff_3 + 1))
-        for j in range(len(rest)):
-            b = rest[j]
-            # print(a, b, abs(a - b))
-            if (abs(a - b) <= 3) and (a < b):
-                assert (a - b) < 0
-                new_l = l[:]
-                new_l.append((a, b))
-                new_rest = [d for d in rest if d != b]
 
-                # if tuple(new_l) not in seen:
+        if len(remaining) == 0:
+            final_chain = chain
+            break
+
+        for j in range(len(remaining)):
+            b = remaining[j]
+
+            if abs(a - b) <= 3:
+                assert a < b
+                new_l = chain[:]
+                new_l.append((a, b))
+                new_rest = [d for d in remaining if d != b]
+
                 heappush(q, ((len(new_rest), b, new_rest, new_l)))
 
-    return None
+    diff_1 = 0
+    diff_3 = 0
+    for e1, e2 in final_chain:
+        if abs(e1 - e2) == 1:
+            diff_1 += 1
+        elif abs(e1 - e2) == 3:
+            diff_3 += 1
+    return diff_1 * (diff_3 + 1)
 
 def day10_2(data):
-    data = read_input(2020, 1001)
+    # data = read_input(2020, 1001)
     data = [int(x) for x in data]
     data = sorted(data)
-    built_volt = max(data)
-    # x = [d for d in data if d != built_volt]
-    q = [(0, 0, data, [])]
-    t = 0
-    seen = set()
-    count = 0
-    best = []
-    while q:
-        # t += 1
-        if t > 40:
-            break
-        _, curr, rest, l = heappop(q)
-        curr = -curr
-        if (((built_volt + 3) - curr) // 3) > len(rest):
-            continue
+    return day10_combinations([0] + data, {})
 
-        a = curr
-        # print(rest)
-        if a == built_volt:  # and len(rest) == 0:
-            count += 1
-            best = l
-            break
+def day10_combinations(available, mem):
+    key = tuple(available)
+    if key in mem:
+        return mem[key]
 
-        for j in range(len(rest)):
-            b = rest[j]
-            # print(a, b, abs(a - b))
-            if (abs(a - b) <= 3) and (a < b):
-                assert (a - b) < 0
-                new_l = l[:]
-                new_l.append((a, b))
-                new_rest = [d for d in rest if d != b]
-
-                # if tuple(new_l) not in seen:
-                heappush(q, ((len(new_rest), -b, new_rest, new_l)))
-    # used = [b for a, b in l]
-    # print(l, used)
-    unused = [d for d in data if d not in used]
-    bags = []
-    for a, b in l:
-        l2 = [d for d in unused if a < d < b]
-        if l2:
-            bags.append(l2)
-    way = 1
-    print(bags)
-    for bag in bags:
-        way *= day10_solve(bag)
-    
-    return day10_solve2(bags)
-
-def day10_solve(bags):
-    if len(bags) == 0:
-        return 1
-    if len(bags) == 1:
-        return 2
-    if len(bags) == 2:
-        return 4
-
-def day10_solve2(bags):
-    if len(bags) == 0:
+    if len(available) == 1:
         return 1
 
+    a = available[0]
     total = 0
-    for i, bag in enumerate(bags):
-        total += day10_solve(bag) * day10_solve2(bags[:i] + bags[i + 1:])
+    for i in range(1, 4):
+        if i >= len(available):
+            break
+        b = available[i]
+        if abs(a - b) <= 3:
+            total += day10_combinations(available[i:], mem)
+    mem[key] = total
     return total
-
-
-def day10_insert(a, l):
-    for i in range(1, len(l)):
-        prev = l[i - 1]
-        next = l[i]
-        if (1 <= a - prev <= 3) and (1 <= next - a <= 3):
-            return l[:i] + [a] + l[i + 1:]
-    return None
-
-# def day10_search(unused, best):
-#     a = unused[0]
-#     rest = day10_search()
-#     for a in unused[1:]:
-#         if new_l = day10_insert(b, best):
-#             day10_search()
-
 
 """ MAIN FUNCTION """
 
