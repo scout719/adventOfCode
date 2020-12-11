@@ -9,6 +9,7 @@ import math
 import os
 import sys
 import time
+from copy import deepcopy
 from collections import defaultdict
 from heapq import heappop, heappush
 import copy
@@ -476,6 +477,76 @@ def day10_combinations(available, mem):
             total += day10_combinations(available[i:], mem)
     mem[key] = total
     return total
+
+
+""" DAY 11 """
+
+def day11_adj(data, r, c, extend=False):
+    count = 0
+    for dr in [-1, 0, 1]:
+        for dc in [-1, 0, 1]:
+            if (dr == 0 and dc == 0):
+                continue
+            n_r, n_c = r + dr, c + dc
+            found = False
+            while (0 <= n_r < len(data)) and (0 <= n_c < len(data[n_r])):
+                if data[n_r][n_c] == "L":
+                    break
+                if data[n_r][n_c] == "#":
+                    found = True
+                    break
+                if not extend:
+                    break
+                n_r, n_c = n_r + dr, n_c + dc
+            if found:
+                count += 1
+    return count
+
+def day11_print(data):
+    for line in data:
+        print(str(line))
+
+def day11_tick(data, extended=False):
+    stop = True
+    new_data = deepcopy(data)
+    for r in range(len(data)):
+        for c in range(len(data[r])):
+            # print(r, c)
+            if data[r][c] == "L" and day11_adj(data, r, c, extended) == 0:
+                new_data[r][c] = "#"
+                stop = False
+            tolerance = 5 if extended else 4
+            if data[r][c] == "#" and day11_adj(data, r, c, extended) >= tolerance:
+                new_data[r][c] = "L"
+                stop = False
+    return new_data, stop
+
+def day11_occupied(data):
+    count = 0
+    for r in range(len(data)):
+        for c in range(len(data[0])):
+            if data[r][c] == "#":
+                count += 1
+    return count
+
+def day11_1(data):
+    # data = read_input(2020, 1101)
+    data = [list(line) for line in data]
+    stop = False
+    while not stop:
+        data, stop = day11_tick(data)
+
+    return day11_occupied(data)
+
+def day11_2(data):
+    # data = read_input(2020, 1101)
+    data = [list(line) for line in data]
+    stop = False
+    while not stop:
+        data, stop = day11_tick(data, True)
+
+    return day11_occupied(data)
+
 
 """ MAIN FUNCTION """
 
