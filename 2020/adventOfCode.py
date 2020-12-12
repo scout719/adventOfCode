@@ -548,6 +548,77 @@ def day11_2(data):
     return day11_occupied(data)
 
 
+""" DAY 12 """
+
+def day12_print(x, y, dx, dy):
+    if dx == 0 and dy == -1:
+        print("^")
+    elif dx == -1 and dy == 0:
+        print("<")
+    elif dx == 1 and dy == 0:
+        print(">")
+    elif dx == 0 and dy == 1:
+        print("v")
+    else:
+        raise ValueError
+
+def day12_solve(data, dx, dy, waypoint=False):
+    x, y = 0, 0
+    for action, val in data:
+        if action == "N":
+            if waypoint:
+                dy -= val
+            else:
+                y -= val
+        elif action == "S":
+            if waypoint:
+                dy += val
+            else:
+                y += val
+        elif action == "E":
+            if waypoint:
+                dx += val
+            else:
+                x += val
+        elif action == "W":
+            if waypoint:
+                dx -= val
+            else:
+                x -= val
+        elif action == "L":
+            steps = val // 90
+            assert val % 90 == 0
+            while steps > 0:
+                n_dx = dy
+                n_dy = -dx
+                dx = n_dx
+                dy = n_dy
+                steps -= 1
+
+        elif action == "R":
+            steps = val // 90
+            assert val % 90 == 0
+            while steps > 0:
+                n_dx = -dy
+                n_dy = dx
+                dx = n_dx
+                dy = n_dy
+                steps -= 1
+
+        elif action == "F":
+            x += val * dx
+            y += val * dy
+    return abs(x) + abs(y)
+
+def day12_1(data):
+    data = [(x[0], int(x[1:])) for x in data]
+    return day12_solve(data, 1, 0)
+
+def day12_2(data):
+    data = [(x[0], int(x[1:])) for x in data]
+    return day12_solve(data, 10, -1, True)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
