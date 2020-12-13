@@ -619,6 +619,82 @@ def day12_2(data):
     return day12_solve(data, 10, -1, True)
 
 
+""" DAY 13 """
+
+def day13_1(data):
+    #data = read_input(2020, 1301)
+    early = int(data[0])
+    buses = []
+    for i in data[1].split(","):
+        if i == "x":
+            continue
+        b_id = int(i)
+        buses.append(b_id)
+    x = early
+    while True:
+        for b in buses:
+            if x % b == 0:
+                return abs(early - x) * b
+        x += 1
+    return None
+
+# Find A such that (A*N) % M == 1
+def modinv(N, M):
+    ans = 1
+    total = N
+    while True:
+        if total % M == 1:
+            assert (ans * N) % M == 1
+            return ans
+        ans += 1
+        total += N
+
+def day13_2(data):
+    # data = read_input(2020, 1301)
+    buses = []
+    rem = []
+    m = {}
+    for i, e in enumerate(data[1].split(",")):
+        if e == "x":
+            continue
+        b_id = int(e)
+        buses.append(b_id)
+        rem.append(-i % b_id)
+        m[b_id] = i
+
+    # These are Linear Diophantine equations
+    # b[0]*x     = t -> t = 0 (mod b[0])
+    # b[1]*y - 1 = t -> t = -1 (mod b[1])
+    # b[2]*z - 2 = t -> t = -2 (mod(b[2]))
+
+    # Use the Chinese remainder theorem to solve for t
+    #   x = ( ∑(rem[i]*pp[i]*inv[i]) ) % prod
+    # Where:
+    #  rem[i] is the time after t
+    #  prod is product of all IDs
+    #  pp[i] is product of all divided by b[i]
+    #  inv[i] = Modular Multiplicative Inverse of
+    #           pp[i] with respect to b[i], i.e,
+    #           value A such that (A*pp[i]) % b[i] == 1
+
+    prod = 1
+    for ID in buses:
+        prod *= ID
+
+    pp = [prod // ID for ID in buses]
+
+    inv = [modinv(pp_i, buses[i]) for i, pp_i in enumerate(pp)]
+
+    ans = 0
+    for i in range(len(buses)):
+        ans += rem[i] * pp[i] * inv[i]
+    ans = ans % prod
+
+    for ID in buses:
+        assert (ans + m[ID]) % ID == 0
+    return ans
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
