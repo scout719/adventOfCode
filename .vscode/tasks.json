@@ -4,6 +4,37 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Get Input",
+            "type": "shell",
+            "command": "${workspaceFolder}/get_input.bat",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Today",
+            "type": "shell",
+            "command": "${workspaceFolder}/execute.bat",
+            "args": ["${config:python.pythonPath}"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Execute",
             "type": "shell",
             "command": "${config:python.pythonPath} ${file} ${input:day}",
