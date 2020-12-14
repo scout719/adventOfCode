@@ -420,7 +420,7 @@ def day9_2(data):
 """ DAY 10 """
 
 def day10_1(data):
-    #data = read_input(2020, 1001)
+    # data = read_input(2020, 1001)
     data = [int(x) for x in data]
     data = sorted(data)
     q = [(0, 0, data, [])]
@@ -622,7 +622,7 @@ def day12_2(data):
 """ DAY 13 """
 
 def day13_1(data):
-    #data = read_input(2020, 1301)
+    # data = read_input(2020, 1301)
     early = int(data[0])
     buses = []
     for i in data[1].split(","):
@@ -693,6 +693,79 @@ def day13_2(data):
     for ID in buses:
         assert (ans + m[ID]) % ID == 0
     return ans
+
+
+""" DAY 14 """
+
+def day14_1(data):
+    # data = read_input(2020, 1401)
+    memory = {}
+    mask = ""
+    for line in data:
+        if line[:4] == "mask":
+            mask = line[7:]
+        else:
+            addr = line.split("]")[0]
+            addr = int(addr[4:])
+            value = int(line.split(" = ")[1])
+
+            curr = memory.get(addr, list("0" * 36))
+
+            binary = "{0:b}".format(value)
+            binary = "0" * (36 - len(binary)) + binary
+            for pos, b in enumerate(binary):
+                if mask[pos] == "X":
+                    curr[pos] = b
+                else:
+                    curr[pos] = mask[pos]
+            memory[addr] = curr
+    res = 0
+    for addr in memory:
+        res += int("".join(memory[addr]), 2)
+    return res
+
+def day14_2(data):
+    # data = read_input(2020, 1401)
+    memory = {}
+    mask = ""
+    for line in data:
+        if line[:4] == "mask":
+            mask = line[7:]
+        else:
+            addr = line.split("]")[0]
+            addr = int(addr[4:])
+            value = int(line.split(" = ")[1])
+
+            binary = "{0:b}".format(addr)
+            binary = "0" * (36 - len(binary)) + binary
+
+            q = set([binary])
+            for i, c in enumerate(mask):
+                q2 = set()
+                for a in q:
+                    a2 = list(a)
+                    if c == "1":
+                        a2[i] = "1"
+                        q2.add("".join(a2))
+                    elif c == "X":
+                        a2[i] = "1"
+                        q2.add("".join(a2))
+                        a2[i] = "0"
+                        q2.add("".join(a2))
+                    else:
+                        q2.add("".join(a2))
+                q = q2
+
+            binary = "{0:b}".format(value)
+            binary = "0" * (36 - len(binary)) + binary
+            for a in q:
+                addr = "".join(list(a))
+                addr = int(addr, 2)
+                memory[addr] = binary
+    res = 0
+    for addr in memory:
+        res += int("".join(memory[addr]), 2)
+    return res
 
 
 """ MAIN FUNCTION """
