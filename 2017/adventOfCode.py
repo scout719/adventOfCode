@@ -619,7 +619,57 @@ def day24_2(data):
     return day24_strongest([c for c in res if len(c) == m_size])
 
 
-start_day = 24
+""" DAY 25 """
+
+def day25_1(data):
+    # data = read_input(2017, 2501)
+    start_state = data[0].split("Begin in state ")[1].split(".")[0]
+    steps = int(data[1].split("Perform a diagnostic checksum after ")[
+        1].split(" steps.")[0])
+    states = {}
+    i = 3
+    while i < len(data):
+        # In state A:
+        # If the current value is 0:
+        #    - Write the value 1.
+        #    - Move one slot to the right.
+        #    - Continue with state B.
+        # If the current value is 1:
+        #    - Write the value 0.
+        #    - Move one slot to the left.
+        #    - Continue with state B.
+        # print(data[i])
+        state = data[i].split("In state ")[1].split(":")[0]
+        on_0_write = int(
+            data[i + 2].split("Write the value ")[1].split(".")[0])
+        on_0_move = data[i + 3].split("Move one slot to the ")[1].split(".")[0]
+        on_0_move = -1 if on_0_move == "left" else 1
+        on_0_state = data[i + 4].split("Continue with state ")[1].split(".")[0]
+
+        on_1_write = int(
+            data[i + 6].split("Write the value ")[1].split(".")[0])
+        on_1_move = data[i + 7].split("Move one slot to the ")[1].split(".")[0]
+        on_1_move = -1 if on_1_move == "left" else 1
+        on_1_state = data[i + 8].split("Continue with state ")[1].split(".")[0]
+
+        states[state] = ((on_0_write, on_0_move, on_0_state),
+                         (on_1_write, on_1_move, on_1_state))
+        i += 10
+    mem = {}
+    curr = 0
+    curr_state = start_state
+    for i in range(steps):
+        if curr not in mem:
+            mem[curr] = 0
+        on_write, on_move, on_state = states[curr_state][mem[curr]]
+        mem[curr] = on_write
+        curr += on_move
+        curr_state = on_state
+    return sum(mem.values())
+
+
+start_day = 20
+
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i_ in range(start_day, 26):
