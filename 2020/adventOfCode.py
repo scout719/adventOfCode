@@ -509,7 +509,7 @@ def day11_print(data):
 def day11_tick(seats, data, extended=False):
     stop = True
     new_data = deepcopy(data)
-    for r,c in seats:
+    for r, c in seats:
         if data[r][c] == "L" and day11_adj(data, r, c, extended) == 0:
             new_data[r][c] = "#"
             stop = False
@@ -521,7 +521,7 @@ def day11_tick(seats, data, extended=False):
 
 def day11_occupied(seats, data):
     count = 0
-    for r,c in seats:
+    for r, c in seats:
         if data[r][c] == "#":
             count += 1
     return count
@@ -531,7 +531,7 @@ def day11_seats(data):
     for r in range(len(data)):
         for c in range(len(data[0])):
             if data[r][c] == "L":
-                seats.append((r,c))
+                seats.append((r, c))
     return seats
 
 def day11_1(data):
@@ -714,15 +714,15 @@ def day14_1(data):
         if line[:4] == "mask":
             mask = line[7:]
             # keep only 0 to &
-            maskAnd = int(mask.replace("X","1"),2)
+            maskAnd = int(mask.replace("X", "1"), 2)
             # keep only 1 to |
-            maskOr = int(mask.replace("X","0"),2)
+            maskOr = int(mask.replace("X", "0"), 2)
         else:
             addr = line.split("]")[0]
             addr = int(addr[4:])
             value = int(line.split(" = ")[1])
 
-            binary = "{0:b}".format((value&maskAnd)|maskOr)
+            binary = "{0:b}".format((value & maskAnd) | maskOr)
             memory[addr] = binary
     res = 0
     for addr in memory:
@@ -737,20 +737,20 @@ def day14_2(data):
     for line in data:
         if line[:4] == "mask":
             mask = line[7:]
-            maskOr = int(mask.replace("X","1"),2)
+            maskOr = int(mask.replace("X", "1"), 2)
         else:
             addr = line.split("]")[0]
             addr = int(addr[4:])
             value = int(line.split(" = ")[1])
 
-            binary = "{0:b}".format(addr|maskOr)
+            binary = "{0:b}".format(addr | maskOr)
             binary = "0" * (36 - len(binary)) + binary
 
             q = [binary]
             for i, c in enumerate(mask):
                 if c != "X":
                     continue
-                
+
                 q2 = []
                 for a in q:
                     a2 = list(a)
@@ -759,7 +759,7 @@ def day14_2(data):
                     a2[i] = "0"
                     q2.append("".join(a2))
                 q = q2
-            #print("Processing: " + line + " Mask: " + mask) 
+            #print("Processing: " + line + " Mask: " + mask)
             #print("Addresses: " + str([int(a,2) for a in q]))
             for a in q:
                 addr = int(a, 2)
