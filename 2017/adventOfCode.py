@@ -10,6 +10,7 @@ import string
 import sys
 import time
 from collections import Counter, deque
+from enum import Enum
 import heapq
 from enum import IntEnum
 from struct import pack
@@ -448,7 +449,130 @@ def day22_2(data):
     return count
 
 
-start_day = 22
+""" DAY 23 """
+
+class Instruction(Enum):
+    snd = 0
+    set_ = 1
+    add = 2
+    mul = 3
+    mod = 4
+    rcv = 5
+    jgz = 6
+    sub = 7
+    jnz = 8
+
+def is_number(n):
+    try:
+        # Type-casting the string to `float`.
+        # If string is not a valid `float`,
+        # it'll raise `ValueError` exception
+        float(n)
+    except ValueError:
+        return False
+    return True
+
+def process(data):
+    comm = data.rstrip().split(" ")
+    comm[0] = "set_" if comm[0] == "set" else comm[0]
+    op = Instruction[comm[0]]
+    arg1 = comm[1]
+    arg2 = 0
+    if is_number(arg1):
+        arg1 = int(arg1)
+    if len(comm) == 3:
+        arg2 = comm[2]
+        if is_number(arg2):
+            arg2 = int(arg2)
+    return (op, arg1, arg2)
+
+def day23_process(regMap, inst):
+    comm = inst[0]
+    arg1 = inst[1]
+    arg2 = inst[2]
+    jump = 1
+    if not is_number(arg2):
+        arg2 = regMap[arg2]
+
+    if comm == Instruction.set_:
+        regMap[arg1] = arg2
+    elif comm == Instruction.mul:
+        regMap[arg1] = regMap[arg1] * arg2
+    elif comm == Instruction.jnz:
+        val = regMap[arg1] if not is_number(arg1) else arg1
+        if val != 0:
+            jump = arg2
+    elif comm == Instruction.sub:
+        regMap[arg1] -= arg2
+    else:
+        assert False
+    return jump
+
+def day23_1(input_):
+    input_ = [process(comm) for comm in input_]
+    registerMap = {}
+    for c in "abcdefgh":
+        registerMap[c] = 0
+
+    pc = 0
+    count = 0
+    while True:
+        inst = input_[pc]
+        if inst[0] == Instruction.mul:
+            count += 1
+
+        pc += day23_process(registerMap, inst)
+
+        if not (0 <= pc < len(input_)):
+            break
+
+    return count
+
+# 01: b = 79
+# 02: c = b
+# 03: if a != 0 jump to 5
+# 04: jump to 9
+# 05: b *= 100
+# 06: b += 100000
+# 07: c = b
+# 08: c = 17000
+# 09: f = 1
+# 10: d = 2
+# 11: e = 2
+# 12: g = d
+# 13: g *= e
+# 14: g -= b
+# 15: if g != 0 jump to 17
+# 16: f = 0
+# 17: e += 1
+# 18: g = e
+# 19: g -= b
+# 20: if g != 0 jump to 12
+# 21: d += 1
+# 22: g = d
+# 23: g -= b
+# 24: if g != 0 jump to 11
+# 25: if f != 0 jump to 27
+# 26: h += 1
+# 27: g = b
+# 28: g -= c
+# 29: if g != 0 jump to 31
+# 30: HALT
+# 31: g += 17
+# 32: jump to 9
+
+def day23_2(_):
+    start = 79 * 100 + 100000
+    h = 0
+    for b in range(start, start + 17000 + 1, 17):
+        for d in range(2, b):
+            if b % d == 0:
+                h += 1
+                break
+    return h
+
+
+start_day = 23
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i_ in range(start_day, 26):
