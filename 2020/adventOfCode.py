@@ -506,46 +506,53 @@ def day11_print(data):
     for line in data:
         print(str(line))
 
-def day11_tick(data, extended=False):
+def day11_tick(seats, data, extended=False):
     stop = True
     new_data = deepcopy(data)
-    for r in range(len(data)):
-        for c in range(len(data[r])):
-            # print(r, c)
-            if data[r][c] == "L" and day11_adj(data, r, c, extended) == 0:
-                new_data[r][c] = "#"
-                stop = False
-            tolerance = 5 if extended else 4
-            if data[r][c] == "#" and day11_adj(data, r, c, extended) >= tolerance:
-                new_data[r][c] = "L"
-                stop = False
+    for r,c in seats:
+        if data[r][c] == "L" and day11_adj(data, r, c, extended) == 0:
+            new_data[r][c] = "#"
+            stop = False
+        tolerance = 5 if extended else 4
+        if data[r][c] == "#" and day11_adj(data, r, c, extended) >= tolerance:
+            new_data[r][c] = "L"
+            stop = False
     return new_data, stop
 
-def day11_occupied(data):
+def day11_occupied(seats, data):
     count = 0
+    for r,c in seats:
+        if data[r][c] == "#":
+            count += 1
+    return count
+
+def day11_seats(data):
+    seats = []
     for r in range(len(data)):
         for c in range(len(data[0])):
-            if data[r][c] == "#":
-                count += 1
-    return count
+            if data[r][c] == "L":
+                seats.append((r,c))
+    return seats
 
 def day11_1(data):
     # data = read_input(2020, 1101)
     data = [list(line) for line in data]
+    seats = day11_seats(data)
     stop = False
     while not stop:
-        data, stop = day11_tick(data)
+        data, stop = day11_tick(seats, data)
 
-    return day11_occupied(data)
+    return day11_occupied(seats, data)
 
 def day11_2(data):
     # data = read_input(2020, 1101)
     data = [list(line) for line in data]
+    seats = day11_seats(data)
     stop = False
     while not stop:
-        data, stop = day11_tick(data, True)
+        data, stop = day11_tick(seats, data, True)
 
-    return day11_occupied(data)
+    return day11_occupied(seats, data)
 
 
 """ DAY 12 """
@@ -701,24 +708,22 @@ def day14_1(data):
     # data = read_input(2020, 1401)
     memory = {}
     mask = ""
+    maskAnd = 0
+    maskOr = 0
     for line in data:
         if line[:4] == "mask":
             mask = line[7:]
+            # keep only 0 to &
+            maskAnd = int(mask.replace("X","1"),2)
+            # keep only 1 to |
+            maskOr = int(mask.replace("X","0"),2)
         else:
             addr = line.split("]")[0]
             addr = int(addr[4:])
             value = int(line.split(" = ")[1])
 
-            curr = memory.get(addr, list("0" * 36))
-
-            binary = "{0:b}".format(value)
-            binary = "0" * (36 - len(binary)) + binary
-            for pos, b in enumerate(binary):
-                if mask[pos] == "X":
-                    curr[pos] = b
-                else:
-                    curr[pos] = mask[pos]
-            memory[addr] = curr
+            binary = "{0:b}".format((value&maskAnd)|maskOr)
+            memory[addr] = binary
     res = 0
     for addr in memory:
         res += int("".join(memory[addr]), 2)
@@ -728,43 +733,40 @@ def day14_2(data):
     # data = read_input(2020, 1401)
     memory = {}
     mask = ""
+    maskOr = 0
     for line in data:
         if line[:4] == "mask":
             mask = line[7:]
+            maskOr = int(mask.replace("X","1"),2)
         else:
             addr = line.split("]")[0]
             addr = int(addr[4:])
             value = int(line.split(" = ")[1])
 
-            binary = "{0:b}".format(addr)
+            binary = "{0:b}".format(addr|maskOr)
             binary = "0" * (36 - len(binary)) + binary
 
-            q = set([binary])
+            q = [binary]
             for i, c in enumerate(mask):
-                q2 = set()
+                if c != "X":
+                    continue
+                
+                q2 = []
                 for a in q:
                     a2 = list(a)
-                    if c == "1":
-                        a2[i] = "1"
-                        q2.add("".join(a2))
-                    elif c == "X":
-                        a2[i] = "1"
-                        q2.add("".join(a2))
-                        a2[i] = "0"
-                        q2.add("".join(a2))
-                    else:
-                        q2.add("".join(a2))
+                    a2[i] = "1"
+                    q2.append("".join(a2))
+                    a2[i] = "0"
+                    q2.append("".join(a2))
                 q = q2
-
-            binary = "{0:b}".format(value)
-            binary = "0" * (36 - len(binary)) + binary
+            #print("Processing: " + line + " Mask: " + mask) 
+            #print("Addresses: " + str([int(a,2) for a in q]))
             for a in q:
-                addr = "".join(list(a))
-                addr = int(addr, 2)
-                memory[addr] = binary
+                addr = int(a, 2)
+                memory[addr] = value
     res = 0
     for addr in memory:
-        res += int("".join(memory[addr]), 2)
+        res += memory[addr]
     return res
 
 
