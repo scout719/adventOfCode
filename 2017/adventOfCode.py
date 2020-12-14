@@ -572,7 +572,54 @@ def day23_2(_):
     return h
 
 
-start_day = 23
+""" DAY 24 """
+
+def day24_configs(data):
+    ports = [tuple([int(p) for p in line.split("/")]) for line in data]
+    res = []
+    q = [(0, [], ports)]
+    while q:
+        pins, used, rest = q.pop()
+        match = False
+        for l, r in rest:
+            if l == pins:
+                match = True
+                q.append(
+                    (r, used + [(l, r)], [p for p in rest if p != (l, r)]))
+            elif r == pins:
+                match = True
+                q.append(
+                    (l, used + [(l, r)], [p for p in rest if p != (l, r)]))
+        if not match:
+            res.append(used)
+            continue
+    return res
+
+def day24_strongest(res):
+    m = 0
+    for config in res:
+        curr = 0
+        for l, r in config:
+            curr += l + r
+        m = max(m, curr)
+    return m
+
+def day24_1(data):
+    # data = read_input(2017, 2401)
+    res = day24_configs(data)
+
+    return day24_strongest(res)
+
+def day24_2(data):
+    # data = read_input(2017, 2401)
+    res = day24_configs(data)
+
+    m_size = max([len(c) for c in res])
+
+    return day24_strongest([c for c in res if len(c) == m_size])
+
+
+start_day = 24
 """ MAIN FUNCTION """
 if __name__ == "__main__":
     for i_ in range(start_day, 26):
