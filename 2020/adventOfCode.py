@@ -12,7 +12,6 @@ import time
 from copy import deepcopy
 from collections import defaultdict
 from heapq import heappop, heappush
-import copy
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 print(FILE_DIR)
@@ -557,7 +556,7 @@ def day11_2(data):
 
 """ DAY 12 """
 
-def day12_print(x, y, dx, dy):
+def day12_print(dx, dy):
     if dx == 0 and dy == -1:
         print("^")
     elif dx == -1 and dy == 0:
@@ -768,6 +767,63 @@ def day14_2(data):
     for addr in memory:
         res += memory[addr]
     return res
+
+
+""" DAY 15 """
+
+def parse_inst(line):
+    # <3 char inst> <signal><value>
+    val = int(line[5:])
+    return [line[:3], -val if line[4] == '-' else val]
+
+def parse_program(data):
+    return [parse_inst(line) for line in data]
+
+def comp_exec(inst, pc, value, acc):
+    if inst == "nop":
+        return (pc + 1, acc)
+    elif inst == "acc":
+        return (pc + 1, acc + value)
+    elif inst == "jmp":
+        return (pc + value, acc)
+    raise NotImplementedError
+
+def day15_solve(data, target):
+    ns = [int(d) for d in data[0].split(",")]
+    ts = 1
+    mem = {}
+    last = 0
+    for i, _ in enumerate(ns):
+        mem[ns[i]] = [ts]
+        last = ns[i]
+        ts += 1
+
+    while ts <= target:
+        if last in mem:
+            if len(mem[last]) == 1:
+                last = 0
+            else:
+                last = mem[last][1] - mem[last][0]
+        else:
+            last = 0
+        if last in mem:
+            if len(mem[last]) == 1:
+                mem[last].append(ts)
+            else:
+                mem[last][0] = mem[last][1]
+                mem[last][1] = ts
+        else:
+            mem[last] = [ts]
+        ts += 1
+    return last
+
+def day15_1(data):
+    # data = read_input(2020, 1501)
+    return day15_solve(data, 2020)
+
+def day15_2(data):
+    # data = read_input(2020, 1501)
+    return day15_solve(data, 30000000)
 
 
 """ MAIN FUNCTION """
