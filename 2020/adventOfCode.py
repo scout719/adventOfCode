@@ -771,23 +771,6 @@ def day14_2(data):
 
 """ DAY 15 """
 
-def parse_inst(line):
-    # <3 char inst> <signal><value>
-    val = int(line[5:])
-    return [line[:3], -val if line[4] == '-' else val]
-
-def parse_program(data):
-    return [parse_inst(line) for line in data]
-
-def comp_exec(inst, pc, value, acc):
-    if inst == "nop":
-        return (pc + 1, acc)
-    elif inst == "acc":
-        return (pc + 1, acc + value)
-    elif inst == "jmp":
-        return (pc + value, acc)
-    raise NotImplementedError
-
 def day15_solve(data, target):
     ns = [int(d) for d in data[0].split(",")]
     ts = 1
@@ -824,6 +807,111 @@ def day15_1(data):
 def day15_2(data):
     # data = read_input(2020, 1501)
     return day15_solve(data, 30000000)
+
+
+""" DAY 16 """
+
+def day16_parse(data):
+    rules = {}
+    for line in data:
+        line = line.rstrip()
+        if line == "":
+            break
+        field = line.split(": ")[0]
+        ranges = line.split(": ")[1].split(" or ")
+        ranges = [tuple([int(e) for e in r.split("-")]) for r in ranges]
+        rules[field] = ranges
+
+    my_ticket = [int(e) for e in data[len(rules) + 2].split(",")]
+
+    tickets = []
+    for i in range(len(rules) + 5, len(data)):
+        ticket = [int(e) for e in data[i].split(",")]
+        tickets.append(ticket)
+
+    return (rules, my_ticket, tickets)
+
+def day16_valid_rule(rule, ticket_value):
+    (fst_low, fst_high), (snd_low, snd_high) = rule
+    return fst_low <= ticket_value <= fst_high or \
+        snd_low <= ticket_value <= snd_high
+
+def day16_any_rule(rules, ticket_value):
+    for field in rules:
+        (fst_low, fst_high), (snd_low, snd_high) = rules[field]
+        if fst_low <= ticket_value <= fst_high or \
+           snd_low <= ticket_value <= snd_high:
+            return (True, field)
+    return (False, None)
+
+def day16_valid(rules, ticket):
+    invalid_values = []
+    valid = True
+    for value in ticket:
+        if not any([day16_valid_rule(rules[rule], value) for rule in rules]):
+            invalid_values.append(value)
+            valid = False
+
+    return (valid, invalid_values)
+
+def day16_1(data):
+    # data = read_input(2020, 1601)
+
+    rules, _, tickets = day16_parse(data)
+
+    invalid_n = []
+    total = 0
+    for ticket in tickets:
+        _, invalid_n = day16_valid(rules, ticket)
+        total += sum(invalid_n)
+    return total
+
+def day16_2(data):
+    # data = read_input(2020, 1601)
+
+    rules, my_ticket, tickets = day16_parse(data)
+
+    valid_tickets = []
+    for ticket in tickets:
+        valid, _ = day16_valid(rules, ticket)
+        if valid:
+            valid_tickets.append(ticket)
+
+    valid_tickets.append(my_ticket)
+    possible = {}
+    for field in rules:
+        possible[field] = list(range(len(my_ticket)))
+
+    for ticket in valid_tickets:
+        for i, ticket_value in enumerate(ticket):
+            for field in rules:
+                if len(possible[field]) == 1 or i not in possible[field]:
+                    continue
+                if not day16_valid_rule(rules[field], ticket_value):
+                    possible[field].remove(i)
+                    break
+
+    # Reach a fixed state
+    closed_fields = set()
+    while len(closed_fields) != len(rules):
+        for field in possible:
+            possible_pos = possible[field]
+            if len(possible_pos) == 1:
+                if field not in closed_fields:
+                    closed_fields.add(field)
+                continue
+
+            for pos in possible_pos:
+                for other_field in closed_fields:
+                    if pos == possible[other_field][0]:
+                        possible[field].remove(pos)
+
+    total = 1
+    for field in possible:
+        if field.startswith("departure"):
+            total *= my_ticket[possible[field][0]]
+
+    return total
 
 
 """ MAIN FUNCTION """
