@@ -914,6 +914,81 @@ def day16_2(data):
     return total
 
 
+""" DAY 17 """
+
+def day17_update_bounds(min_x, max_x, x):
+    return (min(min_x, x - 1), max(max_x, x + 1))
+
+def day17_boot(data, extra_dim):
+    Y = len(data)
+    X = len(data[0])
+    active = set()
+    for y in range(Y):
+        for x in range(X):
+            if data[y][x] == "#":
+                active.add((y, x, 0, 0))
+
+    min_x, max_x = -1, X + 1
+    min_y, max_y = -1, Y + 1
+    min_z, max_z = -1, 1
+    min_w, max_w = -1, 1
+    if not extra_dim:
+        min_w = max_w = 0
+
+    for _ in range(6):
+        new_active = set(list(active))
+        for x in range(min_x, max_x + 1):
+            for y in range(min_y, max_y + 1):
+                for z in range(min_z, max_z + 1):
+                    for w in range(min_w, max_w + 1):
+                        count = 0
+                        D_X = D_Y = D_Z = D_W = [-1, 0, 1]
+                        if not extra_dim:
+                            D_W = [0]
+                        for d_x in D_X:
+                            for d_y in D_Y:
+                                for d_z in D_Z:
+                                    for d_w in D_W:
+                                        if d_x == d_y == d_z == d_w == 0:
+                                            continue
+
+                                        curr_x = x + d_x
+                                        curr_y = y + d_y
+                                        curr_z = z + d_z
+                                        curr_w = w + d_w
+
+                                        if (curr_x, curr_y, curr_z, curr_w) in active:
+                                            count += 1
+
+                        if (x, y, z, w) in active:
+                            if not count in(2, 3):
+                                new_active.remove((x, y, z, w))
+                        else:
+                            if count == 3:
+                                new_active.add((x, y, z, w))
+                                
+                                min_x, max_x = day17_update_bounds(
+                                    min_x, max_x, x)
+                                min_y, max_y = day17_update_bounds(
+                                    min_y, max_y, y)
+                                min_z, max_z = day17_update_bounds(
+                                    min_z, max_z, z)
+                                min_w, max_w = day17_update_bounds(
+                                    min_w, max_w, w)
+
+        active = new_active
+
+    return len(active)
+
+def day17_1(data):
+    # data = read_input(2020, 1701)
+    return day17_boot(data, False)
+
+def day17_2(data):
+    # data = read_input(2020, 1701)
+    return day17_boot(data, True)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
