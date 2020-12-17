@@ -772,33 +772,33 @@ def day14_2(data):
 """ DAY 15 """
 
 def day15_solve(data, target):
-    ns = [int(d) for d in data[0].split(",")]
-    ts = 1
-    mem = {}
-    last = 0
+    ns = [int(n) for n in data[0].split(",")]
+    timestamp = 1
+    memory = {}
+    last_n = 0
     for i, _ in enumerate(ns):
-        mem[ns[i]] = [ts]
-        last = ns[i]
-        ts += 1
+        memory[ns[i]] = [timestamp]
+        last_n = ns[i]
+        timestamp += 1
 
-    while ts <= target:
-        if last in mem:
-            if len(mem[last]) == 1:
-                last = 0
+    while timestamp <= target:
+        if last_n in memory:
+            if len(memory[last_n]) == 1:
+                last_n = 0
             else:
-                last = mem[last][1] - mem[last][0]
+                last_n = memory[last_n][1] - memory[last_n][0]
         else:
-            last = 0
-        if last in mem:
-            if len(mem[last]) == 1:
-                mem[last].append(ts)
+            last_n = 0
+        if last_n in memory:
+            if len(memory[last_n]) == 1:
+                memory[last_n].append(timestamp)
             else:
-                mem[last][0] = mem[last][1]
-                mem[last][1] = ts
+                memory[last_n][0] = memory[last_n][1]
+                memory[last_n][1] = timestamp
         else:
-            mem[last] = [ts]
-        ts += 1
-    return last
+            memory[last_n] = [timestamp]
+        timestamp += 1
+    return last_n
 
 def day15_1(data):
     # data = read_input(2020, 1501)
