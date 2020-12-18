@@ -991,123 +991,20 @@ def day17_2(data):
 
 """ DAY 18 """
 
-# def day18_parse(line, i, acc):
-#     next_i = i+1
-#     fst = 0
-#     if line[i] == "(":
-#         fst, next_i = day18_parse(line, i+1)
-#     op = line[next_i]
-
-
-#     while line[i] not in
-#     if line[i] == "(":
-#         new_i, total = day18_parse(line, i + 1)
-#         return new_i, total
-#     elif line[i] == ")":
-#         return new_i, total
-#     elif line[i] in ["+", "*"]:
-#         new_i, total = day18_parse(line, i + 1)
-#         return acc + total, new_i
-#     else:
-#         val
-
-#     if line[i] not in ["+", "*", "(", ")"]:
-#         pair[curr] += line[i]
-#     elif line[i] in ["+", "*"]:
-#         pair[2] = line[i]
-#         pair[curr + 1] = day18_parse(line, i + 1, curr + 1, pair)
-#     elif line[i] == "(":
-
-
-def day18_1(data):
-    # data = read_input(2020, 1801)
-    acc = 0
-    for line in data:
-        line = line.replace(" ", "")
-        total = [0, "", 0]
-        curr = total
-        curr_i = 0
-        i = 0
-        idx = [0]
-        groups = []
-        groups2 = {}
-        # acc = [0]
-        while i < len(line):
-            # if line[i] not in ["+", "*", "(", ")"]:
-            #     curr[curr_i] = int(line[i])
-            #     if curr_i == 0:
-            #         i += 1
-            #         curr_i += 1
-            #         curr[curr_i] = line[i]
-            #         curr_i += 1
-            #         i += 1
-            # elif line[i] == "(":
-            #     curr[curr_i] = [0,"",0]
-            #     curr_i = 0
-            # elif
-
-            if line[i] == "(":
-                idx.append(i)
-                # acc.append(0)
-            elif line[i] == ")":
-                other_idx = idx.pop()
-                groups.append((other_idx, i))
-                groups2[other_idx] = i  # = acc.pop()
-
-            i += 1
-        last = idx.pop()
-        groups.append((last, i))
-        # groups2[last] = i
-        # print(day18_solve(line, groups2, 0))
-        acc += day18_solve(line, groups2, 0)
-        # groups = sorted(groups)
-        # print(groups)
-
-    return acc
-
-def day18_solve(line, groups, base):
+def day18_groups(line):
     i = 0
-    acc = (0, "+")
-    while i < len(line):
-        # print(line, i, groups, acc, base)
-        n, op = acc
-        if i != len(line) - 1 and i in groups:
-            end = groups[i]
-            new_groups = {}
-            for g in groups:
-                new_groups[g - (i + 1)] = groups[g] - (i + 1)
-            inner = day18_solve(line[i + 1:end], new_groups, i + 1)
-            # print("got", line[i + 1:end], inner)
-            # 1+(2*3)    s = 2 e = 6
-            i = end
-            res = 0
-            if op == "+":
-                res = n + inner
-            elif op == "*":
-                res = n * inner
-            else:
-                assert False
+    idx = [0]
+    groups = {}
+    for i,c in enumerate(line):
+        if c == "(":
+            idx.append(i)
+        elif c == ")":
+            other_idx = idx.pop()
+            groups[other_idx] = i
+    
+    return groups
 
-            i += 1
-            acc = (res, line[i] if i < len(line) else "+")
-
-        else:
-            curr = int(line[i])
-            n, op = acc
-            res = 0
-            if op == "+":
-                res = n + curr
-            elif op == "*":
-                res = n * curr
-            else:
-                assert False
-            i += 1
-            acc = (res, line[i] if i < len(line) else "+")
-        i += 1
-    return acc[0]
-
-
-def day18_solve2(line, groups):
+def day18_parse(line, groups):
     i = 0
     acc = []
     while i < len(line):
@@ -1116,7 +1013,7 @@ def day18_solve2(line, groups):
             new_groups = {}
             for g in groups:
                 new_groups[g - (i + 1)] = groups[g] - (i + 1)
-            inner = day18_solve2(line[i + 1:end], new_groups)
+            inner = day18_parse(line[i + 1:end], new_groups)
             i = end
             i += 1
             acc.append(inner)
@@ -1131,49 +1028,20 @@ def day18_solve2(line, groups):
                 acc.append(line[i])
         i += 1
     return acc
-def day18_2(data):
-    # data = read_input(2020, 1801)
-    acc = 0
-    for line in data:
-        line = line.replace(" ", "")
-        total = [0, "", 0]
-        curr = total
-        curr_i = 0
-        i = 0
-        idx = [0]
-        groups2 = {}
-        # acc = [0]
-        while i < len(line):
-            if line[i] == "(":
-                idx.append(i)
-            elif line[i] == ")":
-                other_idx = idx.pop()
-                groups2[other_idx] = i  # = acc.pop()
 
-            i += 1
-        parsed = day18_solve2(line, groups2)
-        first_op = day18_find_op(parsed)
-        if first_op == None:
-            first_op = 1
-        left, op, right = parsed[:first_op], parsed[first_op], parsed[first_op + 1:]
-        total = day18_eval(parsed)
-        acc += total
-
-    return acc
-
-def day18_eval(parsed):
+def day18_eval(parsed, least_priority_op):
     if len(parsed) == 1:
         if isinstance(parsed[0], list):
-            return day18_eval(parsed[0])
+            return day18_eval(parsed[0],least_priority_op)
         else:
             return parsed[0]
     else:
-        first_op = day18_find_op(parsed)
-        if first_op == None:
-            first_op = 1
-        left, op, right = parsed[:first_op], parsed[first_op], parsed[first_op + 1:]
-        l = day18_eval(left)
-        r = day18_eval(right)
+        last_op = day18_find_op(parsed, least_priority_op)
+        if last_op is None:
+            last_op = len(parsed)-2
+        left, op, right = parsed[:last_op], parsed[last_op], parsed[last_op + 1:]
+        l = day18_eval(left,least_priority_op)
+        r = day18_eval(right,least_priority_op)
         if op == "+":
             return l + r
         elif op == "*":
@@ -1181,12 +1049,34 @@ def day18_eval(parsed):
         else:
             assert False
 
+def day18_find_op(expr, op):
+    if op is None:
+        return None
 
-def day18_find_op(expr):
     for i, c in enumerate(expr):
-        if c == "*":
+        if c == op:
             return i
     return None
+
+def day18_solve(data, least_priority_op=None):
+    acc = 0
+    for line in data:
+        line = line.replace(" ", "")
+        
+        groups = day18_groups(line)
+        parsed = day18_parse(line, groups)
+        total = day18_eval(parsed, least_priority_op)
+        acc += total
+
+    return acc
+
+def day18_1(data):
+    # data = read_input(2020, 1801)
+    return day18_solve(data)
+
+def day18_2(data):
+    # data = read_input(2020, 1801)
+    return day18_solve(data, "*")
 
 
 """ MAIN FUNCTION """
