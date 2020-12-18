@@ -39,6 +39,8 @@ BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 """ DAY 1 """
+# Day 1, part 1: 902451 (0.058 secs)
+# Day 1, part 2: 85555470 (0.069 secs)
 
 def day1_1(data):
     for i in range(len(data)):
@@ -62,6 +64,8 @@ def day1_2(data):
 
 
 """ DAY 2 """
+# Day 2, part 1: 519 (0.110 secs)
+# Day 2, part 2: 708 (0.037 secs)
 
 def day2_1(data):
     count = 0
@@ -101,6 +105,8 @@ def day2_2(data):
 
 
 """ DAY 3 """
+# Day 3, part 1: 292 (0.031 secs)
+# Day 3, part 2: 9354744432 (0.019 secs)
 
 def day3_solve(data, dx, dy):
     x, y = (0, 0)
@@ -130,7 +136,9 @@ def day3_2(data):
     return functools.reduce(lambda a, b: a * b, [day3_solve(data, dx, dy) for (dx, dy) in slopes])
 
 
-""" DAY 3 """
+""" DAY 4 """
+# Day 4, part 1: 200 (0.049 secs)
+# Day 4, part 2: 116 (0.050 secs)
 
 def day4_process(data, f):
     # data = read_input(2020, 401)
@@ -196,6 +204,8 @@ def day4_2(data):
 
 
 """ DAY 5 """
+# Day 5, part 1: 813 (0.054 secs)
+# Day 5, part 2: 612 (0.028 secs)
 
 def day5_get_id(l):
     lo = 0
@@ -236,6 +246,8 @@ def day5_2(data):
 
 
 """ DAY 6 """
+# Day 6, part 1: 6683 (0.100 secs)
+# Day 6, part 2: 3122 (0.029 secs)
 
 def day6_solve(data):
     group = []
@@ -274,6 +286,8 @@ def day6_2(data):
 
 
 """ DAY 7 """
+# Day 7, part 1: 164 (0.110 secs)
+# Day 7, part 2: 7872 (0.046 secs)
 
 def day7_parse(data):
     holds = {}
@@ -333,6 +347,8 @@ def day7_2(data):
 
 
 """ DAY 8 """
+# Day 8, part 1: 1930 (0.061 secs)
+# Day 8, part 2: 1688 (0.063 secs)
 
 def day8_run_program(program):
     program_counter = 0
@@ -373,6 +389,8 @@ def day8_2(data):
 
 
 """ DAY 9 """
+# Day 9, part 1: 2089807806 (0.124 secs)
+# Day 9, part 2: 245848639 (0.029 secs)
 
 def day9_1(data):
     # data = read_input(2020, 901)
@@ -417,6 +435,8 @@ def day9_2(data):
 
 
 """ DAY 10 """
+# Day 10, part 1: 2059 (0.051 secs)
+# Day 10, part 2: 86812553324672 (0.016 secs)
 
 def day10_1(data):
     # data = read_input(2020, 1001)
@@ -479,6 +499,8 @@ def day10_combinations(available, mem):
 
 
 """ DAY 11 """
+# Day 11, part 1: 2254 (0.630 secs)
+# Day 11, part 2: 2004 (0.912 secs)
 
 def day11_adj(data, r, c, extend=False):
     count = 0
@@ -555,6 +577,8 @@ def day11_2(data):
 
 
 """ DAY 12 """
+# Day 12, part 1: 636 (0.078 secs)
+# Day 12, part 2: 26841 (0.076 secs)
 
 def day12_print(dx, dy):
     if dx == 0 and dy == -1:
@@ -626,6 +650,8 @@ def day12_2(data):
 
 
 """ DAY 13 """
+# Day 13, part 1: 2045 (0.038 secs)
+# Day 13, part 2: 402251700208309 (0.073 secs)
 
 def day13_1(data):
     # data = read_input(2020, 1301)
@@ -702,6 +728,8 @@ def day13_2(data):
 
 
 """ DAY 14 """
+# Day 14, part 1: 13105044880745 (0.076 secs)
+# Day 14, part 2: 3505392154485 (0.610 secs)
 
 def day14_1(data):
     # data = read_input(2020, 1401)
@@ -770,6 +798,8 @@ def day14_2(data):
 
 
 """ DAY 15 """
+# Day 15, part 1: 981 (0.097 secs)
+# Day 15, part 2: 164878 (15.961 secs)
 
 def day15_solve(data, target):
     ns = [int(n) for n in data[0].split(",")]
@@ -810,6 +840,8 @@ def day15_2(data):
 
 
 """ DAY 16 """
+# Day 16, part 1: 26053 (0.293 secs)
+# Day 16, part 2: 1515506256421 (0.189 secs)
 
 def day16_parse(data):
     rules = {}
@@ -915,6 +947,8 @@ def day16_2(data):
 
 
 """ DAY 17 """
+# Day 17, part 1: 395 (1.397 secs)
+# Day 17, part 2: 2296 (4.116 secs)
 
 def day17_update_bounds(min_x, max_x, x):
     return (min(min_x, x - 1), max(max_x, x + 1))
@@ -990,81 +1024,54 @@ def day17_2(data):
 
 
 """ DAY 18 """
+# Day 18, part 1: 650217205854 (0.249 secs)
+# Day 18, part 2: 20394514442037 (0.147 secs)
 
-def day18_groups(line):
-    i = 0
-    idx = [0]
-    groups = {}
-    for i,c in enumerate(line):
+def day18_parse(line):
+    orig = []
+    stack = [orig]
+    for c in line:
         if c == "(":
-            idx.append(i)
+            stack.append([])
         elif c == ")":
-            other_idx = idx.pop()
-            groups[other_idx] = i
-    
-    return groups
-
-def day18_parse(line, groups):
-    i = 0
-    acc = []
-    while i < len(line):
-        if i in groups:
-            end = groups[i]
-            new_groups = {}
-            for g in groups:
-                new_groups[g - (i + 1)] = groups[g] - (i + 1)
-            inner = day18_parse(line[i + 1:end], new_groups)
-            i = end
-            i += 1
-            acc.append(inner)
-            if i < len(line):
-                acc.append(line[i])
-
+            last = stack.pop()
+            stack[-1].append(last)
         else:
-            curr = int(line[i])
-            i += 1
-            acc.append(curr)
-            if i < len(line):
-                acc.append(line[i])
-        i += 1
-    return acc
+            c = int(c) if c.isdigit() else c
+            stack[-1].append(c)
+    return orig
 
 def day18_eval(parsed, least_priority_op):
     if len(parsed) == 1:
         if isinstance(parsed[0], list):
-            return day18_eval(parsed[0],least_priority_op)
+            return day18_eval(parsed[0], least_priority_op)
         else:
             return parsed[0]
     else:
         last_op = day18_find_op(parsed, least_priority_op)
-        if last_op is None:
-            last_op = len(parsed)-2
         left, op, right = parsed[:last_op], parsed[last_op], parsed[last_op + 1:]
-        l = day18_eval(left,least_priority_op)
-        r = day18_eval(right,least_priority_op)
+        l = day18_eval(left, least_priority_op)
+        r = day18_eval(right, least_priority_op)
         if op == "+":
             return l + r
         elif op == "*":
             return l * r
         else:
             assert False
+    raise ValueError
 
 def day18_find_op(expr, op):
-    if op is None:
-        return None
-
     for i, c in enumerate(expr):
         if c == op:
             return i
-    return None
+    return len(expr) - 2
 
 def day18_solve(data, least_priority_op=None):
     acc = 0
     for line in data:
         line = line.replace(" ", "")
-        
-        groups = day18_groups(line)
-        parsed = day18_parse(line, groups)
+
+        parsed = day18_parse(line)
         total = day18_eval(parsed, least_priority_op)
         acc += total
 
