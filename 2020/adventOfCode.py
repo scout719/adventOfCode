@@ -1086,6 +1086,68 @@ def day18_2(data):
     return day18_solve(data, "*")
 
 
+""" DAY 19 """
+# Day 19, part 1: 213 (0.352 secs)
+# Day 19, part 2: 325 (0.323 secs)
+
+def day19_process(rules, pattern, line):
+    if len(pattern) > len(line):
+        return False
+
+    for i, sub_p in enumerate(pattern):
+        if not pattern[i].isdigit():
+            if pattern[i] != line[i]:
+                return False
+        else:
+            for rule in rules[sub_p]:
+                if day19_process(rules, rule + pattern[i + 1:], line[i:]):
+                    return True
+            return False
+    return len(pattern) == len(line)
+
+def day19_solve(data, override):
+    rules = {}
+    validating = False
+    count = 0
+    for line in data:
+        line = line.rstrip()
+        if line == "":
+            for r in override:
+                rules[r] = override[r]
+            validating = True
+            continue
+
+        if validating:
+            valid = day19_process(rules, ["0"], line)
+            if valid:
+                count += 1
+        else:
+            # 99: "a"
+            # 108: 118 99 | 96 36
+            line = line.replace("\"", "")
+            parts = line.split(": ")
+            if "|" in parts[1]:
+                parts[1] = parts[1].split(" | ")
+            else:
+                parts[1] = [parts[1]]
+            parts[1] = [part.split(" ") for part in parts[1]]
+
+            rules[parts[0]] = parts[1]
+    return count
+
+def day19_1(data):
+    #data = read_input(2020, 1901)
+    return day19_solve(data, {})
+
+def day19_2(data):
+    # data = read_input(2020, 1901)
+    override = {
+        "8": [["42"], ["42", "8"]],
+        "11": [["42", "31"], ["42", "11", "31"]]
+    }
+    return day19_solve(data, override)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
