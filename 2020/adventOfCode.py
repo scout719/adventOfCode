@@ -1149,8 +1149,8 @@ def day19_2(data):
 
 
 """ DAY 20 """
-# Day 20, part 1: 14129524957217 (1.946 secs)
-# Day 20, part 2: 1649 (0.791 secs)
+# Day 20, part 1: 14129524957217 (0.969 secs)
+# Day 20, part 2: 1649 (0.511 secs)
 
 def day20_positions(tile):
     return [
@@ -1163,14 +1163,8 @@ def day20_positions(tile):
         day20_rotate(day20_rotate(day20_rotate(tile))),
 
         day20_rotate(day20_flip_h(tile)),
-        # day20_rotate(day20_rotate(day20_flip_h(tile))), #
         day20_rotate(day20_rotate(
             day20_rotate(day20_flip_h(tile)))),
-
-        # day20_rotate(day20_flip_v(tile)), #
-        # day20_rotate(day20_rotate(day20_flip_v(tile))), #
-        # day20_rotate(day20_rotate(
-        #     day20_rotate(day20_flip_v(tile)))), #
     ]
 
 def day20_parse(data):
@@ -1182,7 +1176,6 @@ def day20_parse(data):
         # .#.#.#.#..
         if "Tile" in line:
             last_id = line.split(" ")[1][:-1]
-            # print(last_id)
         elif len(line) > 0:
             tile.append(line)
         else:
@@ -1223,26 +1216,20 @@ def day20_rotate(tile):
     tile, o = tile
     n_tile = [["_" for _ in range(len(tile[0]))] for _ in range(len(tile))]
     R = len(tile)
-    C = len(tile[0])
     for r in range(len(tile)):
         for c in range(len(tile[0])):
-            #   . # . .
-            #   . . # .
-            #   # . . #
-            #   # . . .
-
-            #  r,c = -c,r
-            # print(r, c, C)
-            assert 0 <= C - r - 1 < C
-            n_tile[R - 1 - c][r] = tile[r][c]
+            # Rotate counter-clockwise: r,c = -c, r
+            # Add R-1 to move to first quadrant again
+            n_tile[- c + (R - 1)][r] = tile[r][c]
     return (n_tile,
             {"N": o["E"],
              "S": o["W"],
              "E": o["S"],
              "W": o["N"]
              })
+
 # "S" -> t2 is South of t1
-def day20_match(t1, t2):
+def day20_relative_position(t1, t2):
     R = len(t1)
     C = len(t1[0])
     if all([t1[r][0] == t2[r][C - 1] for r in range(R)]):
@@ -1266,7 +1253,7 @@ def day20_neighbours(tiles):
             other_tile = tiles[o_t_id]
             for t1 in tile:
                 for t2 in other_tile:
-                    m = day20_match(t1[0], t2[0])
+                    m = day20_relative_position(t1[0], t2[0])
                     if not m is None:
                         n[t_id][m] = o_t_id
                         break
@@ -1280,23 +1267,7 @@ def day20_print(tile):
         print(line)
     print()
 
-
 def day20_transform(fixed_left, fixed_top, to_transform, n, tiles):
-    # tile = ([[]], {"N": "N", "S": "S", "E": "E", "W": "W"})
-    # transform = {
-    #     tile,
-    #     day20_flip_h(tile),
-    #     day20_flip_v(tile),
-
-    #     day20_rotate(tile),
-    #     day20_rotate(day20_rotate(tile)),
-    #     day20_rotate(day20_rotate(day20_rotate(tile))),
-
-    #     day20_rotate(day20_flip_h(tile)),
-    #     day20_rotate(day20_rotate(day20_rotate(day20_flip_h(tile)))),
-    # }
-    # while True:
-
     curr_pos_left = None
     for k in n[to_transform]:
         if n[to_transform][k] == fixed_left:
@@ -1305,8 +1276,7 @@ def day20_transform(fixed_left, fixed_top, to_transform, n, tiles):
     for k in n[to_transform]:
         if n[to_transform][k] == fixed_top:
             curr_pos_top = k
-    # print(fixed_left, fixed_top, to_transform,
-    #       curr_pos_top, curr_pos_left, n[to_transform])
+
     tile = tiles[to_transform][0]
     transform = {
         ("N", "W"): tile,
@@ -1330,9 +1300,6 @@ def day20_transform(fixed_left, fixed_top, to_transform, n, tiles):
         ("E", None): day20_rotate(day20_flip_v(tile)) if "N" in n[to_transform] else day20_rotate(tile),
     }
 
-    # print("####", to_transform, n[to_transform],
-    #       transform[(curr_pos_top, curr_pos_left)][1])
-
     return transform[(curr_pos_top, curr_pos_left)]
 
 def day20_apply(prev_o, mapping):
@@ -1351,35 +1318,30 @@ def day20_build(n, tiles):
            "E" in n[k].keys():
             corner = k
     size = int(math.sqrt(n_tiles))
-    pic = [["_" for _ in range(size)] for _ in range(size)]
+
     pic_id = [[None for _ in range(size)] for _ in range(size)]
-
+    pic = [["_" for _ in range(size)] for _ in range(size)]
     pic[0][0] = tiles[corner][0][0]
-    # 1171    1489    2971
-    # 2473    1427    2729
-    # 3079    2311    1951
-    # corner = "1951"
-    # # day20_print(tiles[corner][0][0])
-    # res = day20_flip_v(tiles[corner][0])
-    # # day20_print(res[0])
-    # n[corner] = day20_apply(n[corner], res[1])
-    # pic[0][0] = res[0]
 
-    unused = set(tiles.keys())
+    # 1951    2311    3079
+    # 2729    1427    2473
+    # 2971    1489    1171
+    # FOR SAMPLE ONLY
+    # corner = "1951"
+    # if corner == 1951:
+    #     res = day20_flip_v(tiles[corner][0])
+    #     n[corner] = day20_apply(n[corner], res[1])
+    #     pic[0][0] = res[0]
+
     pic_id[0][0] = corner
-    unused.remove(corner)
-    # assert False
     visited = set()
     for r in range(size - 1):
         for c in range(size):
             curr = pic_id[r][c]
-            # print(r, c)
-
-            # day20_print(pic[1][1])
             if c < size - 1:
                 if not (r, c + 1) in visited:
+                    # Fill tile East of current
                     visited.add((r, c + 1))
-                    # print(curr, n[curr])
                     right = n[curr]["E"]
                     pic_id[r][c + 1] = right
                     res = day20_transform(
@@ -1387,105 +1349,27 @@ def day20_build(n, tiles):
                     pic[r][c + 1] = res[0]
                     n[right] = day20_apply(n[right], res[1])
             if not (r + 1, c) in visited:
+                # Fill tile South of current
                 visited.add((r + 1, c))
                 bottom = n[curr]["S"]
                 res = day20_transform(
                     pic_id[r + 1][c - 1] if c - 1 >= 0 else None, curr, bottom, n, tiles)
 
-                # day20_print(pic[1][1])
                 pic_id[r + 1][c] = bottom
                 pic[r + 1][c] = res[0]
                 n[bottom] = day20_apply(n[bottom], res[1])
-                # day20_print(pic[1][1])
-            if right in unused:
-                unused.remove(right)
-            # if bottom in unused:
-            #     unused.remove(bottom)
-
-    # # correct last tile
-    # # bottom = n[curr]["S"]
-    # # pic_id[r + 1][c] = bottom
-    # res = day20_transform(
-    #     pic_id[size - 1][size - 2], pic_id[size - 2][size - 1], pic_id[size - 1][size - 1], n, tiles)
-    # pic[size - 1][size - 1] = res[0]
-    # day20_print(pic[size - 1][size - 1])
-    # print("==================")
-    # # print(
-    # #     pic_id[size - 1][size - 1], n[pic_id[size - 1][size - 1]], res[1])
-    # n[pic_id[size - 1][size - 1]
-    #   ] = day20_apply(n[pic_id[size - 1][size - 1]], res[1])
-    # # print(
-    # #     pic_id[size - 1][size - 1], n[pic_id[size - 1][size - 1]], res[1])
 
     tile_size = len(tiles[corner][0][0]) - 2
-    pic2 = [["_" for _ in range(size * (tile_size))]
-            for _ in range(size * (tile_size))]
+    glued_pic = [["_" for _ in range(size * (tile_size))]
+                 for _ in range(size * (tile_size))]
     for r in range(len(pic)):
-        row = []
         for c in range(len(pic[0])):
-            # print(r, c, pic_id[r][c])
-            # day20_print(pic[r][c])
-            # if r == c == 1:
-            #     day20_print(pic[r][c])
             for r2 in range(1, len(pic[r][c]) - 1):
                 for c2 in range(1, len(pic[r][c][0]) - 1):
-                    # print(r, c, r2, c2, r * tile_size +
-                    #       (r2 - 1), c * tile_size + (c2 - 1))
-                    pic2[r * tile_size +
-                         (r2 - 1)][c * tile_size + (c2 - 1)] = pic[r][c][r2][c2]
-                    # row.append(pic[r][c][r2][c2])
-        # pic2.append("".join(row))
-    # day20_print(pic2)
-    # print(pic_id)
-    return pic2
-    # print(len(n))
+                    glued_pic[r * tile_size +
+                              (r2 - 1)][c * tile_size + (c2 - 1)] = pic[r][c][r2][c2]
 
-def day20_1(data):
-    # 1951    2311    3079
-    # 2729    1427    2473
-    # 2971    1489    1171
-    # data = read_input(2020, 2001)
-    tiles = day20_parse(data)
-    total = 1
-    n = day20_neighbours(tiles)
-    for k in n:
-        if len(n[k]) == 2:
-            # print(n[k])
-            total *= int(k)
-    return total
-
-def day20_2(data):
-    # data = read_input(2020, 2001)
-    tiles = day20_parse(data)
-    total = 1
-    n = day20_neighbours(tiles)
-    completed = day20_build(n, tiles)
-    # day20_print(completed)
-    tile = (completed, {"N": "N", "S": "S", "E": "E", "W": "W"})
-
-    # print("#####")
-    # day20_print(completed)
-    m = 0
-    for config, _ in day20_positions(tile):
-        m = day20_find(config)
-        if m > 0:
-            count = 0
-            for r in range(len(config)):
-                for c in range(len(config[0])):
-                    if config[r][c] == "#":
-                        count+=1
-            return count
-
-    return m
-
-    # print(config)
-
-    # print("=" * 80)
-    # day20_print(config)
-    # print("=" * 80)
-
-    # day20_print(day20_rotate((["..#", ".##", "SSS"], {
-    #             "N": "N", "S": "S", "E": "E", "W": "W"}))[0])
+    return glued_pic
 
 def day20_find(tile):
     monster = ["                  # ",
@@ -1496,7 +1380,6 @@ def day20_find(tile):
         for c in range(len(monster[0])):
             if monster[r][c] == "#":
                 monster_pos.append((r, c))
-    # print(monster_pos)
 
     count = 0
     for r in range(len(tile) - (len(monster) - 1)):
@@ -1508,11 +1391,38 @@ def day20_find(tile):
                     break
 
             if match:
-
                 for rr, cc in monster_pos:
                     tile[r + rr][c + cc] = "O"
                 count += 1
-    return count
+    return count > 0
+
+def day20_1(data):
+    # data = read_input(2020, 2001)
+    tiles = day20_parse(data)
+    total = 1
+    n = day20_neighbours(tiles)
+    for k in n:
+        if len(n[k]) == 2:
+            total *= int(k)
+    return total
+
+def day20_2(data):
+    # data = read_input(2020, 2001)
+    tiles = day20_parse(data)
+    n = day20_neighbours(tiles)
+    completed = day20_build(n, tiles)
+    tile = (completed, {"N": "N", "S": "S", "E": "E", "W": "W"})
+
+    for config, _ in day20_positions(tile):
+        monsters = day20_find(config)
+        if monsters:
+            count = 0
+            for r in range(len(config)):
+                for c in range(len(config[0])):
+                    if config[r][c] == "#":
+                        count += 1
+            return count
+    raise ValueError
 
 
 """ MAIN FUNCTION """
