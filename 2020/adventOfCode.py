@@ -1451,4 +1451,4 @@ def day20_2(data):
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(["s", "20"], globals(), 2020)
+    main(sys.argv, globals(), 2020)
