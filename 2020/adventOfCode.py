@@ -1290,14 +1290,37 @@ def day20_transform(fixed_left, fixed_top, to_transform, n, tiles):
         ("W", "N"): day20_rotate(day20_flip_h(tile)),
         ("E", "S"): day20_rotate(day20_rotate(day20_rotate(day20_flip_h(tile)))),
 
-        (None, "E"): day20_flip_h(tile) if "S" in n[to_transform] else day20_rotate(day20_rotate(tile)),
-        ("W", None): day20_flip_h(day20_rotate(day20_rotate(day20_rotate(tile)))) if "S" in n[to_transform] else day20_rotate(day20_rotate(day20_rotate(tile))),
-        ("N", None): day20_flip_h(tile) if "W" in n[to_transform] else tile,
-        (None, "W"): day20_flip_v(tile) if "N" in n[to_transform] else tile,
-        ("S", None): day20_flip_v(tile) if "E" in n[to_transform] else day20_rotate(day20_rotate(tile)),
-        (None, "N"): day20_rotate(day20_flip_h(tile)) if "E" in n[to_transform] else day20_rotate(tile),
-        (None, "S"): day20_rotate(day20_rotate(day20_rotate(tile))) if "E" in n[to_transform] else day20_rotate(day20_rotate(day20_rotate(day20_flip_h(tile)))),
-        ("E", None): day20_rotate(day20_flip_v(tile)) if "N" in n[to_transform] else day20_rotate(tile),
+        (None, "E"): day20_flip_h(tile)
+        if "S" in n[to_transform] else
+        day20_rotate(day20_rotate(tile)),
+
+        ("W", None): day20_flip_h(day20_rotate(day20_rotate(day20_rotate(tile))))
+        if "S" in n[to_transform] else
+        day20_rotate(day20_rotate(day20_rotate(tile))),
+
+        ("N", None): day20_flip_h(tile)
+        if "W" in n[to_transform] else
+        tile,
+
+        (None, "W"): day20_flip_v(tile)
+        if "N" in n[to_transform] else
+        tile,
+
+        ("S", None): day20_flip_v(tile)
+        if "E" in n[to_transform] else
+        day20_rotate(day20_rotate(tile)),
+
+        (None, "N"): day20_rotate(day20_flip_h(tile))
+        if "E" in n[to_transform] else
+        day20_rotate(tile),
+
+        (None, "S"): day20_rotate(day20_rotate(day20_rotate(tile)))
+        if "E" in n[to_transform] else
+        day20_rotate(day20_rotate(day20_rotate(day20_flip_h(tile)))),
+
+        ("E", None): day20_rotate(day20_flip_v(tile))
+        if "N" in n[to_transform] else
+        day20_rotate(tile),
     }
 
     return transform[(curr_pos_top, curr_pos_left)]
