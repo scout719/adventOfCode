@@ -1450,6 +1450,8 @@ def day20_2(data):
 
 
 """ DAY 21 """
+# Day 21, part 1: 2461 (1.031 secs)
+# Day 21, part 2: ltbj,nrfmm,pvhcsn,jxbnb,chpdjkf,jtqt,zzkq,jqnhd (0.907 secs)
 
 def day21_parse(data):
     foods = []
@@ -1508,7 +1510,7 @@ def day21_solve_match(foods, table_i):
                 if (match_allergen, ingredient) not in solved:
                     solved.add((match_allergen, ingredient))
                     changed = True
-            if len(possibilites) == 0:
+            if not possibilites:
                 impossible.add(ingredient)
 
     return impossible, solved
