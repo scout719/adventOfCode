@@ -995,7 +995,7 @@ def day17_boot(data, extra_dim):
                                             count += 1
 
                         if (x, y, z, w) in active:
-                            if not count in(2, 3):
+                            if not count in (2, 3):
                                 new_active.remove((x, y, z, w))
                         else:
                             if count == 3:
@@ -1447,6 +1447,87 @@ def day20_2(data):
             return count
     raise ValueError
 
+""" DAY 21 """
+
+def day21_parse(data):
+    foods = []
+    for line in data:
+        # trh fvjkl sbzzf mxmxvkd (contains dairy)
+        parts = line.split(" (contains ")
+        foods.append((parts[0].split(" "), parts[1][:-1].split(", ")))
+    return foods
+
+def day21_extract_info(foods):
+    table_i = defaultdict(set)
+    counts = defaultdict(lambda: 0)
+    for ing, al in foods:
+        for i in ing:
+            counts[i] += 1
+            for a in al:
+                table_i[i].add(a)
+    return table_i, counts
+
+def day21_solve_match(foods, table_i):
+    impossible = set()
+    solved = set()
+    changed = True
+    while changed:
+        changed = False
+        for ingredient in table_i:
+            possibilites = set(table_i[ingredient])
+            for allergen in table_i[ingredient]:
+                possible = True
+
+                for ing, al in foods:
+                    valid = [i2 for i2 in ing if i2 not in impossible]
+                    als = set()
+                    if ingredient in valid:
+                        als.add(allergen)
+                    for i2 in valid:
+                        if i2 == ingredient:
+                            continue
+                        for a2 in table_i[i2]:
+                            if a2 == allergen:
+                                continue
+                            als.add(a2)
+                    valid = True
+                    for al3 in al:
+                        if not al3 in als:
+                            valid = False
+                            break
+                    if not valid:
+                        possible = False
+                        break
+                if not possible:
+                    possibilites.remove(allergen)
+            table_i[ingredient] = possibilites
+            if len(possibilites) == 1:
+                match_allergen = list(possibilites)[0]
+                if (match_allergen,ingredient) not in solved:
+                    solved.add((match_allergen,ingredient))
+                    changed = True
+            if len(possibilites) == 0:
+                impossible.add(ingredient)
+
+    return impossible, solved
+
+def day21_1(data):
+    # data = read_input(2020, 2101)
+    foods = day21_parse(data)
+    table_i, counts = day21_extract_info(foods)
+
+    impossible, _ = day21_solve_match(foods, table_i)
+    ans = sum([counts[i] for i in impossible])
+    return ans
+
+def day21_2(data):
+    #data = read_input(2020, 2101)
+    foods = day21_parse(data)
+    table_i, _ = day21_extract_info(foods)
+
+    _, solved = day21_solve_match(foods, table_i)
+    res = ",".join([i for _,i in sorted(solved)])
+    return res
 
 """ MAIN FUNCTION """
 
