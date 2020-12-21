@@ -1316,7 +1316,8 @@ def day20_transform(fixed_left, fixed_top, to_transform, n, tiles):
 
         (None, "S"): day20_rotate(day20_rotate(day20_rotate(tile)))
                      if "E" in n[to_transform] else
-                     day20_rotate(day20_rotate(day20_rotate(day20_flip_h(tile)))),
+                     day20_rotate(day20_rotate(
+                         day20_rotate(day20_flip_h(tile)))),
 
         ("E", None): day20_rotate(day20_flip_v(tile))
                      if "N" in n[to_transform] else
@@ -1447,6 +1448,7 @@ def day20_2(data):
             return count
     raise ValueError
 
+
 """ DAY 21 """
 
 def day21_parse(data):
@@ -1503,8 +1505,8 @@ def day21_solve_match(foods, table_i):
             table_i[ingredient] = possibilites
             if len(possibilites) == 1:
                 match_allergen = list(possibilites)[0]
-                if (match_allergen,ingredient) not in solved:
-                    solved.add((match_allergen,ingredient))
+                if (match_allergen, ingredient) not in solved:
+                    solved.add((match_allergen, ingredient))
                     changed = True
             if len(possibilites) == 0:
                 impossible.add(ingredient)
@@ -1526,8 +1528,9 @@ def day21_2(data):
     table_i, _ = day21_extract_info(foods)
 
     _, solved = day21_solve_match(foods, table_i)
-    res = ",".join([i for _,i in sorted(solved)])
+    res = ",".join([i for _, i in sorted(solved)])
     return res
+
 
 """ MAIN FUNCTION """
 

@@ -48,6 +48,7 @@ def day22_2(data):
     #data = read_input(2020, 2201)
     return None
 
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
