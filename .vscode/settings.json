@@ -1,0 +1,35 @@
+{
+    // #############################################
+    // #######################  <PYTHON> ###########
+    // #############################################
+    "python.disableInstallationCheck": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintArgs": [
+        "--disable=E0401",
+        "--disable=C0111",
+        "--disable=W0105",
+        "--disable=C0103",
+        "--disable=C0302",
+        "--disable=R0903",
+        "--disable=R0913",
+        "--disable=R1705",
+        "--disable=R0914",
+        "--disable=R0912",
+        "--disable=R1702",
+        "--disable=R0911",
+        "--disable=R0902",
+    ],
+    "python.formatting.autopep8Args": [
+        "-v",
+        "--ignore=E302,E121,E131"
+    ],
+    "python.linting.enabled": true,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none"
+    },
+    "python.languageServer": "Pylance",
+    // #############################################
+    // #######################  <\PYTHON> ##########
+    // #############################################
+}
