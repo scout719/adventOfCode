@@ -38,14 +38,19 @@ WHITE_CIRCLE = "•"
 BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
-""" DAY 22 """
+""" DAY 23 """
 
-def day22_1(data):
-    # data = read_input(2020, 2201)
+def day22_parse(data):
+    return data
+
+def day23_1(data):
+    # data = read_input(2020, 2301)
+    data = day22_parse(data)
     return None
 
-def day22_2(data):
-    #data = read_input(2020, 2201)
+def day23_2(data):
+    # data = read_input(2020, 2301)
+    data = day22_parse(data)
     return None
 
 

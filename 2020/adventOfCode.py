@@ -1534,6 +1534,81 @@ def day21_2(data):
     return res
 
 
+""" DAY 22 """
+# Day 22, part 1: 32815 (0.038 secs)
+# Day 22, part 2: 30695 (8.242 secs)
+
+def day22_parse(data):
+    p1 = True
+    cards = [[], []]
+    for line in data:
+        if "Player 1" in line:
+            p1 = True
+        elif "Player 2" in line:
+            p1 = False
+        elif line:
+            if p1:
+                cards[0].append(int(line))
+            else:
+                cards[1].append(int(line))
+    return cards
+
+def day22_score(p1, p2):
+    ans = 0
+    p = p1 if p1 else p2
+    for i, c in enumerate(reversed(p)):
+        ans += c * (i + 1)
+    return ans
+
+def day22_play(p1, p2, recursive):
+    seen = set()
+    while True:
+        k = (tuple(p1), tuple(p2))
+        if k in seen:
+            return True, p1, p2
+        seen.add(k)
+
+        p1_c = p1[0]
+        p2_c = p2[0]
+        p1 = p1[1:]
+        p2 = p2[1:]
+
+        if recursive and len(p1) >= p1_c and len(p2) >= p2_c:
+            winner_p1, _, _ = day22_play(p1[:p1_c], p2[:p2_c], recursive)
+            if winner_p1:
+                p1 = p1 + [p1_c, p2_c]
+            else:
+                p2 = p2 + [p2_c, p1_c]
+        else:
+            if p1_c > p2_c:
+                p1 = p1 + [p1_c, p2_c]
+            elif p2_c > p1_c:
+                p2 = p2 + [p2_c, p1_c]
+            else:
+                assert False
+
+        if not p1 or not p2:
+            break
+
+    return not p2, p1, p2
+
+def day22_1(data):
+    # data = read_input(2020, 2201)
+    p1, p2 = day22_parse(data)
+
+    _, p1, p2 = day22_play(p1, p2, False)
+
+    return day22_score(p1, p2)
+
+def day22_2(data):
+    # data = read_input(2020, 2201)
+    p1, p2 = day22_parse(data)
+
+    _, p1, p2 = day22_play(p1, p2, True)
+
+    return day22_score(p1, p2)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
