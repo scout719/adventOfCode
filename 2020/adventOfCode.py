@@ -14,11 +14,8 @@ from collections import defaultdict
 from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-print(FILE_DIR)
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-sys.path.insert(0, FILE_DIR + "/../../")
-import computer  # NOQA: E402
 from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
@@ -1535,8 +1532,8 @@ def day21_2(data):
 
 
 """ DAY 22 """
-# Day 22, part 1: 32815 (0.038 secs)
-# Day 22, part 2: 30695 (8.242 secs)
+# Day 22, part 1: 32815 (0.006 secs)
+# Day 22, part 2: 30695 (2.181 secs)
 
 def day22_parse(data):
     p1 = True

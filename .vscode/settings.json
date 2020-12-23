@@ -29,6 +29,7 @@
         "reportMissingImports": "none"
     },
     "python.languageServer": "Pylance",
+    "python.analysis.completeFunctionParens": true
     // #############################################
     // #######################  <\PYTHON> ##########
     // #############################################
