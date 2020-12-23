@@ -1606,6 +1606,120 @@ def day22_2(data):
     return day22_score(p1, p2)
 
 
+""" DAY 23 """
+# Day 23, part 1: 36472598 (0.012 secs)
+# Day 23, part 2: 90481418730 (5.123 secs)
+
+class Cup:
+    label = 0
+    next_ = None
+    prev_ = None
+
+def day23_play(rounds, n_cups, cups):
+    max_ = max(cups)
+    for i in range(max_ + 1, n_cups + 1):
+        cups.append(i)
+    assert len(cups) == n_cups, len(cups)
+
+    min_ = 1
+    max_ = n_cups
+    start, mem = day23_create_loop(cups)
+
+    for _ in range(rounds):
+        start = day23_round(start, min_, max_, mem)
+
+    return mem
+
+def day23_round(start: Cup, min_, max_, mem):
+    after_sel = start
+    selected = []
+    for _ in range(4):
+        after_sel = after_sel.next_
+        selected.append(after_sel.label)
+    selected = selected[:-1]
+
+    # store pointers to first and last cups of selection
+    start_sel = start.next_
+    end_sel = after_sel.prev_
+
+    # remove selection from the loop
+    start.next_ = after_sel
+    after_sel.prev_ = start
+
+    # calculate the destination label
+    dest_cup = after_sel
+    dest_cup_i = start.label - 1
+    if dest_cup_i < min_:
+        dest_cup_i = max_
+    while dest_cup_i in selected:
+        dest_cup_i -= 1
+        if dest_cup_i < min_:
+            dest_cup_i = max_
+
+    # get the destination cup
+    dest_cup = mem[dest_cup_i]
+
+    # insert the selection after the destination
+    end_sel.next_ = dest_cup.next_
+    dest_cup.next_.prev_ = end_sel
+
+    start_sel.prev_ = dest_cup
+    dest_cup.next_ = start_sel
+
+    return start.next_
+
+def day23_get_sequence(start: Cup):
+    seen = set()
+    l = []
+    while start.label not in seen:
+        seen.add(start.label)
+        l.append(str(start.label))
+        start = start.next_
+    return l
+
+def day23_create_loop(cups):
+    prev_node = Cup()
+    prev_node.label = cups[0]
+    start = prev_node
+    mem = {}
+    mem[cups[0]] = start
+    for label in cups[1:]:
+        curr = Cup()
+        curr.label = label
+        mem[label] = curr
+        prev_node.next_ = curr
+        curr.prev_ = prev_node
+        prev_node = curr
+
+    # close the loop
+    start.prev_ = prev_node
+    prev_node.next_ = start
+
+    return start, mem
+
+def day23_1(data):
+    # data = read_input(2020, 2301)
+    cups = [int(x) for x in data[0]]
+    rounds = 100
+    n_cups = len(cups)
+
+    mem = day23_play(rounds, n_cups, cups)
+
+    return "".join(day23_get_sequence(mem[1])).replace("1", "")
+
+def day23_2(data):
+    # data = read_input(2020, 2301)
+    cups = [int(x) for x in data[0]]
+    rounds = 10000000
+    n_cups = 1000000
+    # rounds = 100
+    # n_cups = 9
+
+    mem = day23_play(rounds, n_cups, cups)
+
+    return mem[1].next_.label * mem[1].next_.next_.label
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
