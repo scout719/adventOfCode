@@ -1720,6 +1720,136 @@ def day23_2(data):
     return mem[1].next_.label * mem[1].next_.next_.label
 
 
+""" DAY 24 """
+
+def day24_parse(data):
+    tiles = []
+    for line in data:
+        curr_dir = ""
+        curr_tile = []
+        for c in list(line):
+            curr_dir += c
+            if curr_dir in ["e", "se", "sw", "w", "nw", "ne"]:
+                curr_tile.append(curr_dir)
+                curr_dir = ""
+
+        tiles.append(curr_tile)
+
+    return tiles
+
+def day24_print(tiles_pos, min_x, max_x, min_y, max_y):
+
+    grid = ""
+    for y in range(min_y - 1, max_y + 2):
+        line = ""
+        for x in range(int(min_x - 1), int(max_x + 2)):
+            if y % 2 != 0:
+                dx = 0.5
+            else:
+                dx = 0
+            pos = x + dx, y
+            s = " "
+            if tiles_pos[pos]:
+                s = WHITE_SQUARE
+            else:
+                s = "."
+            if dx == 0.5:
+                line += " " + s
+            else:
+                line += s + " "
+        grid += line + "\n"
+
+    print("=" * 80)
+    print()
+    print(grid)
+    print("=" * 80)
+    time.sleep(.2)
+
+def day24_move(dir_):
+    if dir_ == "e":
+        return 2, 0
+    elif dir_ == "se":
+        return 1, 1
+    elif dir_ == "sw":
+        return -1, 1
+    elif dir_ == "w":
+        return -2, 0
+    elif dir_ == "nw":
+        return -1, -1
+    elif dir_ == "ne":
+        return 1, -1
+    else:
+        assert False
+    return None
+
+def day24_flip(tiles_flips):
+    tiles = {}
+    for flip in tiles_flips:
+        x, y = 0, 0
+        for dir_ in flip:
+            dx, dy = day24_move(dir_)
+            x, y = x + dx, y + dy
+        pos = (x, y)
+        if pos not in tiles:
+            tiles[pos] = True
+        else:
+            tiles[pos] = not tiles[pos]
+
+    return tiles
+
+def day24_new_flip(x, y, tiles_pos):
+    count = 0
+    edges = set()
+    for dir_ in ["e", "se", "sw", "w", "nw", "ne"]:
+        dx, dy = day24_move(dir_)
+        nx, ny = x + dx, y + dy
+        if (nx, ny) in tiles_pos:
+            if tiles_pos[(nx, ny)]:
+                count += 1
+        else:
+            edges.add((nx, ny))
+
+    pos = (x, y)
+    result = tiles_pos[pos] if pos in tiles_pos else False
+    if result and count == 0 or count > 2:
+        result = False
+    elif not result and count == 2:
+        result = True
+
+    return result, edges
+
+def day24_1(data):
+    # data = read_input(2020, 2401)
+    tiles_flips = day24_parse(data)
+
+    tiles = day24_flip(tiles_flips)
+
+    return sum([1 for x in tiles.values() if x])
+
+def day24_2(data):
+    # data = read_input(2020, 2401)
+    tiles_flips = day24_parse(data)
+
+    tiles_pos = day24_flip(tiles_flips)
+
+    for _ in range(100):
+        n_tiles_pos = {}
+        edges = set()
+        for t in tiles_pos:
+            x, y = t
+            new_flip, new_edges = day24_new_flip(x, y, tiles_pos)
+            edges |= new_edges
+
+            n_tiles_pos[t] = new_flip
+        for x, y in edges:
+            new_flip, _ = day24_new_flip(x, y, tiles_pos)
+            n_tiles_pos[(x, y)] = new_flip
+
+        tiles_pos = n_tiles_pos
+
+    return sum([1 for x in tiles_pos.values() if x])
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
