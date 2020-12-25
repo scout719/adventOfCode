@@ -1722,6 +1722,8 @@ def day23_2(data):
 
 
 """ DAY 24 """
+# Day 24, part 1: 351 (0.016 secs)
+# Day 24, part 2: 3869 (7.044 secs)
 
 def day24_parse(data):
     tiles = []
@@ -1849,6 +1851,40 @@ def day24_2(data):
         tiles_pos = n_tiles_pos
 
     return sum([1 for x in tiles_pos.values() if x])
+
+
+""" DAY 25 """
+# Day 25, part 1: 16902792 (26.371 secs)
+
+def day25_parse(data):
+    return int(data[0]), int(data[1])
+
+def day25_transform(s_n, l_s):
+    # Fast implementation based on https://en.wikipedia.org/wiki/Modular_exponentiation
+    s = 1
+    base = s_n
+    e = l_s
+    while e > 0:
+        if e % 2 == 1:
+            s = s * base % 20201227
+        e = e >> 1
+        base = (base * base) % 20201227
+
+    return s
+
+def day25_get_loop_size(p_k):
+    i = 0
+    while True:
+        curr_p_k = day25_transform(7, i)
+        if curr_p_k == p_k:
+            return i
+        i += 1
+
+def day25_1(data):
+    # data = read_input(2020, 2501)
+    c_p_k, d_p_k = day25_parse(data)
+    v1 = day25_get_loop_size(c_p_k)
+    return day25_transform(d_p_k, v1)
 
 
 """ MAIN FUNCTION """
