@@ -6,7 +6,7 @@
         {
             "label": "Get Input",
             "type": "shell",
-            "command": "${workspaceFolder}/get_input.bat",
+            "command": "${workspaceFolder}/get_input.sh",
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -22,7 +22,9 @@
             "label": "Today",
             "type": "shell",
             "command": "${workspaceFolder}/execute.bat",
-            "args": ["${config:python.pythonPath}"],
+            "args": [
+                "${config:python.pythonPath}"
+            ],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -38,7 +40,9 @@
             "label": "Today pypy",
             "type": "shell",
             "command": "${workspaceFolder}/execute.bat",
-            "args": ["${config:custom.pypyPath}"],
+            "args": [
+                "${config:custom.pypyPath}"
+            ],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -54,6 +58,21 @@
             "label": "Execute",
             "type": "shell",
             "command": "${config:python.pythonPath} ${file} ${input:day}",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Execute pypy",
+            "type": "shell",
+            "command": "${config:custom.pypyPath} ${file} ${input:day}",
             "group": "build",
             "presentation": {
                 "echo": true,
