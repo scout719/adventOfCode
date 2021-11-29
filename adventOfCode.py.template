@@ -6,51 +6,53 @@
 # pylint: disable=consider-using-enumerate
 import functools
 import math
-import multiprocessing as mp
 import os
-import re
-import string
+from os.path import join
 import sys
 import time
-from collections import Counter, deque
-import heapq
-from enum import Enum
-from struct import pack
+from copy import deepcopy
+from collections import defaultdict
+from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, FILE_DIR + "\\..\\")
-sys.path.insert(0, FILE_DIR + "\\..\\..\\")
-from common.utils import execute_day  # NOQA: E402
-# pylint: enable=unused-import
+sys.path.insert(0, FILE_DIR + "/")
+sys.path.insert(0, FILE_DIR + "/../")
+from common.utils import read_input, main, clear  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+WHITE_SQUARE = "█"
+WHITE_CIRCLE = "•"
+BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
+RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 year = XXXX
 
 """ DAY 1 """
-def day1_1(data):
+
+def day1_parse(data):
     return data
 
-""" MAIN FUNCTION """
-def main(specific_day):
-    initial_day = 1
-    end_day = 25
-    if specific_day is not None:
-        initial_day = specific_day
-        end_day = specific_day
+def day1_1(data):
+    # data = read_input(year, 101)
+    return day1_parse(data)
 
-    for day in range(initial_day, end_day + 1):
-        execute_day(globals(), year, day, 1)
-        execute_day(globals(), year, day, 2)
+def day1_2(data):
+    # data = read_input(year, 101)
+    return day1_parse(data)
+
+
+""" MAIN FUNCTION """
 
 if __name__ == "__main__":
-    start_day = None
-    if len(sys.argv) > 1:
-        try:
-            if len(sys.argv) > 2:
-                raise ValueError
-            start_day = int(sys.argv[1])
-        except ValueError:
-            print("Usage: adventOfCode.py [<day>]")
-            sys.exit(1)
-    main(start_day)
+    main(sys.argv, globals(), year)
