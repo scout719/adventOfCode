@@ -69,6 +69,44 @@ def day1_2(data):
     return greater
 
 
+""" DAY 2 """
+
+def day2_parse(data):
+    return [s.split() for s in data]
+
+def day2_1(data):
+    # data = read_input(2021, 201)
+    data = day2_parse(data)
+    pos = 0
+    depth = 0
+    for comm, val in data:
+        if comm == "forward":
+            pos += int(val)
+        elif comm == "up":
+            depth -= int(val)
+        elif comm == "down":
+            depth += int(val)
+    return depth * pos
+
+def day2_2(data):
+    # data = read_input(2021, 201)
+    data = day2_parse(data)
+    pos = 0
+    depth = 0
+    aim = 0
+    for comm, val in data:
+        if comm == "forward":
+            pos += int(val)
+            depth += aim * int(val)
+        elif comm == "up":
+            aim -= int(val)
+            # depth -= int(val)
+        elif comm == "down":
+            aim += int(val)
+            # depth += int(val)
+    return depth * pos
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
