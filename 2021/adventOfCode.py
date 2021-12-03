@@ -146,30 +146,20 @@ def day3_2(data):
     data = day3_parse(data)
     n_bits = len(data[0])
     data_copy = ["" + y for y in data]
-    while len(data) > 1:
-        for i in range(n_bits):
-            most, _ = day3_freq(data, i)
-            new_data = []
-            for v in data:
-                if v[i] == most:
-                    new_data.append(v)
-            data = new_data
-            if len(data) == 1:
-                break
+    for i in range(n_bits):
+        most, _ = day3_freq(data, i)
+        data = [v for v in data if v[i] == most]
+        if len(data) == 1:
+            break
 
     oxygen = int(data[0], 2)
     data = data_copy
 
-    while len(data) > 1:
-        for i in range(n_bits):
-            _, least = day3_freq(data, i)
-            new_data = []
-            for v in data:
-                if v[i] == least:
-                    new_data.append(v)
-            data = new_data
-            if len(data) == 1:
-                break
+    for i in range(n_bits):
+        _, least = day3_freq(data, i)
+        data = [v for v in data if v[i] == least]
+        if len(data) == 1:
+            break
 
     co2 = int(data[0], 2)
     return co2 * oxygen
