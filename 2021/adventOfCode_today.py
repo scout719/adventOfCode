@@ -36,21 +36,23 @@ WHITE_CIRCLE = "•"
 BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
+YEAR = 2021
+DAY = 4
 
-""" DAY 3 """
+""" DAY 4 """
 
-def day3_parse(data):
+def day4_parse(data):
     return data
 
-def day3_1(data):
-    # data = read_input(2021, 301)
-    data = day3_parse(data)
+def day4_1(data):
+    # data = read_input(YEAR, DAY*100 + 1)
+    data = day4_parse(data)
     return data
 
 
-def day3_2(data):
-    # data = read_input(2021, 301)
-    data = day3_parse(data)
+def day4_2(data):
+    # data = read_input(YEAR, DAY*100 + 1)
+    data = day4_parse(data)
     return data
 
 
