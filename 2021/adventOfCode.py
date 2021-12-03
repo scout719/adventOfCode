@@ -100,11 +100,79 @@ def day2_2(data):
             depth += aim * int(val)
         elif comm == "up":
             aim -= int(val)
-            # depth -= int(val)
         elif comm == "down":
             aim += int(val)
-            # depth += int(val)
     return depth * pos
+
+
+""" DAY 3 """
+
+def day3_parse(data):
+    return data
+
+def day3_freq(data, bit):
+    n_0 = 0
+    n_1 = 0
+    for j in range(len(data)):
+        curr = data[j][bit]
+        if curr == "0":
+            n_0 += 1
+        else:
+            n_1 += 1
+    if n_0 > n_1:
+        return ("0", "1")
+    else:
+        return ("1", "0")
+
+
+def day3_1(data):
+    # data = read_input(2021, 301)
+    data = day3_parse(data)
+    n_bits = len(data[0])
+    gamma = ""
+    epsilon = ""
+    for i in range(n_bits):
+        most, least = day3_freq(data, i)
+        gamma += most
+        epsilon += least
+
+    gamma = int(gamma, 2)
+    epsilon = int(epsilon, 2)
+    return gamma * epsilon
+
+
+def day3_2(data):
+    # data = read_input(2021, 301)
+    data = day3_parse(data)
+    n_bits = len(data[0])
+    data_copy = ["" + y for y in data]
+    while len(data) > 1:
+        for i in range(n_bits):
+            most, _ = day3_freq(data, i)
+            new_data = []
+            for v in data:
+                if v[i] == most:
+                    new_data.append(v)
+            data = new_data
+            if len(data) == 1:
+                break
+
+    oxygen = int(data[0], 2)
+    data = data_copy
+
+    while len(data) > 1:
+        for i in range(n_bits):
+            _, least = day3_freq(data, i)
+            new_data = []
+            for v in data:
+                if v[i] == least:
+                    new_data.append(v)
+            data = new_data
+            if len(data) == 1:
+                break
+
+    co2 = int(data[0], 2)
+    return co2 * oxygen
 
 
 """ MAIN FUNCTION """
