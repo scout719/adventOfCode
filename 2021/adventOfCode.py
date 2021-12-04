@@ -165,6 +165,81 @@ def day3_2(data):
     return co2 * oxygen
 
 
+""" DAY 4 """
+
+def day4_parse(data):
+    nums = [int(x) for x in data[0].split(",")]
+
+    boards = []
+    size = 0
+    for line in data[1:]:
+        if line == "":
+            boards.append([])
+            size += 1
+            continue
+        boards[-1].append([])
+        for n in line.split():
+            boards[-1][-1].append([int(n), False])
+
+    return nums, boards
+
+def day4_score(board):
+    total = 0
+    for r in range(len(board)):
+        for c in range(len(board[r])):
+            if not board[r][c][1]:
+                total += board[r][c][0]
+    return total
+
+def day4_won(board):
+    for r in range(len(board)):
+        if all([board[r][c][1] for c in range(len(board[r]))]):
+            return True
+    for c in range(len(board[0])):
+        if all([board[r][c][1] for r in range(len(board))]):
+            return True
+    return False
+
+def day4_1(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    nums, boards = day4_parse(data)
+    for n in nums:
+        for b in range(len(boards)):
+            board = boards[b]
+            for l in range(len(board)):
+                line = board[l]
+                for p in range(len(line)):
+                    c = line[p][0]
+                    if c == n:
+                        boards[b][l][p][1] = True
+        for b in range(len(boards)):
+            board = boards[b]
+            if day4_won(board):
+                return n * day4_score(board)
+    return None
+
+def day4_2(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    nums, boards = day4_parse(data)
+    won = [False for _ in range(len(boards))]
+    for n in nums:
+        for b in range(len(boards)):
+            board = boards[b]
+            for l in range(len(board)):
+                line = board[l]
+                for p in range(len(line)):
+                    c = line[p][0]
+                    if c == n:
+                        boards[b][l][p][1] = True
+        for b in range(len(boards)):
+            board = boards[b]
+            if day4_won(board):
+                won[b] = True
+                if sum(won) == len(boards):
+                    return n * day4_score(board)
+    return None
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
