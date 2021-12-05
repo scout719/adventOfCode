@@ -240,6 +240,71 @@ def day4_2(data):
     return None
 
 
+""" DAY 5 """
+
+def day5_parse(data):
+    m = []
+    max_x = 0
+    max_y = 0
+    for line in data:
+        parts = line.split(" -> ")
+        fst = parts[0].split(",")
+        snd = parts[1].split(",")
+        max_x = max(max_x, int(fst[0]))
+        max_x = max(max_x, int(snd[0]))
+        max_y = max(max_y, int(fst[1]))
+        max_y = max(max_y, int(snd[1]))
+        m.append((int(fst[0]), int(fst[1]), int(snd[0]), int(snd[1])))
+    return max_x, max_y, m
+
+def day5_between(x, x1, x2):
+    return x1 <= x <= x2 or x2 <= x <= x1
+
+def day5_1(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    max_x, max_y, m = day5_parse(data)
+    counts = defaultdict(lambda: 0)
+    for y in range(max_y + 1):
+        for x in range(max_x + 1):
+            for x1, y1, x2, y2 in m:
+                if x1 == x2 or y1 == y2:
+                    if (x == x1 and day5_between(y, y1, y2)) \
+                            or (y == y1 and day5_between(x, x1, x2)):
+                        counts[(x, y)] += 1
+
+    count = 0
+    for k in counts:
+        if counts[k] >= 2:
+            count += 1
+    return count
+
+
+def day5_2(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    _, _, m = day5_parse(data)
+    counts = defaultdict(lambda: 0)
+    for x1, y1, x2, y2 in m:
+        if x1 == x2 or y1 == y2 or (abs(x1 - x2) == abs(y1 - y2)):
+            dx, dy = 0, 0
+            if x2 - x1 != 0:
+                dx = (x2 - x1) / abs(x2 - x1)
+            if y2 - y1 != 0:
+                dy = (y2 - y1) / abs(y2 - y1)
+
+            curr_x, curr_y = x1, y1
+            while curr_x != x2 or curr_y != y2:
+                counts[(curr_x, curr_y)] += 1
+                curr_x, curr_y = curr_x + dx, curr_y + dy
+            # Count final position (x2,y2) as well
+            counts[(curr_x, curr_y)] += 1
+
+    count = 0
+    for k in counts:
+        if counts[k] >= 2:
+            count += 1
+    return count
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
