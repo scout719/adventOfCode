@@ -45,18 +45,17 @@ def day5_parse(data):
     return data
 
 def day5_1(data):
-    # data = read_input(YEAR, DAY*100 + 1)
+    # data = read_input(YEAR, DAY * 100 + 1)
     data = day5_parse(data)
     return data
-
 
 def day5_2(data):
-    # data = read_input(YEAR, DAY*100 + 1)
+    # data = read_input(YEAR, DAY * 100 + 1)
     data = day5_parse(data)
-    return data
+    return None
 
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(sys.argv, globals(), 2021)
+    main(sys.argv, globals(), YEAR)
