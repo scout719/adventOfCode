@@ -305,6 +305,47 @@ def day5_2(data):
     return count
 
 
+""" DAY 6 """
+
+def day6_parse(data):
+    return [int(x) for x in data[0].split(",")]
+
+def day6_1(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    data = day6_parse(data)
+
+    for _ in range(80):
+        new_fish = []
+        for i, n in enumerate(data):
+            if n == 0:
+                data[i] = 6
+                new_fish.append(8)
+            else:
+                data[i] -= 1
+        for n in new_fish:
+            data.append((n))
+
+    return len(data)
+
+def day6_2(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    data = day6_parse(data)
+    fish = defaultdict(lambda: 0)
+    for n in data:
+        fish[n] += 1
+    for _ in range(256):
+        new_fish_data = defaultdict(lambda: 0)
+        for k in fish.keys():
+            if k == 0:
+                new_fish_data[6] += fish[k]
+                new_fish_data[8] += fish[k]
+            else:
+                new_fish_data[k - 1] += fish[k]
+        fish = new_fish_data
+
+    return sum(new_fish_data.values())
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
