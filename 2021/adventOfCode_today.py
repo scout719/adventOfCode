@@ -37,25 +37,43 @@ BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
 RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 YEAR = 2021
-DAY = 7
+DAY = 8
+EXPECTED_1 = None
+EXPECTED_2 = None
 
-""" DAY 7 """
+""" DAY 8 """
 
-def day7_parse(data):
+def day8_parse(data):
     return data
 
-def day7_1(data):
-    # data = read_input(YEAR, DAY * 100 + 1)
-    data = day7_parse(data)
+def day8_1(data):
+    data = day8_parse(data)
     return data
 
-def day7_2(data):
-    # data = read_input(YEAR, DAY * 100 + 1)
-    data = day7_parse(data)
-    return None
+def day8_2(data):
+    data = day8_parse(data)
+    return data
+
+def day_with_validation(part, data):
+    data_ex = read_input(YEAR, DAY * 100 + 1)
+    expected_result = EXPECTED_1 if part == 1 else EXPECTED_2
+    func = globals()[f"day{DAY}_{part}"]
+    result = func(data_ex)
+    if result != expected_result:
+        print(f"{bcolors.FAIL}FAIL")
+        print(result)
+        print("SHOULD BE:")
+        print(expected_result)
+        print(f"{bcolors.ENDC}")
+        return
+    print(f"{bcolors.OKGREEN}SUCCESS{bcolors.ENDC}")
+    print(f"{bcolors.OKBLUE}{func(data)}{bcolors.ENDC}")
 
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(sys.argv, globals(), YEAR)
+    main(sys.argv, {
+        f"day{DAY}_1": lambda data: day_with_validation(1, data),
+        f"day{DAY}_2": lambda data: day_with_validation(2, data),
+    }, YEAR)
