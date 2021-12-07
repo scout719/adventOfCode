@@ -5,10 +5,26 @@ from timeit import default_timer as timer
 import sys
 import os
 # pylint: enable=import-error
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+WHITE_SQUARE = "█"
+WHITE_CIRCLE = "•"
+BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
+RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
 
 """ AUX FUNCTIONS """
 class SignalCatchingError(Exception):
     """ Base class for exceptions in this module. """
+
 
 HEAVY_EXERCISE = "nil (too computationally heavy)"
 EXERCISE_TIMEOUT = 120  # secs
@@ -66,6 +82,19 @@ def read_input(year, day):
     file_dir = os.path.dirname(os.path.realpath(__file__))
     with open("{0}/../{1}/input/day{2}".format(file_dir, year, day), "r") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
+
+def day_with_validation(globals_, YEAR, DAY, EXPECTED_1, EXPECTED_2, part, data):
+    data_ex = read_input(YEAR, DAY * 100 + 1)
+    expected_result = EXPECTED_1 if part == 1 else EXPECTED_2
+    func = globals_[f"day{DAY}_{part}"]
+    result = func(data_ex)
+    if result != expected_result:
+        print(f"{bcolors.FAIL}FAIL")
+        print(f"WAS: {result} SHOULD BE: {expected_result}")
+        print(f"{bcolors.ENDC}")
+        sys.exit(0)
+    print(f"{bcolors.OKGREEN}SUCCESS{bcolors.ENDC}")
+    print(f"{bcolors.OKBLUE}{func(data)}{bcolors.ENDC}")
 
 def main(argv_, globals_, year):
     start_day = None
