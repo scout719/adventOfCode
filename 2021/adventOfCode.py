@@ -346,6 +346,41 @@ def day6_2(data):
     return sum(new_fish_data.values())
 
 
+""" DAY 7 """
+
+def day7_parse(data):
+    return [int(x) for x in data[0].split(",")]
+
+def day7_calculate(data, p1):
+    min_pos, max_pos = min(data), max(data)
+    max_fuel = None
+    for i in range(min_pos, max_pos + 1):
+        counter = 0
+        for p in data:
+            # for j in range(1, abs(p - i) + 1):
+            #     counter += j
+            #     if max_fuel and counter > max_fuel:
+            #         break
+            dist = abs(p - i)
+            counter += dist if p1 else (dist * (dist + 1)) / 2
+            if max_fuel and counter > max_fuel:
+                break
+
+        max_fuel = counter if not max_fuel else min(max_fuel, counter)
+    return int(max_fuel)
+
+
+def day7_1(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    data = day7_parse(data)
+    return day7_calculate(data, True)
+
+def day7_2(data):
+    # data = read_input(YEAR, DAY * 100 + 1)
+    data = day7_parse(data)
+    return day7_calculate(data, False)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
