@@ -399,26 +399,28 @@ def day8_1(data):
                 count += 1
     return count
 
-def day8_2(data):
-    data = day8_parse(data)
-    total = 0
-#   0:      1:      2:      3:      4:
-#  aaaa    ....    aaaa    aaaa    ....
-# b    c  .    c  .    c  .    c  b    c
-# b    c  .    c  .    c  .    c  b    c
-#  ....    ....    dddd    dddd    dddd
-# e    f  .    f  e    .  .    f  .    f
-# e    f  .    f  e    .  .    f  .    f
-#  gggg    ....    gggg    gggg    ....
+def day8_fixed_point(segments):
+    # Go through all alternatives,
+    # if segment X has alternatives 1, 2 and 3
+    # and segment Y has alternatives 1 and 2
+    # we can conclude that X is 3
+    modified_segments = False
+    new_information = True
+    while new_information:
+        new_information = False
+        for s, ps in segments.items():
+            if len(ps) == 1:
+                continue
 
-#   5:      6:      7:      8:      9:
-#  aaaa    aaaa    aaaa    aaaa    aaaa
-# b    .  b    .  .    c  b    c  b    c
-# b    .  b    .  .    c  b    c  b    c
-#  dddd    dddd    ....    dddd    dddd
-# .    f  e    f  .    f  e    f  .    f
-# .    f  e    f  .    f  e    f  .    f
-#  gggg    gggg    ....    gggg    gggg
+            for s2, ps2 in segments.items():
+                if s2 != s:
+                    if len(ps) > len(ps2) and ps2.issubset(ps):
+                        segments[s] = ps.difference(ps2)
+                        new_information = True
+                        modified_segments = True
+    return segments, modified_segments
+
+def day8_calculate_outputs(segments, outputs):
     result = {
         "abcefg": 0,
         "cf": 1,
@@ -431,7 +433,42 @@ def day8_2(data):
         "abcdefg": 8,
         "abcdfg": 9
     }
-    for signal, value in data:
+    mapping = {}
+    for adg, v in segments.items():
+        mapping[v.pop()] = adg
+    decoded_out = ""
+    for d in outputs:
+        decoded_str = ""
+        for c in d:
+            decoded_str += mapping[c]
+
+        decoded_str = "".join(sorted(decoded_str))
+        decoded_digit = str(result[decoded_str])
+        decoded_out += decoded_digit
+    return int(decoded_out)
+
+def day8_2(data):
+    data = day8_parse(data)
+    total = 0
+    #   0:      1:      2:      3:      4:
+    #  aaaa    ....    aaaa    aaaa    ....
+    # b    c  .    c  .    c  .    c  b    c
+    # b    c  .    c  .    c  .    c  b    c
+    #  ....    ....    dddd    dddd    dddd
+    # e    f  .    f  e    .  .    f  .    f
+    # e    f  .    f  e    .  .    f  .    f
+    #  gggg    ....    gggg    gggg    ....
+
+    #   5:      6:      7:      8:      9:
+    #  aaaa    aaaa    aaaa    aaaa    aaaa
+    # b    .  b    .  .    c  b    c  b    c
+    # b    .  b    .  .    c  b    c  b    c
+    #  dddd    dddd    ....    dddd    dddd
+    # .    f  e    f  .    f  e    f  .    f
+    # .    f  e    f  .    f  e    f  .    f
+    #  gggg    gggg    ....    gggg    gggg
+
+    for signal, outputs in data:
 
         segments = {
             "a": set(),
@@ -443,132 +480,131 @@ def day8_2(data):
             "g": set(),
         }
         for x in signal:
+            # 1 is made up of only C and F
             if len(x) == 2:
                 for c in x:
                     segments["c"].add(c)
                     segments["f"].add(c)
+
+            # 4 is made up of B, D, C and F
+            # Since C and F are set from previous
+            # iteration, add alternatives for B and D
             elif len(x) == 4:
                 for c in x:
                     segments["b"].add(c)
-                    # segments["c"].add(c)
                     segments["d"].add(c)
+                    # segments["c"].add(c)
                     # segments["f"].add(c)
+
+            # 7 is made up of A, C and F
+            # Since C and F are set from previous
+            # iteration, add alternative for A
             elif len(x) == 3:
                 for c in x:
                     segments["a"].add(c)
                     # segments["c"].add(c)
                     # segments["f"].add(c)
 
+        # 2, 3 and 5 share A, D and G
+        # So, save the alternatives that
+        # appear in all of them
         all_5 = [x for x in signal if len(x) == 5]
         counts = Counter()
         for x in all_5:
             for c in x:
                 counts[c] += 1
-        k = ""
+        adg = ""
         for c, count in counts.items():
             if count == len(all_5):
-                k += c
-        assert len(k) == 3
+                adg += c
+        assert len(adg) == 3
 
+        # All digits except 1, 4 and 7 share G
+        # So, save the alternatives that
+        # appear in all of them in G
         all_g = [x for x in signal if len(x) not in [2, 4, 3]]
         counts3 = Counter()
         for x in all_g:
             for c in x:
                 counts3[c] += 1
-        k3 = ""
         for c, count in counts3.items():
             if count == len(all_g):
-                k3 += c
                 segments["g"].add(c)
 
+        # 0, 6 and 9 share A, B, F and G
+        # So, save the alternatives that
+        # appear in all of them
         all_6 = [x for x in signal if len(x) == 6]
         counts2 = Counter()
         for x in all_6:
             for c in x:
                 counts2[c] += 1
-        k2 = ""
+        abfg = ""
         for c, count in counts2.items():
             if count == len(all_6):
-                k2 += c
-        assert len(k2) == 4
+                abfg += c
+        assert len(abfg) == 4
 
-        all_s = "abcdefg"
+        # When we reach this point, all
+        # segments except E have an alternative
+        # So save the remaining ones
         used = []
         for l in segments.values():
             for c in l:
                 used.append(c)
+        all_s = "abcdefg"
         for c in all_s:
             if not c in used:
                 segments["e"] = set([c])
 
-        k_bak = k
-        k2_bak = k2
-        changed2 = True
-        while changed2:
-            changed2 = False
+        adg_bak = adg
+        abfg_bak = abfg
+        new_information = True
+        while new_information:
+            new_information = False
 
-            change = True
-            while change:
-                change = False
-                for s, ps in segments.items():
-                    if len(ps) == 1:
-                        continue
+            # Simplify alternatives by eliminating redundant ones
+            segments, new_information = day8_fixed_point(segments)
 
-                    for s2, ps2 in segments.items():
-                        if s2 != s:
-                            if len(ps2) > 0 and len(ps) > len(ps2) and ps2.issubset(ps):
-                                segments[s] = ps.difference(ps2)
-                                change = True
-                                changed2 = True
+            adg = adg_bak
+            abfg = abfg_bak
 
-            k = k_bak
-            k2 = k2_bak
-
-            pos = "adg"
+            # Use the relation between A, D and G
+            # to narrow the results
+            pattern = "adg"
             if len(segments["a"]) == 1:
-                pos = pos.replace("a", "")
-                k = k.replace(list(segments["a"])[0], "")
+                pattern = pattern.replace("a", "")
+                adg = adg.replace(list(segments["a"])[0], "")
             if len(segments["d"]) == 1:
-                pos = pos.replace("d", "")
-                k = k.replace(list(segments["d"])[0], "")
+                pattern = pattern.replace("d", "")
+                adg = adg.replace(list(segments["d"])[0], "")
             if len(segments["g"]) == 1:
-                pos = pos.replace("g", "")
-                k = k.replace(list(segments["g"])[0], "")
-            if len(k) == 1:
-                segments[pos] = set([k])
-                changed2 = True
+                pattern = pattern.replace("g", "")
+                adg = adg.replace(list(segments["g"])[0], "")
+            if len(adg) == 1:
+                segments[pattern] = set([adg])
+                new_information = True
 
-            pos = "abfg"
+            # Use the relation between A, B, F and G
+            # to narrow the results
+            pattern = "abfg"
             if len(segments["a"]) == 1:
-                pos = pos.replace("a", "")
-                k2 = k2.replace(list(segments["a"])[0], "")
+                pattern = pattern.replace("a", "")
+                abfg = abfg.replace(list(segments["a"])[0], "")
             if len(segments["b"]) == 1:
-                pos = pos.replace("b", "")
-                k2 = k2.replace(list(segments["b"])[0], "")
+                pattern = pattern.replace("b", "")
+                abfg = abfg.replace(list(segments["b"])[0], "")
             if len(segments["f"]) == 1:
-                pos = pos.replace("f", "")
-                k2 = k2.replace(list(segments["f"])[0], "")
+                pattern = pattern.replace("f", "")
+                abfg = abfg.replace(list(segments["f"])[0], "")
             if len(segments["g"]) == 1:
-                pos = pos.replace("g", "")
-                k2 = k2.replace(list(segments["g"])[0], "")
-            if len(k2) == 1:
-                segments[pos] = set([k2])
-                changed2 = True
+                pattern = pattern.replace("g", "")
+                abfg = abfg.replace(list(segments["g"])[0], "")
+            if len(abfg) == 1:
+                segments[pattern] = set([abfg])
+                new_information = True
 
-        mapping = {}
-        for k, v in segments.items():
-            mapping[v.pop()] = k
-        output = ""
-        for d in value:
-            decoded_d = ""
-            decoded = ""
-            for c in d:
-                decoded += mapping[c]
-
-            decoded = "".join(sorted(decoded))
-            decoded_d += str(result[decoded])
-            output += decoded_d
-        total += int(output)
+        total += day8_calculate_outputs(segments, outputs)
 
     return total
 
