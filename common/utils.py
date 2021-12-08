@@ -83,18 +83,18 @@ def read_input(year, day):
     with open("{0}/../{1}/input/day{2}".format(file_dir, year, day), "r") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
 
-def day_with_validation(globals_, YEAR, DAY, EXPECTED_1, EXPECTED_2, part, data):
-    data_ex = read_input(YEAR, DAY * 100 + 1)
-    expected_result = EXPECTED_1 if part == 1 else EXPECTED_2
+def day_with_validation(globals_, YEAR, DAY, expected_result, part, data):
     func = globals_[f"day{DAY}_{part}"]
-    result = func(data_ex)
-    if result != expected_result:
-        print(f"{bcolors.FAIL}FAIL")
-        print(f"WAS: {result} SHOULD BE: {expected_result}")
-        print(f"{bcolors.ENDC}")
-        sys.exit(0)
-    print(f"{bcolors.OKGREEN}SUCCESS{bcolors.ENDC}")
-    print(f"{bcolors.OKBLUE}{func(data)}{bcolors.ENDC}")
+    if expected_result is not None:
+        data_ex = read_input(YEAR, DAY * 100 + 1)
+        result = func(data_ex)
+        if result != expected_result:
+            print(f"{bcolors.FAIL}FAIL")
+            print(f"WAS: {result} SHOULD BE: {expected_result}")
+            print(f"{bcolors.ENDC}")
+            sys.exit(0)
+        print(f"{bcolors.OKGREEN}SUCCESS{bcolors.ENDC}")
+    return func(data)
 
 def main(argv_, globals_, year):
     start_day = None
