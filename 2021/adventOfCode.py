@@ -11,7 +11,7 @@ from os.path import join
 import sys
 import time
 from copy import deepcopy
-from collections import defaultdict
+from collections import Counter, defaultdict
 from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -379,6 +379,198 @@ def day7_2(data):
     # data = read_input(YEAR, DAY * 100 + 1)
     data = day7_parse(data)
     return day7_calculate(data, False)
+
+
+""" DAY 8 """
+
+def day8_parse(data):
+    d = []
+    for l in data:
+        parts = l.split(" | ")
+        d.append((parts[0].split(), parts[1].split()))
+    return d
+
+def day8_1(data):
+    data = day8_parse(data)
+    count = 0
+    for _, value in data:
+        for x in value:
+            if len(x) in [2, 4, 3, 7]:
+                count += 1
+    return count
+
+def day8_2(data):
+    data = day8_parse(data)
+    total = 0
+#   0:      1:      2:      3:      4:
+#  aaaa    ....    aaaa    aaaa    ....
+# b    c  .    c  .    c  .    c  b    c
+# b    c  .    c  .    c  .    c  b    c
+#  ....    ....    dddd    dddd    dddd
+# e    f  .    f  e    .  .    f  .    f
+# e    f  .    f  e    .  .    f  .    f
+#  gggg    ....    gggg    gggg    ....
+
+#   5:      6:      7:      8:      9:
+#  aaaa    aaaa    aaaa    aaaa    aaaa
+# b    .  b    .  .    c  b    c  b    c
+# b    .  b    .  .    c  b    c  b    c
+#  dddd    dddd    ....    dddd    dddd
+# .    f  e    f  .    f  e    f  .    f
+# .    f  e    f  .    f  e    f  .    f
+#  gggg    gggg    ....    gggg    gggg
+    result = {
+        "abcefg": 0,
+        "cf": 1,
+        "acdeg": 2,
+        "acdfg": 3,
+        "bcdf": 4,
+        "abdfg": 5,
+        "abdefg": 6,
+        "acf": 7,
+        "abcdefg": 8,
+        "abcdfg": 9
+    }
+    for signal, value in data:
+
+        segments = {
+            "a": set(),
+            "b": set(),
+            "c": set(),
+            "d": set(),
+            "e": set(),
+            "f": set(),
+            "g": set(),
+        }
+        for x in signal:
+            if len(x) == 2:
+                for c in x:
+                    segments["c"].add(c)
+                    segments["f"].add(c)
+            elif len(x) == 4:
+                for c in x:
+                    segments["b"].add(c)
+                    # segments["c"].add(c)
+                    segments["d"].add(c)
+                    # segments["f"].add(c)
+            elif len(x) == 3:
+                for c in x:
+                    segments["a"].add(c)
+                    # segments["c"].add(c)
+                    # segments["f"].add(c)
+
+        all_5 = [x for x in signal if len(x) == 5]
+        counts = Counter()
+        for x in all_5:
+            for c in x:
+                counts[c] += 1
+        k = ""
+        for c, count in counts.items():
+            if count == len(all_5):
+                k += c
+        assert len(k) == 3
+
+        all_g = [x for x in signal if len(x) not in [2, 4, 3]]
+        counts3 = Counter()
+        for x in all_g:
+            for c in x:
+                counts3[c] += 1
+        k3 = ""
+        for c, count in counts3.items():
+            if count == len(all_g):
+                k3 += c
+                segments["g"].add(c)
+
+        all_6 = [x for x in signal if len(x) == 6]
+        counts2 = Counter()
+        for x in all_6:
+            for c in x:
+                counts2[c] += 1
+        k2 = ""
+        for c, count in counts2.items():
+            if count == len(all_6):
+                k2 += c
+        assert len(k2) == 4
+
+        all_s = "abcdefg"
+        used = []
+        for l in segments.values():
+            for c in l:
+                used.append(c)
+        for c in all_s:
+            if not c in used:
+                segments["e"] = set([c])
+
+        k_bak = k
+        k2_bak = k2
+        changed2 = True
+        while changed2:
+            changed2 = False
+
+            change = True
+            while change:
+                change = False
+                for s, ps in segments.items():
+                    if len(ps) == 1:
+                        continue
+
+                    for s2, ps2 in segments.items():
+                        if s2 != s:
+                            if len(ps2) > 0 and len(ps) > len(ps2) and ps2.issubset(ps):
+                                segments[s] = ps.difference(ps2)
+                                change = True
+                                changed2 = True
+
+            k = k_bak
+            k2 = k2_bak
+
+            pos = "adg"
+            if len(segments["a"]) == 1:
+                pos = pos.replace("a", "")
+                k = k.replace(list(segments["a"])[0], "")
+            if len(segments["d"]) == 1:
+                pos = pos.replace("d", "")
+                k = k.replace(list(segments["d"])[0], "")
+            if len(segments["g"]) == 1:
+                pos = pos.replace("g", "")
+                k = k.replace(list(segments["g"])[0], "")
+            if len(k) == 1:
+                segments[pos] = set([k])
+                changed2 = True
+
+            pos = "abfg"
+            if len(segments["a"]) == 1:
+                pos = pos.replace("a", "")
+                k2 = k2.replace(list(segments["a"])[0], "")
+            if len(segments["b"]) == 1:
+                pos = pos.replace("b", "")
+                k2 = k2.replace(list(segments["b"])[0], "")
+            if len(segments["f"]) == 1:
+                pos = pos.replace("f", "")
+                k2 = k2.replace(list(segments["f"])[0], "")
+            if len(segments["g"]) == 1:
+                pos = pos.replace("g", "")
+                k2 = k2.replace(list(segments["g"])[0], "")
+            if len(k2) == 1:
+                segments[pos] = set([k2])
+                changed2 = True
+
+        mapping = {}
+        for k, v in segments.items():
+            mapping[v.pop()] = k
+        output = ""
+        for d in value:
+            decoded_d = ""
+            decoded = ""
+            for c in d:
+                decoded += mapping[c]
+
+            decoded = "".join(sorted(decoded))
+            decoded_d += str(result[decoded])
+            output += decoded_d
+        total += int(output)
+
+    return total
 
 
 """ MAIN FUNCTION """
