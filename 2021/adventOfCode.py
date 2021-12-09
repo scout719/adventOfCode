@@ -609,6 +609,72 @@ def day8_2(data):
     return total
 
 
+""" DAY 9 """
+
+def day9_parse(data):
+    return [[int(x) for x in line] for line in data]
+
+def day9_lowest(data):
+    D = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    R = len(data)
+    C = len(data[0])
+    lowest_pos = []
+    for r in range(R):
+        for c in range(C):
+            curr = data[r][c]
+            lowest = True
+            for dr, dc in D:
+                rr, cc = r + dr, c + dc
+                if 0 <= rr < R and 0 <= cc < C:
+                    curr2 = data[rr][cc]
+                    if curr >= curr2:
+                        lowest = False
+            if lowest:
+                lowest_pos.append((r, c))
+    return lowest_pos
+
+def day9_1(data):
+    data = day9_parse(data)
+
+    total = 0
+    for r, c in day9_lowest(data):
+        total += data[r][c] + 1
+    return total
+
+def day9_move_up(data, r, c, R, C):
+    if data[r][c] == 9:
+        return set()
+
+    curr = data[r][c]
+    res = set([(r, c)])
+    D = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    for dr, dc in D:
+        rr, cc = r + dr, c + dc
+        if 0 <= rr < R and 0 <= cc < C:
+            if curr < data[rr][cc]:
+                res = res.union(day9_move_up(data, rr, cc, R, C))
+    return res
+
+def day9_2(data):
+    data = day9_parse(data)
+
+    R = len(data)
+    C = len(data[0])
+    sizes = []
+
+    sizes = []
+    lowest = day9_lowest(data)
+    for r, c in lowest:
+        visited = set()
+        visited = day9_move_up(data, r, c, R, C)
+        sizes.append(len(visited))
+    total = 1
+    sizes = sorted(sizes)[-3:len(sizes)]
+    for x in sizes:
+        total *= x
+    return total
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
