@@ -675,6 +675,71 @@ def day9_2(data):
     return total
 
 
+""" DAY 10 """
+
+def day10_parse(data):
+    return data
+
+def day10_separate(data):
+    corrupted = []
+    rest = []
+    for l in data:
+        stack = []
+        is_corrupted = False
+        for c in l:
+            if c in "({[<":
+                stack.append(c)
+            else:
+                last = stack[-1]
+                stack = stack[0:-1]
+                if c == ")" and last != "(" or \
+                        c == "]" and last != "[" or \
+                        c == "}" and last != "{" or \
+                        c == ">" and last != "<":
+                    is_corrupted = True
+                    corrupted.append((l, c))
+                    break
+
+        if len(stack) != 0 and not is_corrupted:
+            rest.append((l, stack))
+    return corrupted, rest
+
+def day10_1(data):
+    data = day10_parse(data)
+
+    points = {
+        ")": 3,
+        "]": 57,
+        "}": 1197,
+        ">": 25137
+    }
+    total = 0
+    corrupted, _ = day10_separate(data)
+    for _, c in corrupted:
+        total += points[c]
+
+    return total
+
+def day10_2(data):
+    data = day10_parse(data)
+    _, rest = day10_separate(data)
+    points = {
+        "(": 1,
+        "[": 2,
+        "{": 3,
+        "<": 4
+    }
+    scores = []
+    for _, stack in rest:
+        total = 0
+        for c in reversed(stack):
+            total *= 5
+            total += points[c]
+        scores.append(total)
+        scores.sort()
+    return scores[len(scores) // 2]
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
