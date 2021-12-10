@@ -683,19 +683,28 @@ def day10_parse(data):
 def day10_separate(data):
     corrupted = []
     rest = []
+    mapping = {
+        ")": "(",
+        "]": "[",
+        "}": "{",
+        ">": "<"
+    }
+    opening_chars = mapping.values()
     for l in data:
         stack = []
         is_corrupted = False
         for c in l:
-            if c in "({[<":
+            if c in opening_chars:
                 stack.append(c)
             else:
                 last = stack[-1]
                 stack = stack[0:-1]
-                if c == ")" and last != "(" or \
-                        c == "]" and last != "[" or \
-                        c == "}" and last != "{" or \
-                        c == ">" and last != "<":
+                # if c == ")" and last != "(" or \
+                #         c == "]" and last != "[" or \
+                #         c == "}" and last != "{" or \
+                #         c == ">" and last != "<":
+                assert c in mapping
+                if mapping[c] != last:
                     is_corrupted = True
                     corrupted.append((l, c))
                     break
