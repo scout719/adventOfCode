@@ -749,6 +749,73 @@ def day10_2(data):
     return scores[len(scores) // 2]
 
 
+""" DAY 11 """
+
+def day11_parse(data):
+    return [[int(x) for x in line] for line in data]
+
+def day11_solve(data):
+    flashes_by_step = {}
+    data = day11_parse(data)
+    R = len(data)
+    C = len(data[0])
+
+    for step in range(1, 500):
+
+        # clear()
+        # print(step)
+        # for r in range(R):
+        #     row = ""
+        #     for c in range(C):
+        #         if data[r][c] == 0:
+        #             row += WHITE_SQUARE
+        #         else:
+        #             row += " "
+        #     print(row)
+        # print()
+        # time.sleep(.1)
+
+        flashes = 0
+        q = set()
+        for r in range(R):
+            for c in range(C):
+                data[r][c] += 1
+                if data[r][c] > 9:
+                    q.add((r, c))
+        flashed = set()
+        while q:
+            r, c = q.pop()
+            data[r][c] = 0
+            flashed.add((r, c))
+            flashes += 1
+            if flashes == R * C:
+                return flashes_by_step, step
+            D = [(-1, -1), (-1, 0), (-1, 1), (0, -1),
+                 (0, 1), (1, -1), (1, 0), (1, 1)]
+            for dr, dc in D:
+                rr, cc = r + dr, c + dc
+                if 0 <= rr < R and 0 <= cc < C:
+                    if (rr, cc) not in flashed:
+                        data[rr][cc] += 1
+                        if data[rr][cc] > 9:
+                            q.add((rr, cc))
+        flashes_by_step[step] = flashes
+
+    assert False
+
+def day11_1(data):
+    data = day11_parse(data)
+
+    flashes_by_step, _ = day11_solve(data)
+    return sum([v for k, v in flashes_by_step.items() if k <= 100])
+
+def day11_2(data):
+    data = day11_parse(data)
+
+    _, step = day11_solve(data)
+    return step
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
