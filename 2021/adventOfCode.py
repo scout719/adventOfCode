@@ -816,6 +816,65 @@ def day11_2(data):
     return step
 
 
+""" DAY 12 """
+
+def day12_parse(data):
+    graph = defaultdict(list)
+    for line in data:
+        start, finish = line.split("-")
+        graph[start].append(finish)
+        graph[finish].append(start)
+    return graph
+
+def day12_1(data):
+    data = day12_parse(data)
+
+    q = [("start", ["start"], set())]
+    paths = []
+    while q:
+        curr, path, visited = q.pop()
+        for next_cave in data[curr]:
+            if next_cave == "start" or \
+                    next_cave[0].islower() and next_cave in visited:
+                continue
+            if next_cave == "end":
+                paths.append(path)
+            else:
+                q.append((next_cave,
+                          path + [next_cave],
+                          set(list(visited) + [next_cave])))
+    return len(paths)
+
+def day12_2(data):
+    data = day12_parse(data)
+
+    q = [("start", ["start"], set(), False)]
+    paths = []
+    while q:
+        curr, path, visited, small_twice = q.pop()
+        for next_cave in data[curr]:
+            if next_cave == "start" or \
+                    (next_cave[0].islower() and next_cave in visited
+                        and small_twice):
+                continue
+            if next_cave == "end":
+                paths.append(path)
+            else:
+                if next_cave[0].islower():
+                    q.append(
+                        (next_cave,
+                         path + [next_cave],
+                         set(list(visited) + [next_cave]),
+                         small_twice or (next_cave in visited)))
+                else:
+                    q.append(
+                        (next_cave,
+                         path + [next_cave],
+                         set(list(visited) + [next_cave]),
+                         small_twice))
+    return len(paths)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
