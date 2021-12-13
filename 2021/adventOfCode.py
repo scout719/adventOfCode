@@ -262,15 +262,30 @@ def day5_between(x, x1, x2):
 
 def day5_1(data):
     # data = read_input(YEAR, DAY * 100 + 1)
-    max_x, max_y, m = day5_parse(data)
+    _, _, m = day5_parse(data)
     counts = defaultdict(lambda: 0)
-    for y in range(max_y + 1):
-        for x in range(max_x + 1):
-            for x1, y1, x2, y2 in m:
-                if x1 == x2 or y1 == y2:
-                    if (x == x1 and day5_between(y, y1, y2)) \
-                            or (y == y1 and day5_between(x, x1, x2)):
-                        counts[(x, y)] += 1
+    # for y in range(max_y + 1):
+    #     for x in range(max_x + 1):
+    #         for x1, y1, x2, y2 in m:
+    #             if x1 == x2 or y1 == y2:
+    #                 if (x == x1 and day5_between(y, y1, y2)) \
+    #                         or (y == y1 and day5_between(x, x1, x2)):
+    #                     counts[(x, y)] += 1
+
+    for x1, y1, x2, y2 in m:
+        if x1 == x2 or y1 == y2:
+            dx, dy = 0, 0
+            if x2 - x1 != 0:
+                dx = (x2 - x1) / abs(x2 - x1)
+            if y2 - y1 != 0:
+                dy = (y2 - y1) / abs(y2 - y1)
+
+            curr_x, curr_y = x1, y1
+            while curr_x != x2 or curr_y != y2:
+                counts[(curr_x, curr_y)] += 1
+                curr_x, curr_y = curr_x + dx, curr_y + dy
+            # Count final position (x2,y2) as well
+            counts[(curr_x, curr_y)] += 1
 
     count = 0
     for k in counts:
@@ -873,6 +888,125 @@ def day12_2(data):
                          set(list(visited) + [next_cave]),
                          small_twice))
     return len(paths)
+
+
+""" DAY 13 """
+
+def day13_parse(data):
+    points = set()
+    i = 0
+    for line in data:
+        if line:
+            x, y = line.split(",")
+            points.add((int(x), int(y)))
+            i += 1
+        else:
+            break
+    folds = []
+    for line in data[i + 1:]:
+        first, second = line.split("=")
+        along = first.split("fold along ")[1]
+        folds.append((along, int(second)))
+
+    return points, folds
+
+def day13_1(data):
+    points, folds = day13_parse(data)
+
+    max_c = max([x for x, _ in points])
+    max_r = max([y for _, y in points])
+
+    dr, dc = (0, -1) if folds[0][0] == "x" else (-1, 0)
+    C = max_c + 1
+    R = max_r + 1
+    point = folds[0][1]
+    # 735 wrong
+    for dir_, point in folds:
+        new_points = set()
+        dr, dc = (0, -1) if dir_ == "x" else (-1, 0)
+        for r in range(R):
+            for c in range(C):
+                if (c, r) in points:
+                    points.remove((c, r))
+                    if dc == -1:  # folds on x
+                        assert c != point, c
+                        if c > point:
+                            # new_points.add((C - c - 1, r))
+                            new_points.add((point - (c - point), r))
+                        else:
+                            new_points.add((c, r))
+                    if dr == -1:  # folds on y
+                        assert r != point, r
+                        if r > point:
+                            # new_points.add((c, R - r - 1))
+                            new_points.add((c, point - (r - point)))
+                        else:
+                            new_points.add((c, r))
+        points = new_points
+        max_c = max([x for x, y in points])
+        max_r = max([y for x, y in points])
+        C = max_c + 1
+        R = max_r + 1
+        break
+
+    # for r in range(R):
+    #     row = ""
+    #     for c in range(C):
+    #         if (c, r) in points:
+    #             row += WHITE_SQUARE
+    #         else:
+    #             row += " "
+    #     print(row)
+    return len(new_points)
+
+def day13_2(data):
+    points, folds = day13_parse(data)
+
+    max_c = max([x for x, _ in points])
+    max_r = max([y for _, y in points])
+
+    dr, dc = (0, -1) if folds[0][0] == "x" else (-1, 0)
+    C = max_c + 1
+    R = max_r + 1
+    point = folds[0][1]
+    # 735 wrong
+    for dir_, point in folds:
+        new_points = set()
+        dr, dc = (0, -1) if dir_ == "x" else (-1, 0)
+        for r in range(R):
+            for c in range(C):
+                if (c, r) in points:
+                    points.remove((c, r))
+                    if dc == -1:  # folds on x
+                        assert c != point, c
+                        if c > point:
+                            #new_points.add((C - c - 1, r))
+                            new_points.add((point - (c - point), r))
+                        else:
+                            new_points.add((c, r))
+                    if dr == -1:  # folds on y
+                        assert r != point, r
+                        if r > point:
+                            #new_points.add((c, R - r - 1))
+                            new_points.add((c, point - (r - point)))
+                        else:
+                            new_points.add((c, r))
+        points = new_points
+        max_c = max([x for x, y in points])
+        max_r = max([y for x, y in points])
+        C = max_c + 1
+        R = max_r + 1
+
+    for r in range(R):
+        row = ""
+        for c in range(C):
+            if (c, r) in points:
+                row += WHITE_SQUARE
+            else:
+                row += " "
+        print(row)
+
+    return None
 
 
 """ MAIN FUNCTION """
