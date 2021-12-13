@@ -910,93 +910,29 @@ def day13_parse(data):
 
     return points, folds
 
-def day13_1(data):
-    points, folds = day13_parse(data)
+def day13_fold(points, fold):
+    point = fold[1]
+    new_points = set()
+    for x, y in points:
+        if fold[0] == "x":
+            assert x != point, x
+            if x > point:
+                # new_points.add((C - c - 1, r))
+                new_points.add((point - (x - point), y))
+            else:
+                new_points.add((x, y))
+        if fold[0] == "y":
+            assert y != point, y
+            if y > point:
+                # new_points.add((c, R - r - 1))
+                new_points.add((x, point - (y - point)))
+            else:
+                new_points.add((x, y))
+    return new_points
 
-    max_c = max([x for x, _ in points])
-    max_r = max([y for _, y in points])
-
-    dr, dc = (0, -1) if folds[0][0] == "x" else (-1, 0)
-    C = max_c + 1
-    R = max_r + 1
-    point = folds[0][1]
-    # 735 wrong
-    for dir_, point in folds:
-        new_points = set()
-        dr, dc = (0, -1) if dir_ == "x" else (-1, 0)
-        for r in range(R):
-            for c in range(C):
-                if (c, r) in points:
-                    points.remove((c, r))
-                    if dc == -1:  # folds on x
-                        assert c != point, c
-                        if c > point:
-                            # new_points.add((C - c - 1, r))
-                            new_points.add((point - (c - point), r))
-                        else:
-                            new_points.add((c, r))
-                    if dr == -1:  # folds on y
-                        assert r != point, r
-                        if r > point:
-                            # new_points.add((c, R - r - 1))
-                            new_points.add((c, point - (r - point)))
-                        else:
-                            new_points.add((c, r))
-        points = new_points
-        max_c = max([x for x, y in points])
-        max_r = max([y for x, y in points])
-        C = max_c + 1
-        R = max_r + 1
-        break
-
-    # for r in range(R):
-    #     row = ""
-    #     for c in range(C):
-    #         if (c, r) in points:
-    #             row += WHITE_SQUARE
-    #         else:
-    #             row += " "
-    #     print(row)
-    return len(new_points)
-
-def day13_2(data):
-    points, folds = day13_parse(data)
-
-    max_c = max([x for x, _ in points])
-    max_r = max([y for _, y in points])
-
-    dr, dc = (0, -1) if folds[0][0] == "x" else (-1, 0)
-    C = max_c + 1
-    R = max_r + 1
-    point = folds[0][1]
-    # 735 wrong
-    for dir_, point in folds:
-        new_points = set()
-        dr, dc = (0, -1) if dir_ == "x" else (-1, 0)
-        for r in range(R):
-            for c in range(C):
-                if (c, r) in points:
-                    points.remove((c, r))
-                    if dc == -1:  # folds on x
-                        assert c != point, c
-                        if c > point:
-                            #new_points.add((C - c - 1, r))
-                            new_points.add((point - (c - point), r))
-                        else:
-                            new_points.add((c, r))
-                    if dr == -1:  # folds on y
-                        assert r != point, r
-                        if r > point:
-                            #new_points.add((c, R - r - 1))
-                            new_points.add((c, point - (r - point)))
-                        else:
-                            new_points.add((c, r))
-        points = new_points
-        max_c = max([x for x, y in points])
-        max_r = max([y for x, y in points])
-        C = max_c + 1
-        R = max_r + 1
-
+def day13_print(points):
+    C = max([x for x, _ in points]) + 1
+    R = max([y for _, y in points]) + 1
     for r in range(R):
         row = ""
         for c in range(C):
@@ -1006,6 +942,19 @@ def day13_2(data):
                 row += " "
         print(row)
 
+def day13_1(data):
+    points, folds = day13_parse(data)
+
+    new_points = day13_fold(points, folds[0])
+
+    return len(new_points)
+
+def day13_2(data):
+    points, folds = day13_parse(data)
+    for fold in folds:
+        points = day13_fold(points, fold)
+
+    day13_print(points)
     return None
 
 
