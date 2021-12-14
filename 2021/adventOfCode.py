@@ -958,6 +958,84 @@ def day13_2(data):
     return None
 
 
+""" DAY 14 """
+
+def day14_parse(data):
+    m = {}
+    temp = data[0]
+
+    for line in data[2:]:
+        left, right = line.split(" -> ")
+        m[left] = right
+    return temp, m
+
+def day14_1(data):
+    temp, m = day14_parse(data)
+
+    s = temp
+    for _ in range(10):
+        n = s[0]
+        for j in range(len(s) - 1):
+            curr = s[j:j + 2]
+            n += m[curr]
+            n += curr[1]
+        s = n
+    vals = Counter(s)
+    return max(vals.values()) - min(vals.values())
+
+# Try 1
+def day14_divide(curr, DP, m):
+    if len(curr) == 2:
+        return curr[0] + m[curr] + curr[1]
+
+    if curr in DP:
+        return DP[curr]
+
+    if len(curr) % 2 == 0:
+
+        mid = len(curr) // 2
+        left = curr[:mid]
+        right = curr[mid:]
+        mid_c = left[-1] + right[0]
+        assert mid_c in m, mid_c
+        DP[curr] = day14_divide(left, DP, m) + m[mid_c] + \
+            day14_divide(right, DP, m)
+        return DP[curr]
+    else:
+
+        rest = curr[-2:]
+        n_curr = curr[:-1]
+        DP[curr] = day14_divide(n_curr, DP, m) + m[rest] + rest[-1]
+        return DP[curr]
+
+def day14_2(data):
+    temp, m = day14_parse(data)
+    freq = Counter()
+    for j in range(len(temp) - 1):
+        curr = temp[j:j + 2]
+        freq[curr] += 1
+
+    for _ in range(40):
+        new_freq = Counter()
+        for pair in freq:
+            n1 = pair[0] + m[pair]
+            n2 = m[pair] + pair[1]
+            new_freq[n1] += freq[pair]
+            new_freq[n2] += freq[pair]
+        freq = new_freq
+
+    final_c = Counter()
+    for k in freq:
+        final_c[k[1]] += freq[k]
+    # Counter({'N': 2, 'C': 1, 'B': 1})
+    # Counter({'N': 2, 'C': 2, 'B': 2, 'H': 1})
+    # Counter({'B': 6, 'C': 4, 'N': 2, 'H': 1})
+    # Counter({'B': 11, 'N': 5, 'C': 5, 'H': 4})
+    # Counter({'B': 23, 'N': 11, 'C': 10, 'H': 5})
+    final_c[temp[0]] += 1
+    return max(final_c.values()) - min(final_c.values())
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
