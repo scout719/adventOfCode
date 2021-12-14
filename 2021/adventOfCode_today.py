@@ -11,8 +11,9 @@ from os.path import join
 import sys
 import time
 from copy import deepcopy
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from heapq import heappop, heappush
+from typing import ChainMap
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -24,23 +25,23 @@ from common.utils import BLUE_CIRCLE, RED_SMALL_SQUARE  # NOQA: E402
 # pylint: enable=wrong-import-position
 
 YEAR = 2021
-DAY = 9
+DAY = 15
 EXPECTED_1 = None
 EXPECTED_2 = None
 
 
-""" DAY 9 """
+""" DAY 15 """
 
-def day9_parse(data):
+def day15_parse(data):
     return data
 
-def day9_1(data):
-    data = day9_parse(data)
+def day15_1(data):
+    data = day15_parse(data)
     return data
 
-def day9_2(data):
-    data = day9_parse(data)
-    return data
+def day15_2(data):
+    data = day15_parse(data)
+    return None
 
 
 """ MAIN FUNCTION """
