@@ -1036,6 +1036,65 @@ def day14_2(data):
     return max(final_c.values()) - min(final_c.values())
 
 
+""" DAY 15 """
+
+def day15_parse(data):
+    G = []
+    for line in data:
+        G.append([int(x) for x in line])
+    return G
+
+def day15_flood(G):
+    R = len(G)
+    C = len(G[0])
+    q = [(G[R - 1][C - 1], R - 1, C - 1)]
+    risks = defaultdict(lambda: -1)
+    risks[(R - 1, C - 1)] = G[R - 1][C - 1]
+    while q:
+        risk, r, c = heappop(q)
+        if r == 0 and c == 0:
+            return risk
+
+        D = [(0, -1), (-1, 0), (1, 0), (0, 1)]
+        for dr, dc in D:
+            rr = r + dr
+            cc = c + dc
+            if 0 <= rr < R and 0 <= cc < C:
+                curr = G[rr][cc] + risks[(r, c)]
+                if risks[(rr, cc)] == -1 or curr < risks[(rr, cc)]:
+                    risks[(rr, cc)] = curr
+                    heappush(q, (curr, rr, cc))
+    assert False
+
+def day15_1(data):
+    G = day15_parse(data)
+    # Remove cost of initial position
+    return day15_flood(G) - G[0][0]
+
+def day15_2(data):
+    data = day15_parse(data)
+    G = day15_parse(data)
+    R = len(G)
+    C = len(G[0])
+
+    new_G = []
+    for r in range(R * 5):
+        row = []
+        for c in range(C * 5):
+            pos = G[r % R][c % C]
+            pos += r // R + c // C
+
+            # If we wanted between 1 and 3:
+            # 4 -> 3 -> 3%3 = 0 -> 1
+            # N -> N-1 -> N-1 % MAX -> +1
+            pos = ((pos - 1) % 9) + 1
+            row.append(pos)
+        new_G.append(row)
+
+    # Remove cost of initial position
+    return day15_flood(new_G) - new_G[0][0]
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
