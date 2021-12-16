@@ -1095,6 +1095,116 @@ def day15_2(data):
     return day15_flood(new_G) - new_G[0][0]
 
 
+""" DAY 16 """
+
+def day16_parse(data):
+    return ("{:0" + str(len(data[0] * 4)) + "b}").format(int(data[0], 16))
+
+def day16_decode(pack):
+    if pack == "":
+        return "", [], 0
+    ver = int(pack[0:3], 2)
+    id_ = int(pack[3:6], 2)
+    rest = pack[6:]
+    total_size = 6
+    number = ""
+    packs = []
+    if id_ == 4:
+        go = True
+        i = 0
+        while go:
+            if rest[0] == "1":
+                number += rest[1:1 + 4]
+                rest = rest[1 + 4:]
+            else:
+                number += rest[1:1 + 4]
+                rest = rest[1 + 4:]
+                go = False
+            i += 5
+            total_size += 5
+        return rest, [(ver, id_, [int(number, 2)])], total_size
+    else:
+        if rest[0] == "0":
+            size = int(rest[1:16], 2)
+            rest = rest[16:]
+            total_size += 16
+            go = True
+            sub_size = 0
+            while go:
+                rest, inner_packs, inner_size = day16_decode(rest)
+                total_size += inner_size
+                sub_size += inner_size
+                packs += inner_packs
+                if sub_size == size:
+                    go = False
+                assert sub_size <= size, (size, sub_size)
+        else:
+            count = int(rest[1:12], 2)
+            rest = rest[12:]
+            total_size += 12
+            for _ in range(count):
+                rest, inner_packs, size = day16_decode(rest)
+                total_size += size
+                packs += inner_packs
+    return rest, [(ver, id_, packs)], total_size
+
+def day16_sum(packs):
+    total = 0
+    for p in packs:
+        ver, id_, inner_packs = p
+        if id_ == 4:
+            total += ver
+        else:
+            total += ver + day16_sum(inner_packs)
+    return total
+
+def day16_process(packs):
+    total = 0
+    _, id_, inner_packs = packs
+    if id_ == 0:
+        for pack in inner_packs:
+            total += day16_process(pack)
+        return total
+    elif id_ == 1:
+        total = 1
+        for pack in inner_packs:
+            total *= day16_process(pack)
+        return total
+    elif id_ == 2:
+        total = min([day16_process(pack) for pack in inner_packs])
+        return total
+    elif id_ == 3:
+        total = max([day16_process(pack) for pack in inner_packs])
+        return total
+    elif id_ == 4:
+        return inner_packs[0]
+    elif id_ == 5:
+        total = 1 if day16_process(
+            inner_packs[0]) > day16_process(inner_packs[1]) else 0
+        return total
+    elif id_ == 6:
+        total = 1 if day16_process(
+            inner_packs[0]) < day16_process(inner_packs[1]) else 0
+        return total
+    elif id_ == 7:
+        total = 1 if day16_process(
+            inner_packs[0]) == day16_process(inner_packs[1]) else 0
+        return total
+    else:
+        assert False
+
+def day16_1(data):
+    data = day16_parse(data)
+    _, packs, _ = day16_decode(data)
+    return day16_sum(packs)
+
+
+def day16_2(data):
+    data = day16_parse(data)
+    _, packs, _ = day16_decode(data)
+    return day16_process(packs[0])
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
