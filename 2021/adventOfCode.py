@@ -1162,33 +1162,61 @@ def day16_process(packs):
     total = 0
     _, id_, inner_packs = packs
     if id_ == 0:
-        for pack in inner_packs:
+        # print("(", end="")
+        for i, pack in enumerate(inner_packs):
             total += day16_process(pack)
+        #     if i != len(inner_packs) - 1:
+        #         print("+", end="")
+        # print(")", end="")
         return total
     elif id_ == 1:
         total = 1
-        for pack in inner_packs:
+        # print("(", end="")
+        for i, pack in enumerate(inner_packs):
             total *= day16_process(pack)
+        #     if i != len(inner_packs) - 1:
+        #         print("*", end="")
+        # print(")", end="")
         return total
     elif id_ == 2:
+        # print("min(", end="")
         total = min([day16_process(pack) for pack in inner_packs])
+        # print(")", end="")
         return total
     elif id_ == 3:
+        # print("max(", end="")
         total = max([day16_process(pack) for pack in inner_packs])
+        # print(")", end="")
         return total
     elif id_ == 4:
+        # print(f" {inner_packs[0]} ", end="")
         return inner_packs[0]
     elif id_ == 5:
-        total = 1 if day16_process(
-            inner_packs[0]) > day16_process(inner_packs[1]) else 0
+        # print("(", end="")
+        left = day16_process(
+            inner_packs[0])
+        # print(">", end="")
+        right = day16_process(inner_packs[1])
+        total = 1 if left > right else 0
+        # print(")", end="")
         return total
     elif id_ == 6:
-        total = 1 if day16_process(
-            inner_packs[0]) < day16_process(inner_packs[1]) else 0
+        # print("(", end="")
+        left = day16_process(
+            inner_packs[0])
+        # print("<", end="")
+        right = day16_process(inner_packs[1])
+        total = 1 if left < right else 0
+        # print(")", end="")
         return total
     elif id_ == 7:
-        total = 1 if day16_process(
-            inner_packs[0]) == day16_process(inner_packs[1]) else 0
+        # print("(", end="")
+        left = day16_process(
+            inner_packs[0])
+        # print("==", end="")
+        right = day16_process(inner_packs[1])
+        total = 1 if left == right else 0
+        # print(")", end="")
         return total
     else:
         assert False
@@ -1203,6 +1231,55 @@ def day16_2(data):
     data = day16_parse(data)
     _, packs, _ = day16_decode(data)
     return day16_process(packs[0])
+
+
+""" DAY 17 """
+
+def day17_parse(data):
+    pos = data[0].split("target area: ")[1]
+    x, y = pos.split(", ")
+    min_x, max_x = x.split("..")
+    min_x = int(min_x.replace("x=", ""))
+    max_x = int(max_x)
+    min_y, max_y = y.split("..")
+    min_y = int(min_y.replace("y=", ""))
+    max_y = int(max_y)
+
+    return min_x, max_x, min_y, max_y
+
+def day17_all_vels(min_x, max_x, min_y, max_y):
+    ans = []
+    t = 0
+    for dx in range(1, max_x + 1):
+        dy = min_y - 1
+        while dy < 200:  # Magic 200, can this be calculated?
+            dy += 1
+            curr_x, curr_y = 0, 0
+            i_dx = dx
+            i_dy = dy
+            top_y = 0
+            while curr_y >= min_y and curr_x <= max_x:
+                t += 1
+                curr_x += dx
+                curr_y += dy
+                dx -= 1 if dx != 0 else 0
+                dy -= 1
+                top_y = max(top_y, curr_y)
+                if min_x <= curr_x <= max_x and min_y <= curr_y <= max_y:
+                    ans.append((top_y, i_dx, i_dy))
+                    break
+            dy = i_dy
+            dx = i_dx
+
+    return ans
+
+def day17_1(data):
+    min_x, max_x, min_y, max_y = day17_parse(data)
+    return max(day17_all_vels(min_x, max_x, min_y, max_y))[0]
+
+def day17_2(data):
+    min_x, max_x, min_y, max_y = day17_parse(data)
+    return len(day17_all_vels(min_x, max_x, min_y, max_y))
 
 
 """ MAIN FUNCTION """
