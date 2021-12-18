@@ -1249,17 +1249,15 @@ def day17_parse(data):
 
 def day17_all_vels(min_x, max_x, min_y, max_y):
     ans = []
-    t = 0
     for dx in range(1, max_x + 1):
         dy = min_y - 1
-        while dy < 200:  # Magic 200, can this be calculated?
+        while dy < max_y:  # Magic 200, can this be calculated?
             dy += 1
             curr_x, curr_y = 0, 0
             i_dx = dx
             i_dy = dy
             top_y = 0
             while curr_y >= min_y and curr_x <= max_x:
-                t += 1
                 curr_x += dx
                 curr_y += dy
                 dx -= 1 if dx != 0 else 0
@@ -1280,6 +1278,209 @@ def day17_1(data):
 def day17_2(data):
     min_x, max_x, min_y, max_y = day17_parse(data)
     return len(day17_all_vels(min_x, max_x, min_y, max_y))
+
+
+""" DAY 18 """
+
+class Node:
+    def __init__(self) -> None:
+        self.left = None
+        self.right = None
+        self.parent = None
+
+    def __str__(self) -> str:
+        return f"[{self.left},{self.right}]"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+def day18_tree(pair, parent):
+    l, r = pair
+    curr = Node()
+    if type(l) != int:
+        l = day18_tree(l, curr)
+    if type(r) != int:
+        r = day18_tree(r, curr)
+    curr.left = l
+    curr.right = r
+    curr.parent = parent
+    return curr
+
+def day18_parse(data):
+    x = []
+    for line in data:
+        x.append(day18_tree(eval(line), None))
+    return x
+
+def day18_add_left(v, node):
+    # [[[[[[1,2],[9,8]],1],2],3],4]
+    #                           |
+    #     4                  |       4
+    #                   |       3
+    #                |      2
+    #             |     1
+    #         |      |
+    #     1      2 9    8
+    #                           |
+    #             |                                 1
+    #      4                 |       4
+    #                   |       3
+    #                |      2
+    #             |     1
+    #          9    8
+    if node is None or node.parent is None:
+        return
+    sibling = node.parent.left
+    if sibling == node:
+        return day18_add_left(v, node.parent)
+    elif type(sibling) == int:
+        node.parent.left += v
+    else:
+        curr = sibling
+        while type(curr.right) != int:
+            curr = curr.right
+        curr.right += v
+
+def day18_add_right(v, node):
+    if node is None or node.parent is None:
+        return
+    sibling = node.parent.right
+    if sibling == node:
+        return day18_add_right(v, node.parent)
+    elif type(sibling) == int:
+        node.parent.right += v
+    else:
+        curr = sibling
+        while type(curr.left) != int:
+            curr = curr.left
+        curr.left += v
+
+def day18_explode(curr, d):
+    if curr is None or type(curr) == int:
+        return False
+    if d == 4:
+        assert type(curr.left) == int and type(curr.right) == int
+        day18_add_left(curr.left, curr)
+        day18_add_right(curr.right, curr)
+        if curr.parent.left == curr:
+            curr.parent.left = 0
+        else:
+            curr.parent.right = 0
+        return True
+    else:
+        exploded = day18_explode(curr.left, d + 1)
+        if not exploded:
+            exploded = day18_explode(curr.right, d + 1)
+        return exploded
+
+def day18_split(pair):
+    splitted = False
+    if type(pair.left) != int:
+        splitted = day18_split(pair.left)
+    else:
+        if pair.left >= 10:
+            splitted = True
+            curr = Node()
+            curr.parent = pair
+            curr.left = pair.left // 2
+            curr.right = pair.left - curr.left
+            pair.left = curr
+
+    if not splitted:
+        if type(pair.right) != int:
+            splitted = day18_split(pair.right)
+        else:
+            if pair.right >= 10:
+                splitted = True
+                curr = Node()
+                curr.parent = pair
+                curr.left = pair.right // 2
+                curr.right = pair.right - curr.left
+                pair.right = curr
+    return splitted
+
+def day18_add(p1, p2):
+    curr = Node()
+    curr.left = p1
+    curr.right = p2
+    p1.parent = curr
+    p2.parent = curr
+    return curr
+
+def day18_reduce(curr):
+    reduced = True
+    while reduced:
+        # #print(curr)
+        reduced = day18_explode(curr, 0)
+        if not reduced:
+            reduced = day18_split(curr)
+
+def day18_mag(pair):
+    mag = 0
+    if type(pair.left) == int:
+        mag += 3 * pair.left
+    else:
+        mag += 3 * day18_mag(pair.left)
+    if type(pair.right) == int:
+        mag += 2 * pair.right
+    else:
+        mag += 2 * day18_mag(pair.right)
+    return mag
+
+
+def day18_1(data):
+    data = day18_parse(data)
+    # #print(data)
+    curr = data[0]
+    day18_reduce(curr)
+    rest = data[1:]
+    while rest:
+        n = rest[0]
+        day18_reduce(n)
+        rest = rest[1:]
+        curr = day18_add(curr, n)
+        day18_reduce(curr)
+    return day18_mag(curr)
+
+def day18_clone(pair):
+    assert pair is not None
+    if type(pair) == int:
+        return pair
+    curr = Node()
+    curr.left = day18_clone(pair.left)
+    curr.right = day18_clone(pair.right)
+    if type(curr.left) != int:
+        curr.left.parent = curr
+    if type(curr.right) != int:
+        # print(curr)
+        curr.right.parent = curr
+    return curr
+
+def day18_2(data_str):
+    data = day18_parse(data_str)
+    m = None
+    for i in range(len(data)):
+        for j in range(len(data)):
+            if i != j:
+                l = day18_clone(data[i])
+                r = day18_clone(data[j])
+                day18_reduce(l)
+                day18_reduce(r)
+                a = day18_add(l, r)
+                day18_reduce(a)
+                mag = day18_mag(a)
+                if m is None or mag > m:
+                    m = mag
+                l = day18_clone(data[j])
+                r = day18_clone(data[i])
+                day18_reduce(l)
+                day18_reduce(r)
+                a = day18_add(l, r)
+                day18_reduce(a)
+                mag = day18_mag(a)
+                if m is None or mag > m:
+                    m = mag
+    return m
 
 
 """ MAIN FUNCTION """
