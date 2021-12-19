@@ -1483,6 +1483,173 @@ def day18_2(data_str):
     return m
 
 
+""" DAY 19 """
+
+def day19_parse(data):
+    scanner = []
+    a_s = {}
+    for line in data:
+        if not line:
+            continue
+        if "scanner" in line:
+            s_id = int(line.replace("--- scanner ", "").replace(" ---", ""))
+            scanner = []
+            a_s[s_id] = scanner
+        else:
+            scanner.append(tuple([int(x) for x in line.split(",")]))
+
+    return a_s
+
+def day19_apply(x, y, z, t_x, t_y, t_z):
+    x_ = x * t_x[0] + y * t_x[1] + z * t_x[2]
+    y_ = x * t_y[0] + y * t_y[1] + z * t_y[2]
+    z_ = x * t_z[0] + y * t_z[1] + z * t_z[2]
+    return x_, y_, z_
+
+
+def day19_bruteforce(beacons, diffs, positions, i, DP):
+    R = [
+        ((1, 0, 0), (0, 1, 0), (0, 0, 1)),     # dx,dy,dz
+        ((-1, 0, 0), (0, 1, 0), (0, 0, 1)),    # -dx,dy,dz
+        ((1, 0, 0), (0, -1, 0), (0, 0, 1)),    # dx,-dy,dz
+        ((-1, 0, 0), (0, -1, 0), (0, 0, 1)),    # -dx,-dy,dz
+        ((1, 0, 0), (0, 1, 0), (0, 0, -1)),    # dx,dy,-dz
+        ((-1, 0, 0), (0, 1, 0), (0, 0, -1)),    # -dx,dy,-dz
+        ((1, 0, 0), (0, -1, 0), (0, 0, -1)),    # dx,-dy,-dz
+        ((-1, 0, 0), (0, -1, 0), (0, 0, -1))    # -dx,-dy,-dz
+    ]
+    D = [(0, 1, 2),  # x,y,z
+         (0, 2, 1),  # x,z,y
+         (1, 0, 2),  # y,x,z
+         (1, 2, 0),  # y,z,x
+         (2, 0, 1),  # z,x,y
+         (2, 1, 0)   # z,y,x
+         ]
+
+    for i_x, i_y, i_z in D:
+        for r in R:
+            t_x, t_y, t_z = r[i_x], r[i_y], r[i_z]
+            # for each rotation
+            # t_X is a tripplet with the multiplicative of each component for each component
+            # Eg. t_x = (0,-1,0) -> x is -y from the original coordinate
+            key = (t_x, t_y, t_z, i)
+            if not key in DP:
+                # relative positions of each beacon to every other beacon
+                diffs2 = {}
+                for x, y, z in beacons:
+                    # for each beacon from scanner
+                    x_, y_, z_ = day19_apply(
+                        x, y, z, t_x, t_y, t_z)
+                    rel_pos = set()
+                    for x2, y2, z2 in beacons:
+                        # for each beacon from scanner
+                        x2_, y2_, z2_ = day19_apply(
+                            x2, y2, z2, t_x, t_y, t_z)
+                        # Calculate the relative position to x,y,z
+                        rel_pos.add((x2_ - x_, y2_ - y_, z2_ - z_))
+                    # Store relative positions
+                    diffs2[(x_, y_, z_)] = rel_pos
+                DP[key] = diffs2
+
+            diffs2 = DP[key]
+            for scanner_i in diffs:
+                # for each already known scanner
+                inner_diffs = diffs[scanner_i]
+                for inner_beacon in inner_diffs:
+                    # for each beacon's relative positions
+                    inner_rel_pos = inner_diffs[inner_beacon]
+                    for other_beacon in diffs2:
+                        # for each beacon's relative positions on the current scanner
+                        other_rel_pos = diffs2[other_beacon]
+
+                        # if there is an intersection of at least 12 points, we found the correct orientation
+                        if len(other_rel_pos.intersection(inner_rel_pos)) >= 12:
+                            assert scanner_i == 0 or scanner_i in positions
+                            pos = tuple(
+                                map(lambda i, j: i - j, inner_beacon, other_beacon))
+                            if scanner_i != 0:
+                                # if the match we found is not scanner 0, translate it to 0
+                                pos = tuple(
+                                    map(lambda i, j: i + j, pos, positions[scanner_i]))
+                            return diffs2, pos
+    return None, None
+
+def day19_solve(a_s):
+    diffs = {0: {}}
+    positions = {0: (0, 0, 0)}
+    for x, y, z in a_s[0]:
+        rel_pos = set()
+        for x2, y2, z2 in a_s[0]:
+            rel_pos.add((x2 - x, y2 - y, z2 - z))
+        diffs[0][(x, y, z)] = rel_pos
+
+    solved = set([0])
+    DP = {}
+    while len(solved) != len(a_s):
+        for i in a_s:
+            # for each scanner
+            if i not in solved:
+                diffs2, pos = day19_bruteforce(a_s[i], diffs, positions, i, DP)
+                if diffs2 is not None:
+                    diffs[i] = diffs2
+                    positions[i] = pos
+                    solved.add(i)
+                    break
+
+    return diffs, positions
+
+def day19_1(data):
+
+    a_s = day19_parse(data)
+
+    diffs, _ = day19_solve(a_s)
+    beacons = 0
+    for scanner_i in diffs:
+        # for each already known scanner
+        inner_diffs = diffs[scanner_i]
+        for inner_beacon in inner_diffs:
+            # for each beacon's relative positions
+            count_matching = 0
+            found = False
+            inner_rel_pos = inner_diffs[inner_beacon]
+            for scanner_i2 in diffs:
+                if scanner_i2 <= scanner_i:
+                    continue
+                diffs2 = diffs[scanner_i2]
+                for other_beacon in diffs2:
+                    # for each beacon's relative positions on the current scanner
+                    other_rel_pos = diffs2[other_beacon]
+
+                    # if there is an intersection of at least 12 points, we found a matching beacon
+                    if len(other_rel_pos.intersection(inner_rel_pos)) >= 2:
+                        # diffs[i] = diffs2
+                        found = True
+                        # diffs[scanner_i].remove(inner_beacon)
+                        count_matching += 1
+            if not found:
+                beacons += 1
+
+    return beacons
+
+def day19_2(data):
+    a_s = day19_parse(data)
+
+    _, positions = day19_solve(a_s)
+
+    dists = []
+    for s1 in positions:
+        x1 = positions[s1][0]
+        y1 = positions[s1][1]
+        z1 = positions[s1][2]
+        for s2 in positions:
+            x2 = positions[s2][0]
+            y2 = positions[s2][1]
+            z2 = positions[s2][2]
+            dists.append(abs(x2 - x1) + abs(y2 - y1) + abs(z2 - z1))
+
+    return max(dists)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
