@@ -4,7 +4,6 @@
     // #############################################
     "python.disableInstallationCheck": true,
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintUseMinimalCheckers": false,
     "python.linting.pylintArgs": [
         "--disable=E0401",
         "--disable=C0111",
@@ -25,11 +24,9 @@
         "--ignore=E302,E121,E131"
     ],
     "python.linting.enabled": true,
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportMissingImports": "none"
-    },
+    "python.linting.lintOnSave": true,
+    "python.analysis.completeFunctionParens": true,
     "python.languageServer": "Pylance",
-    "python.analysis.completeFunctionParens": true
     // #############################################
     // #######################  <\PYTHON> ##########
     // #############################################
