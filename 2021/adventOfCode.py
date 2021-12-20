@@ -1507,7 +1507,7 @@ def day19_apply(x, y, z, t_x, t_y, t_z):
     return x_, y_, z_
 
 
-def day19_bruteforce(beacons, diffs, positions, i, DP):
+def day19_bruteforce(beacons, diffs, positions, i, DP, already_compared):
     R = [
         ((1, 0, 0), (0, 1, 0), (0, 0, 1)),     # dx,dy,dz
         ((-1, 0, 0), (0, 1, 0), (0, 0, 1)),    # -dx,dy,dz
@@ -1534,25 +1534,23 @@ def day19_bruteforce(beacons, diffs, positions, i, DP):
             # Eg. t_x = (0,-1,0) -> x is -y from the original coordinate
             key = (t_x, t_y, t_z, i)
             if not key in DP:
+                # coordinated of the beacon with rotation applied
+                transformed_beacons = [day19_apply(
+                    x, y, z, t_x, t_y, t_z) for x, y, z in beacons]
+
                 # relative positions of each beacon to every other beacon
-                diffs2 = {}
-                for x, y, z in beacons:
-                    # for each beacon from scanner
-                    x_, y_, z_ = day19_apply(
-                        x, y, z, t_x, t_y, t_z)
-                    rel_pos = set()
-                    for x2, y2, z2 in beacons:
-                        # for each beacon from scanner
-                        x2_, y2_, z2_ = day19_apply(
-                            x2, y2, z2, t_x, t_y, t_z)
-                        # Calculate the relative position to x,y,z
-                        rel_pos.add((x2_ - x_, y2_ - y_, z2_ - z_))
-                    # Store relative positions
-                    diffs2[(x_, y_, z_)] = rel_pos
+                diffs2 = {(x, y, z):
+                          {(x2 - x, y2 - y, z2 - z)
+                           for x2, y2, z2 in transformed_beacons}
+                          for x, y, z in transformed_beacons}
                 DP[key] = diffs2
 
             diffs2 = DP[key]
             for scanner_i in diffs:
+                key = (i, scanner_i, t_x, t_y, t_z)
+                if key in already_compared:
+                    continue
+                already_compared.add(key)
                 # for each already known scanner
                 inner_diffs = diffs[scanner_i]
                 for inner_beacon in inner_diffs:
@@ -1577,24 +1575,25 @@ def day19_bruteforce(beacons, diffs, positions, i, DP):
 def day19_solve(a_s):
     diffs = {0: {}}
     positions = {0: (0, 0, 0)}
-    for x, y, z in a_s[0]:
-        rel_pos = set()
-        for x2, y2, z2 in a_s[0]:
-            rel_pos.add((x2 - x, y2 - y, z2 - z))
-        diffs[0][(x, y, z)] = rel_pos
+    diffs[0] = {(x, y, z):
+                {(x2 - x, y2 - y, z2 - z)
+                 for x2, y2, z2 in a_s[0]}
+                for x, y, z in a_s[0]}
 
     solved = set([0])
     DP = {}
+    already_compared = set()
     while len(solved) != len(a_s):
         for i in a_s:
             # for each scanner
             if i not in solved:
-                diffs2, pos = day19_bruteforce(a_s[i], diffs, positions, i, DP)
+                diffs2, pos = day19_bruteforce(
+                    a_s[i], diffs, positions, i, DP, already_compared)
                 if diffs2 is not None:
                     diffs[i] = diffs2
                     positions[i] = pos
                     solved.add(i)
-                    break
+                    # break
 
     return diffs, positions
 
@@ -1609,7 +1608,6 @@ def day19_1(data):
         inner_diffs = diffs[scanner_i]
         for inner_beacon in inner_diffs:
             # for each beacon's relative positions
-            count_matching = 0
             found = False
             inner_rel_pos = inner_diffs[inner_beacon]
             for scanner_i2 in diffs:
@@ -1622,10 +1620,8 @@ def day19_1(data):
 
                     # if there is an intersection of at least 12 points, we found a matching beacon
                     if len(other_rel_pos.intersection(inner_rel_pos)) >= 2:
-                        # diffs[i] = diffs2
                         found = True
-                        # diffs[scanner_i].remove(inner_beacon)
-                        count_matching += 1
+                        break
             if not found:
                 beacons += 1
 
