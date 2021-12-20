@@ -1650,6 +1650,92 @@ def day19_2(data):
     return max(dists)
 
 
+""" DAY 20 """
+
+def day20_parse(data):
+    algo = data[0]
+
+    img = []
+    for line in data[2:]:
+        img.append(line)
+
+    return algo, img
+
+def day20_get_pixel(algo, r, c, G, old_min, old_max, outside_lit):
+    DR = [-1, 0, 1]
+    DC = [-1, 0, 1]
+    n = ""
+    for dr in DR:
+        for dc in DC:
+            rr, cc = r + dr, c + dc
+            if not (old_min <= rr <= old_max and old_min <= cc <= old_max):
+                if outside_lit:
+                    n += "1"
+                else:
+                    n += "0"
+                continue
+            if G[(rr, cc)]:
+                n += "1"
+            else:
+                n += "0"
+    v = int(n, 2)
+    return algo[v]
+
+def day20_print(G, old_min, old_max):
+    counter = 0
+    for r in range(old_min, old_max):
+        line = ""
+        for c in range(old_min, old_max):
+            if G[(r, c)]:
+                line += "#"
+                counter += 1
+            else:
+                line += " "
+        print(line + "|")
+
+def day20_solve(img, algo, t):
+    R = len(img)
+    C = len(img[0])
+    old_min = 0
+    old_max = R - 1
+
+    G = defaultdict(bool)
+    for r in range(R):
+        for c in range(C):
+            assert img[r][c] in ["#", "."], img[r][c]
+            if img[r][c] == "#":
+                G[(r, c)] = True
+
+    outside_lit = False
+
+    for _ in range(t):
+        G2 = defaultdict(bool)
+        for r in range(old_min - 1, old_max + 2):
+            for c in range(old_min - 1, old_max + 2):
+                p = day20_get_pixel(algo, r, c, G, old_min,
+                                    old_max, outside_lit)
+                if p == "#":
+                    G2[(r, c)] = True
+        old_min -= 1
+        old_max += 1
+        G = G2
+        if algo[0] == "#":
+            outside_lit = not outside_lit
+        # day20_print(G, old_min, old_max)
+
+    return sum(G.values())
+
+def day20_1(data):
+    algo, img = day20_parse(data)
+
+    return day20_solve(img, algo, 2)
+
+def day20_2(data):
+    algo, img = day20_parse(data)
+
+    return day20_solve(img, algo, 50)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
