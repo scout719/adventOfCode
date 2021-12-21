@@ -724,7 +724,7 @@ def day10_separate(data):
                     corrupted.append((l, c))
                     break
 
-        if len(stack) != 0 and not is_corrupted:
+        if stack and not is_corrupted:
             rest.append((l, stack))
     return corrupted, rest
 
@@ -870,7 +870,7 @@ def day12_2(data):
         for next_cave in data[curr]:
             if next_cave == "start" or \
                     (next_cave[0].islower() and next_cave in visited
-                        and small_twice):
+                     and small_twice):
                 continue
             if next_cave == "end":
                 paths.append(path)
@@ -1163,7 +1163,7 @@ def day16_process(packs):
     _, id_, inner_packs = packs
     if id_ == 0:
         # print("(", end="")
-        for i, pack in enumerate(inner_packs):
+        for _, pack in enumerate(inner_packs):
             total += day16_process(pack)
         #     if i != len(inner_packs) - 1:
         #         print("+", end="")
@@ -1172,7 +1172,7 @@ def day16_process(packs):
     elif id_ == 1:
         total = 1
         # print("(", end="")
-        for i, pack in enumerate(inner_packs):
+        for _, pack in enumerate(inner_packs):
             total *= day16_process(pack)
         #     if i != len(inner_packs) - 1:
         #         print("*", end="")
@@ -1297,9 +1297,9 @@ class Node:
 def day18_tree(pair, parent):
     l, r = pair
     curr = Node()
-    if type(l) != int:
+    if not isinstance(l, int):
         l = day18_tree(l, curr)
-    if type(r) != int:
+    if not isinstance(r, int):
         r = day18_tree(r, curr)
     curr.left = l
     curr.right = r
@@ -1308,8 +1308,9 @@ def day18_tree(pair, parent):
 
 def day18_parse(data):
     x = []
+    import ast
     for line in data:
-        x.append(day18_tree(eval(line), None))
+        x.append(day18_tree(ast.literal_eval(line), None))
     return x
 
 def day18_add_left(v, node):
@@ -1333,11 +1334,11 @@ def day18_add_left(v, node):
     sibling = node.parent.left
     if sibling == node:
         return day18_add_left(v, node.parent)
-    elif type(sibling) == int:
+    elif isinstance(sibling, int):
         node.parent.left += v
     else:
         curr = sibling
-        while type(curr.right) != int:
+        while not isinstance(curr.right, int):
             curr = curr.right
         curr.right += v
 
@@ -1347,19 +1348,19 @@ def day18_add_right(v, node):
     sibling = node.parent.right
     if sibling == node:
         return day18_add_right(v, node.parent)
-    elif type(sibling) == int:
+    elif isinstance(sibling, int):
         node.parent.right += v
     else:
         curr = sibling
-        while type(curr.left) != int:
+        while not isinstance(curr.left, int):
             curr = curr.left
         curr.left += v
 
 def day18_explode(curr, d):
-    if curr is None or type(curr) == int:
+    if curr is None or isinstance(curr, int):
         return False
     if d == 4:
-        assert type(curr.left) == int and type(curr.right) == int
+        assert isinstance(curr.left, int) and isinstance(curr.right, int)
         day18_add_left(curr.left, curr)
         day18_add_right(curr.right, curr)
         if curr.parent.left == curr:
@@ -1375,7 +1376,7 @@ def day18_explode(curr, d):
 
 def day18_split(pair):
     splitted = False
-    if type(pair.left) != int:
+    if not isinstance(pair.left, int):
         splitted = day18_split(pair.left)
     else:
         if pair.left >= 10:
@@ -1387,7 +1388,7 @@ def day18_split(pair):
             pair.left = curr
 
     if not splitted:
-        if type(pair.right) != int:
+        if not isinstance(pair.right, int):
             splitted = day18_split(pair.right)
         else:
             if pair.right >= 10:
@@ -1417,11 +1418,11 @@ def day18_reduce(curr):
 
 def day18_mag(pair):
     mag = 0
-    if type(pair.left) == int:
+    if isinstance(pair.left, int):
         mag += 3 * pair.left
     else:
         mag += 3 * day18_mag(pair.left)
-    if type(pair.right) == int:
+    if isinstance(pair.right, int):
         mag += 2 * pair.right
     else:
         mag += 2 * day18_mag(pair.right)
@@ -1444,15 +1445,14 @@ def day18_1(data):
 
 def day18_clone(pair):
     assert pair is not None
-    if type(pair) == int:
+    if isinstance(pair, int):
         return pair
     curr = Node()
     curr.left = day18_clone(pair.left)
     curr.right = day18_clone(pair.right)
-    if type(curr.left) != int:
+    if not isinstance(curr.left, int):
         curr.left.parent = curr
-    if type(curr.right) != int:
-        # print(curr)
+    if not isinstance(curr.right, int):
         curr.right.parent = curr
     return curr
 
@@ -1560,7 +1560,8 @@ def day19_bruteforce(beacons, diffs, positions, i, DP, already_compared):
                         # for each beacon's relative positions on the current scanner
                         other_rel_pos = diffs2[other_beacon]
 
-                        # if there is an intersection of at least 12 points, we found the correct orientation
+                        # if there is an intersection of at least 12 points,
+                        # we found the correct orientation
                         if len(other_rel_pos.intersection(inner_rel_pos)) >= 12:
                             assert scanner_i == 0 or scanner_i in positions
                             pos = tuple(
