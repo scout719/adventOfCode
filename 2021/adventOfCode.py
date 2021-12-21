@@ -1732,6 +1732,84 @@ def day20_2(data):
     return day20_solve(img, algo, 50)
 
 
+""" DAY 21 """
+
+def day21_parse(data):
+    p1 = int(data[0].split("Player 1 starting position: ")[1])
+    p2 = int(data[1].split("Player 2 starting position: ")[1])
+    return p1, p2
+
+def day21_1(data):
+    p1, p2 = day21_parse(data)
+    die = 1
+    s1, s2 = 0, 0
+    players = [p1, p2]
+    scores = [s1, s2]
+    curr = 0
+    while True:
+        launch = die + die + 1 + die + 2
+        die = die + 3
+        players[curr] += launch
+        players[curr] = ((players[curr] - 1) % 10) + 1
+        scores[curr] += players[curr]
+        if scores[curr] >= 1000:
+            return scores[(curr + 1) % 2] * (die - 1)
+        curr = (
+            curr + 1) % 2
+
+def day21_total_outcomes(p1_, p2_):
+    # In 1 round, these are the possible new positions for a pawn
+    # (x+3 x+4 x+4 x+5 x+5 x+5 x+6 x+6 x+7)
+    # (x+4 x+5 x+5 x+6 x+6 x+6 x+7 x+7 x+8)
+    # (x+5 x+6 x+6 x+7 x+7 x+7 x+8 x+8 x+9)
+
+    outcomes = [
+        (3, 1),
+        (4, 3),
+        (5, 6),
+        (6, 7),
+        (7, 6),
+        (8, 3),
+        (9, 1)
+    ]
+    total_1 = 0
+    total_2 = 0
+    game_situations = defaultdict(int)
+    game_situations[(p1_, 0, p2_, 0)] = 1
+    while sum(game_situations.values()) != 0:
+        # print(possible_positions_scores)
+        next_game_situations = defaultdict(int)
+        for (p1, s1, p2, s2) in game_situations:
+            # how many boards are in this situation
+            curr_n = game_situations[(p1, s1, p2, s2)]
+            for jmp1, n1 in outcomes:
+                new_p1 = p1 + jmp1
+                new_p1 = ((new_p1 - 1) % 10) + 1
+                new_s1 = s1 + new_p1
+                if new_s1 >= 21:
+                    # p1 wins
+                    total_1 += n1 * curr_n
+                else:
+                    for jmp2, n2 in outcomes:
+                        new_p2 = p2 + jmp2
+                        new_p2 = ((new_p2 - 1) % 10) + 1
+                        new_s2 = s2 + new_p2
+                        if new_s2 >= 21:
+                            # p2 wins
+                            total_2 += n1 * n2 * curr_n
+                        else:
+                            next_game_situations[(new_p1, new_s1, new_p2,
+                                                  new_s2)] += n1 * n2 * curr_n
+        game_situations = next_game_situations
+    return max(total_1, total_2)
+
+
+def day21_2(data):
+    p1, p2 = day21_parse(data)
+
+    return day21_total_outcomes(p1, p2)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
