@@ -1251,7 +1251,7 @@ def day17_all_vels(min_x, max_x, min_y, max_y):
     ans = []
     for dx in range(1, max_x + 1):
         dy = min_y - 1
-        while dy < max_y:  # Magic 200, can this be calculated?
+        while dy < 200:  # Magic 200, can this be calculated?
             dy += 1
             curr_x, curr_y = 0, 0
             i_dx = dx
