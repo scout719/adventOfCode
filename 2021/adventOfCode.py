@@ -4,6 +4,7 @@
 # pylint: disable=wildcard-import
 # pylint: disable=wrong-import-position
 # pylint: disable=consider-using-enumerate
+from typing import Callable, Iterator, Union, Optional, List
 import functools
 import math
 import os
@@ -11,6 +12,7 @@ from os.path import join
 import sys
 import time
 from copy import deepcopy
+import ast
 from collections import Counter, defaultdict
 from heapq import heappop, heappush
 
@@ -1308,7 +1310,6 @@ def day18_tree(pair, parent):
 
 def day18_parse(data):
     x = []
-    import ast
     for line in data:
         x.append(day18_tree(ast.literal_eval(line), None))
     return x
@@ -1809,6 +1810,199 @@ def day21_2(data):
     p1, p2 = day21_parse(data)
 
     return day21_total_outcomes(p1, p2)
+
+
+""" DAY 22 """
+
+class OctaNode:
+    def __init__(self, x1, x2, y1, y2, z1, z2, on, parent) -> None:
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
+        self.z1 = z1
+        self.z2 = z2
+        self.on = on
+        self.parent = parent
+        self.top_left_front: OctaNode = None
+        self.top_right_front: OctaNode = None
+        self.bottom_left_front: OctaNode = None
+        self.bottom_right_front: OctaNode = None
+        self.top_left_back: OctaNode = None
+        self.top_right_back: OctaNode = None
+        self.bottom_left_back: OctaNode = None
+        self.bottom_right_back: OctaNode = None
+
+    def children(self) -> List["OctaNode"]:
+        return [self.top_left_front,
+                self.top_right_front,
+                self.bottom_left_front,
+                self.bottom_right_front,
+                self.top_left_back,
+                self.top_right_back,
+                self.bottom_left_back,
+                self.bottom_right_back]
+
+    def set_on(self, on):
+        self.on = on
+
+        self.top_left_front: OctaNode = None
+        self.top_right_front: OctaNode = None
+        self.bottom_left_front: OctaNode = None
+        self.bottom_right_front: OctaNode = None
+        self.top_left_back: OctaNode = None
+        self.top_right_back: OctaNode = None
+        self.bottom_left_back: OctaNode = None
+        self.bottom_right_back: OctaNode = None
+
+    def apply(self, x1_, x2_, y1_, y2_, z1_, z2_, on):
+        if x2_ < self.x1 or x1_ >= self.x2 or \
+                y2_ < self.y1 or y1_ >= self.y2 or \
+                z2_ < self.z1 or z1_ >= self.z2:
+            # no intersection
+            return
+        if x1_ <= self.x1 and self.x2 - 1 <= x2_ and \
+                y1_ <= self.y1 and self.y2 - 1 <= y2_ and \
+                z1_ <= self.z1 and self.z2 - 1 <= z2_:
+            # This tree is fully inside the zone
+            self.set_on(on)
+            return
+
+        if self.is_leaf():
+            assert self.x2 - self.x1 != 0 and self.y2 - \
+                self.y1 != 0 and self.z2 - self.z1 != 0
+            # There is an intesection with our limits, just divide
+
+            if self.x1 < x1_ < self.x2:
+                mid_x = x1_
+            elif self.x1 < x2_ < self.x2:
+                mid_x = x2_
+            elif x1_ <= self.x1 and self.x2 - 1 <= x2_:
+                mid_x = self.x1
+            else:
+                mid_x = self.x1 + 1
+
+            if self.y1 < y1_ < self.y2:
+                mid_y = y1_
+            elif self.y1 < y2_ < self.y2:
+                mid_y = y2_
+            elif y1_ <= self.y1 and self.y2 - 1 <= y2_:
+                mid_y = self.y1
+            else:
+                mid_y = self.y1 + 1
+
+            if self.z1 < z1_ < self.z2:
+                mid_z = z1_
+            elif self.z1 < z2_ < self.z2:
+                mid_z = z2_
+            elif z1_ <= self.z1 and self.z2 - 1 <= z2_:
+                mid_z = self.z1
+            else:
+                mid_z = self.z1 + 1
+
+            assert self.x1 <= mid_x and mid_x < self.x2 and \
+                self.y1 <= mid_y and mid_y < self.y2 and \
+                self.z1 <= mid_z and mid_z < self.z2
+
+            self.top_left_front: OctaNode = OctaNode(
+                self.x1, mid_x, mid_y, self.y2, mid_z, self.z2, self.on, self)
+            self.top_right_front: OctaNode = OctaNode(
+                mid_x, self.x2, mid_y, self.y2, mid_z, self.z2, self.on, self)
+            self.bottom_left_front: OctaNode = OctaNode(
+                self.x1, mid_x, self.y1, mid_y, mid_z, self.z2, self.on, self)
+            self.bottom_right_front: OctaNode = OctaNode(
+                mid_x, self.x2, self.y1, mid_y, mid_z, self.z2, self.on, self)
+            self.top_left_back: OctaNode = OctaNode(
+                self.x1, mid_x, mid_y, self.y2, self.z1, mid_z, self.on, self)
+            self.top_right_back: OctaNode = OctaNode(
+                mid_x, self.x2, mid_y, self.y2, self.z1, mid_z, self.on, self)
+            self.bottom_left_back: OctaNode = OctaNode(
+                self.x1, mid_x, self.y1, mid_y, self.z1, mid_z, self.on, self)
+            self.bottom_right_back: OctaNode = OctaNode(
+                mid_x, self.x2, self.y1, mid_y, self.z1, mid_z, self.on, self)
+        for c in self.children():
+            if c.x2 - c.x1 == 0 or c.y2 - c.y1 == 0 or c.z2 - c.z1 == 0:
+                continue
+            assert c.x2 - c.x1 >= 0 or c.y2 - c.y1 >= 0 or c.z2 - c.z1 >= 0
+            c.apply(x1_, x2_, y1_, y2_, z1_, z2_, on)
+
+    def is_leaf(self):
+        leaf = all(c is None for c in self.children())
+        any_none = any(c is None for c in self.children())
+        assert leaf or not any_none
+        return leaf
+
+    def total_on(self):
+        if self.x2 - self.x1 == 0 or self.y2 - self.y1 == 0 or self.z2 - self.z1 == 0:
+            return 0
+        if self.is_leaf():
+            if not self.on:
+                return 0
+            x_rad = abs(self.x2 - self.x1)
+            y_rad = abs(self.y2 - self.y1)
+            z_rad = abs(self.z2 - self.z1)
+            return x_rad * y_rad * z_rad
+        else:
+            return sum([c.total_on() for c in self.children()])
+
+def day22_parse(data):
+    robots = []
+    for line in data:
+        # on x=10..12,y=10..12,z=10..12
+        on = line.startswith("on")
+        line = line.replace("on ", "").replace("off ", "")
+        x, y, z = line.split(",")
+        x = x.replace("x=", "")
+        x1, x2 = [int(v) for v in x.split("..")]
+        y = y.replace("y=", "")
+        y1, y2 = [int(v) for v in y.split("..")]
+        z = z.replace("z=", "")
+        z1, z2 = [int(v) for v in z.split("..")]
+        robots.append((x1, x2, y1, y2, z1, z2, on))
+
+    return robots
+
+def day22_1(data):
+    robots = day22_parse(data)
+    n = OctaNode(-50, 50 + 1, -50, 50 + 1, -50, 50 + 1, False, None)
+
+    for _, (x1, x2, y1, y2, z1, z2, on) in enumerate(robots):
+        n.apply(x1, x2, y1, y2, z1, z2, on)
+
+    return n.total_on()
+
+    # lo = -50
+    # hi = 50
+    # all_on = set()
+    # for x in range(lo, hi + 1):
+    #     for y in range(lo, hi + 1):
+    #         for z in range(lo, hi + 1):
+    #             for x1, x2, y1, y2, z1, z2, on in robots:
+    #                 if x1 <= x <= x2 and y1 <= y <= y2 and z1 <= z <= z2:
+    #                     if on:
+    #                         all_on.add((x, y, z))
+    #                     else:
+    #                         if (x, y, z) in all_on:
+    #                             all_on.remove((x, y, z))
+    # return len(all_on)
+
+def day22_2(robots):
+    robots = day22_parse(robots)
+
+    min_x = min(x for x, _, _, _, _, _, _ in robots)
+    min_y = min(y for _, _, y, _, _, _, _ in robots)
+    min_z = min(z for _, _, _, _, z, _, _ in robots)
+    max_x = max(x for _, x, _, _, _, _, _ in robots)
+    max_y = max(y for _, _, _, y, _, _, _ in robots)
+    max_z = max(z for _, _, _, _, _, z, _ in robots)
+
+    n = OctaNode(min_x, max_x + 1, min_y, max_y +
+                 1, min_z, max_z + 1, False, None)
+
+    for _, (x1, x2, y1, y2, z1, z2, on) in enumerate(robots):
+        n.apply(x1, x2, y1, y2, z1, z2, on)
+
+    return n.total_on()
 
 
 """ MAIN FUNCTION """
