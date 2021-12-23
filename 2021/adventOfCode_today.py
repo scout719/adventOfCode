@@ -207,11 +207,121 @@ def day23_solve(data):
         if day23_complete(board):
             return energy
 
+def day23_complete2(positions):
+    return \
+        all(c == 3 for _, c in positions["A"]) and \
+        all(c == 5 for _, c in positions["B"]) and \
+        all(c == 7 for _, c in positions["C"]) and \
+        all(c == 9 for _, c in positions["D"])
+
+def day23_move2(r, c, rr, cc, cost, occupied):
+
+    D = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    visited = set()
+    q = [(r, c, 0)]
+    while q:
+        rrr, ccc, e = q.pop()
+        if rrr == rr and ccc == cc:
+            return e
+        if (rrr, ccc) in visited:
+            continue
+        visited.add((rrr, ccc))
+        for dr, dc in D:
+            rrrr, cccc = rrr + dr, ccc + dr
+            if (rrrr, cccc) in day23_limits() and rrrr != r or cccc != c and (rrrr, cccc) not in occupied:
+                q.append((rrrr, cccc, e + cost))
+
+    return 0
+
+
+def day23_solve2(positions, DP):
+    hallway = [
+        (1, 1),
+        (1, 2),
+        (1, 4),
+        (1, 6),
+        (1, 8),
+        (1, 10),
+        (1, 11)
+    ]
+    if day23_complete2(positions):
+        return 0
+
+    key = (tuple(sorted(positions["A"])), tuple(sorted(positions["B"])),
+           tuple(sorted(positions["C"])), tuple(sorted(positions["D"])))
+    print(len(DP))
+    if key in DP:
+        return DP[key]
+
+    occupied = positions["A"] + positions["B"] + \
+        positions["C"] + positions["D"]
+    total = []
+    for char in positions:
+        for r, c in positions[char]:
+            if r != 1 and c != day23_room(char) and (r - 1, c) not in occupied:
+                for rr, cc in hallway:
+                    e = day23_move2(r, c, rr, cc, day23_energy(char), occupied)
+                    if e != 0:
+                        new_pos = deepcopy(positions)
+                        new_pos[char].remove((r, c))
+                        new_pos[char].append((rr, cc))
+                        total.append(e + day23_solve2(new_pos, DP))
+            else:  # in hallway
+                room = day23_room(char)
+                for rr, cc in [(3, room), (2, room)]:
+                    e = day23_move2(r, c, rr, cc, day23_energy(char), occupied)
+                    if e != 0:
+                        new_pos = deepcopy(positions)
+                        new_pos[char].remove((r, c))
+                        new_pos[char].append((rr, cc))
+                        total.append(e + day23_solve2(new_pos, DP))
+                        break
+    DP[key] = min(total)
+    return total
+
+    # for r in range(len(board)):
+    #     for c in range(len(board[r])):
+    #         char = board[r][c]
+    #         if char in "ABCD":
+    #             if r == 1:  # in hallway
+
+    hallway = [
+        (1, 1),
+        (1, 2),
+        (1, 4),
+        (1, 6),
+        (1, 8),
+        (1, 10),
+        (1, 11)
+    ]
+
+    room_front = [
+        (2, 3),
+        (2, 5),
+        (2, 7),
+        (2, 9),
+    ]
+    room_front = [
+        (3, 3),
+        (3, 5),
+        (3, 7)
+        (3, 9)
+    ]
+    # for r, c in room_front:
+    #     char = board[r][c]
+    #     if c != day23_room(char):
+
 
 def day23_1(data):
     data = day23_parse(data)
-
-    return day23_solve(data)
+    DP = {}
+    positions = defaultdict(list)
+    for r in range(len(data)):
+        for c in range(len(data[r])):
+            char = data[r][c]
+            if char in "ABCD":
+                positions[char].append((r, c))
+    return day23_solve2(positions, DP)
 
 def day23_2(data):
     data = day23_parse(data)
