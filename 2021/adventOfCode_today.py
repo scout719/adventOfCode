@@ -27,44 +27,13 @@ from common.utils import BLUE_CIRCLE, RED_SMALL_SQUARE  # NOQA: E402
 YEAR = 2021
 DAY = 23
 EXPECTED_1 = 12521  # 474140
-EXPECTED_2 = None  # 2758514936282235
+EXPECTED_2 = 44169  # 2758514936282235
 
 
 """ DAY 23 """
 
 def day23_parse(data):
     return data
-    pos = defaultdict(list)
-    for r in range(len(data)):
-        for c in range(len(data[r])):
-            char = data[r][c]
-            if char in "ABCD":
-                pos[char].append((r, c))
-    return pos
-
-def day23_complete(board):
-    return board[2][3] == "A" and \
-        board[3][3] == "A" and \
-        board[2][5] == "B" and \
-        board[3][5] == "B" and \
-        board[2][7] == "C" and \
-        board[3][7] == "C" and \
-        board[2][9] == "D" and \
-        board[3][9] == "D"
-    return (2, 3) in board["A"] and \
-        (3, 3) in board["A"] and \
-        (2, 5) in board["B"] and \
-        (3, 5) in board["B"] and \
-        (2, 7) in board["C"] and \
-        (3, 7) in board["C"] and \
-        (2, 9) in board["D"] and \
-        (3, 9) in board["D"]
-
-def day23_is_hallway(r, _):
-    return r == 1
-
-def day23_outside_room(r, c):
-    return r == 1 and c in [3, 5, 7, 9]
 
 def day23_energy(c):
     E = {
@@ -84,70 +53,23 @@ def day23_room(c):
     }
     return E[c]
 
-def day23_print(board):
-    for row in board:
-        print(row)
-
-def day23_move(r, c, board):
-
-    D = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    moves = []
-
-    # for r in range(len(board)):
-    #     for c in range(len(board[r])):
-    #         if board[r][c] in "ABCD":
-
-    char = board[r][c]
-    assert char in ["A", "B", "C", "D"], (char, r, c)
-    # day23_print(board)
-    visited = set()
-    q = [(0, r, c)]
-    while q:
-        e, rr, cc = q.pop()
-        if (rr, cc) in visited:
-            continue
-        visited.add((rr, cc))
-        for dr, dc in D:
-            rrr, ccc = rr + dr, cc + dc
-            if board[rrr][ccc] == ".":
-                q.append((c + day23_energy(char), rrr, ccc))
-
-        if r != rr or c != cc:
-            if rr != 1 and cc == day23_room(char):  # started in hallway
-                # blocking other one
-                if rr == 2 and board[3][cc] != '.' and day23_room(board[3][cc]) != cc:
-                    pass
-                else:
-                    moves.append((e, rr, cc))
-            else:  # started in room
-                if rr == 1 and cc not in [3, 5, 7, 9]:
-                    moves.append((e, rr, cc))
-
-    return moves
-
-def day23_key(board):
-    p = defaultdict(list)
-    for r in range(len(board)):
-        for c in range(len(board[r])):
-            char = board[r][c]
-            if char in "ABCD":
-                p[char].append((r, c))
-    p = {k: tuple(sorted(v)) for k, v in p.items()}
-    return tuple(sorted(p.items()))
-
-def day23_limits():
+def day23_limits(rows):
     m = []
-    for r in range(1, 4):
+    for r in range(1, rows + 2):
         for c in range(1, 12):
             if r == 1 or c in [3, 5, 7, 9]:
                 m.append((r, c))
     return m
 
-def day23_heuristic(board, limits):
+def day23_heuristic(positions, limits, rows):
+    reverse_positions = {}
+    for char, p in positions.items():
+        for v1 in p:
+            reverse_positions[v1] = char
     remaining = 0
     for r, c in limits:
-        char = board[r][c]
-        if char in "ABCD":
+        if (r, c) in reverse_positions:
+            char = reverse_positions[(r, c)]
             energy = day23_energy(char)
             if day23_room(char) != c:
                 # effort to move to halway
@@ -158,54 +80,8 @@ def day23_heuristic(board, limits):
                 remaining += 2 * energy
             else:
                 # effort to go to the back of room
-                remaining += abs(2 - r) * energy
+                remaining += abs(rows + 1 - r) * energy
     return remaining
-
-def day23_solve(data):
-    limits = day23_limits()
-    # energy, active pod, board
-    q = [(day23_heuristic(data, limits), 0, (0, 0), [[c for c in r] for r in data])]
-
-    visited = set()
-    while q:
-        eur, e, (r, c), board = heappop(q)
-        print(e, eur)
-        key = (r, c, day23_key(board))
-        # print(key)
-        if key in visited:
-            continue
-        visited.add(key)
-
-        if day23_complete(board):
-            return e
-
-        # day23_print(board)
-        for r, c in limits:
-            if board[r][c] in "ABCD":
-                for ee, rr, cc in day23_move(r, c, board):
-                    bb = [[c for c in r] for r in board]
-                    bb[rr][cc] = bb[r][c]
-                    bb[r][c] = "."
-                    # print(r, c, rr, cc)
-                    heappush(
-                        q, (e + ee + day23_heuristic(bb, limits), e + ee, (rr, cc), bb))
-                    # # day23_print(bb)
-                    # # day23_print(bb)
-                    # for rrr in range(len(bb)):
-                    #     for ccc in range(len(bb[rrr])):
-                    #         if (rrr != rr or ccc != cc) and bb[rrr][ccc] in "ABCD":
-                    #             heappush(q, (e + ee, (rrr, ccc), deepcopy(bb)))
-    assert False
-
-    # energy, active pod, board
-    q = [(0, (2, 3), {k: v for k, v in data.items()}),
-         (0, (2, 5), {k: v for k, v in data.items()}),
-         (0, (2, 7), {k: v for k, v in data.items()}),
-         (0, (2, 9), {k: v for k, v in data.items()})]
-    while q:
-        energy, (r, c), board = heappop(q)
-        if day23_complete(board):
-            return energy
 
 def day23_complete2(positions):
     return \
@@ -214,77 +90,55 @@ def day23_complete2(positions):
         all(c == 7 for _, c in positions["C"]) and \
         all(c == 9 for _, c in positions["D"])
 
-def day23_move2(r, c, rr, cc, cost, occupied):
+def day23_move2(r, c, rr, cc, cost, occupied, rows, limits):
 
     D = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     visited = set()
     q = [(r, c, 0)]
     while q:
-        rrr, ccc, e = q.pop()
+        rrr, ccc, e = heappop(q)
         if rrr == rr and ccc == cc:
             return e
         if (rrr, ccc) in visited:
             continue
         visited.add((rrr, ccc))
         for dr, dc in D:
-            rrrr, cccc = rrr + dr, ccc + dr
-            if (rrrr, cccc) in day23_limits() and rrrr != r or cccc != c and (rrrr, cccc) not in occupied:
-                q.append((rrrr, cccc, e + cost))
+            rrrr, cccc = rrr + dr, ccc + dc
+            if (rrrr, cccc) in limits and (rrrr, cccc) not in occupied:
+                heappush(q, (rrrr, cccc, e + cost))
 
     return 0
 
-
-def day23_solve2(positions, DP):
-    hallway = [
-        (1, 1),
-        (1, 2),
-        (1, 4),
-        (1, 6),
-        (1, 8),
-        (1, 10),
-        (1, 11)
+def day23_print2(positions, rows):
+    B = [
+        "#############",
+        "#...........#",
+        "###.#.#.#.###",
+        "  #.#.#.#.#",
+        "  #########"
     ]
-    if day23_complete2(positions):
-        return 0
 
-    key = (tuple(sorted(positions["A"])), tuple(sorted(positions["B"])),
-           tuple(sorted(positions["C"])), tuple(sorted(positions["D"])))
-    print(len(DP))
-    if key in DP:
-        return DP[key]
+    B2 = B[:3]
+    for _ in range(rows - 2):
+        B2.append("  #.#.#.#.#")
+    B2 += B[3:]
+    B = B2
 
-    occupied = positions["A"] + positions["B"] + \
-        positions["C"] + positions["D"]
-    total = []
+    reverse_pos = {}
     for char in positions:
         for r, c in positions[char]:
-            if r != 1 and c != day23_room(char) and (r - 1, c) not in occupied:
-                for rr, cc in hallway:
-                    e = day23_move2(r, c, rr, cc, day23_energy(char), occupied)
-                    if e != 0:
-                        new_pos = deepcopy(positions)
-                        new_pos[char].remove((r, c))
-                        new_pos[char].append((rr, cc))
-                        total.append(e + day23_solve2(new_pos, DP))
-            else:  # in hallway
-                room = day23_room(char)
-                for rr, cc in [(3, room), (2, room)]:
-                    e = day23_move2(r, c, rr, cc, day23_energy(char), occupied)
-                    if e != 0:
-                        new_pos = deepcopy(positions)
-                        new_pos[char].remove((r, c))
-                        new_pos[char].append((rr, cc))
-                        total.append(e + day23_solve2(new_pos, DP))
-                        break
-    DP[key] = min(total)
-    return total
+            reverse_pos[(r, c)] = char
+    for r in range(len(B)):
+        row = ""
+        for c in range(len(B[r])):
+            if (r, c) in reverse_pos:
+                row += reverse_pos[(r, c)]
+            else:
+                row += B[r][c]
+        print(row)
+    print()
 
-    # for r in range(len(board)):
-    #     for c in range(len(board[r])):
-    #         char = board[r][c]
-    #         if char in "ABCD":
-    #             if r == 1:  # in hallway
-
+def day23_solve3(positions_, rows, limits):
     hallway = [
         (1, 1),
         (1, 2),
@@ -295,37 +149,112 @@ def day23_solve2(positions, DP):
         (1, 11)
     ]
 
-    room_front = [
-        (2, 3),
-        (2, 5),
-        (2, 7),
-        (2, 9),
-    ]
-    room_front = [
-        (3, 3),
-        (3, 5),
-        (3, 7)
-        (3, 9)
-    ]
-    # for r, c in room_front:
-    #     char = board[r][c]
-    #     if c != day23_room(char):
+    counter = 0
+    q = [(day23_heuristic(positions_, limits, rows), 0, counter, [(0, 0)])]
+    visited2 = {}
+    costs = None
+    states = {}
+    states[counter] = positions_
+    counter += 1
+    while q:
+        _, e2, new_pos_arr, path = heappop(q)
+        new_pos = states[new_pos_arr]
+        if day23_complete2(new_pos):
+            # count = 0
+            # for i, e in path:
+            #     count += e
+            #     print("Cost to reach following state:", e, "Total cost", count)
+            #     day23_print2(states[i], rows)
+            return e2
+        if costs is not None and e2 >= costs:
+            continue
+        key = (tuple(sorted(new_pos["A"])), tuple(sorted(new_pos["B"])),
+               tuple(sorted(new_pos["C"])), tuple(sorted(new_pos["D"])))
+        if key in visited2 and visited2[key] <= e2:
+            continue
+        visited2[key] = e2
+        occupied = new_pos["A"] + new_pos["B"] + \
+            new_pos["C"] + new_pos["D"]
 
+        reverse_pos = {}
+        for char, p in new_pos.items():
+            for v1 in p:
+                reverse_pos[v1] = char
+
+        for char in new_pos:
+            for r, c in new_pos[char]:
+                room = day23_room(char)
+                if r != 1:  # in a room
+                    # wrong room or blocking other
+                    blocking = False
+                    for rrr in range(r + 1, rows + 2):
+                        blocking |= (rrr, c) in reverse_pos and day23_room(
+                            reverse_pos[(rrr, c)]) != c
+                    if room != c or blocking:
+                        for rr, cc in hallway:  # try to move to hallway
+                            e = day23_move2(
+                                r, c, rr, cc, day23_energy(char), occupied, rows, limits)
+                            if e != 0:
+                                new_pos2 = deepcopy(new_pos)
+                                new_pos2[char].remove((r, c))
+                                new_pos2[char].append((rr, cc))
+                                states[counter] = new_pos2
+                                counter += 1
+                                heappush(
+                                    q, (day23_heuristic(positions_, limits, rows) + e2 + e, e2 + e, counter - 1, path + [(counter - 1, e)]))
+                else:  # in hallway
+                    added = False
+                    for rr in range(rows + 1, 1, -1):
+                        if added:
+                            break
+                        cc = room  # try to move to room
+                        # if we don't block
+                        blocking = False
+                        for rrr in range(rr + 1, rows + 2):
+                            blocking |= ((rrr, cc) in reverse_pos and day23_room(
+                                reverse_pos[(rrr, cc)]) != cc)
+                        if not blocking:
+                            e = day23_move2(
+                                r, c, rr, cc, day23_energy(char), occupied, rows, limits)
+                            if e != 0:
+                                new_pos2 = deepcopy(new_pos)
+                                new_pos2[char].remove((r, c))
+                                new_pos2[char].append((rr, cc))
+                                states[counter] = new_pos2
+                                counter += 1
+                                heappush(
+                                    q, (day23_heuristic(positions_, limits, rows) + e2 + e, e2 + e, counter - 1, path + [(counter - 1, e)]))
+                                added = True
+                                break  # moved to back of room
+    assert False
 
 def day23_1(data):
     data = day23_parse(data)
-    DP = {}
     positions = defaultdict(list)
     for r in range(len(data)):
         for c in range(len(data[r])):
             char = data[r][c]
             if char in "ABCD":
                 positions[char].append((r, c))
-    return day23_solve2(positions, DP)
+
+    limits = day23_limits(2)
+    return day23_solve3(positions, 2, limits)
 
 def day23_2(data):
     data = day23_parse(data)
-    return data
+    positions = defaultdict(list)
+    data2 = data[:3]
+    data2.append("  #D#C#B#A#")
+    data2.append("  #D#B#A#C#")
+    data2 += data[3:]
+    for r in range(len(data2)):
+        for c in range(len(data2[r])):
+            char = data2[r][c]
+            if char in "ABCD":
+                positions[char].append((r, c))
+
+    limits = day23_limits(4)
+    return day23_solve3(positions, 4, limits)
 
 
 """ MAIN FUNCTION """
