@@ -92,6 +92,11 @@ def day23_move(r, c, board):
 
     D = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     moves = []
+
+    # for r in range(len(board)):
+    #     for c in range(len(board[r])):
+    #         if board[r][c] in "ABCD":
+
     char = board[r][c]
     assert char in ["A", "B", "C", "D"], (char, r, c)
     # day23_print(board)
@@ -108,10 +113,14 @@ def day23_move(r, c, board):
                 q.append((c + day23_energy(char), rrr, ccc))
 
         if r != rr or c != cc:
-            if r == 1 and cc == day23_room(char):  # started in hallway
-                moves.append((e, rr, cc))
+            if rr != 1 and cc == day23_room(char):  # started in hallway
+                # blocking other one
+                if rr == 2 and board[3][cc] != '.' and day23_room(board[3][cc]) != cc:
+                    pass
+                else:
+                    moves.append((e, rr, cc))
             else:  # started in room
-                if cc not in [3, 5, 7, 9]:
+                if rr == 1 and cc not in [3, 5, 7, 9]:
                     moves.append((e, rr, cc))
 
     return moves
@@ -126,32 +135,66 @@ def day23_key(board):
     p = {k: tuple(sorted(v)) for k, v in p.items()}
     return tuple(sorted(p.items()))
 
+def day23_limits():
+    m = []
+    for r in range(1, 4):
+        for c in range(1, 12):
+            if r == 1 or c in [3, 5, 7, 9]:
+                m.append((r, c))
+    return m
+
+def day23_heuristic(board, limits):
+    remaining = 0
+    for r, c in limits:
+        char = board[r][c]
+        if char in "ABCD":
+            energy = day23_energy(char)
+            if day23_room(char) != c:
+                # effort to move to halway
+                remaining += abs(r - 1) * energy
+                # effort to move to correct room
+                remaining += abs(day23_room(char) - c) * energy
+                # effort to go to the back of room
+                remaining += 2 * energy
+            else:
+                # effort to go to the back of room
+                remaining += abs(2 - r) * energy
+    return remaining
+
 def day23_solve(data):
+    limits = day23_limits()
     # energy, active pod, board
-    q = [(0, (2, 3), [[c for c in r] for r in data]),
-         (0, (2, 5), [[c for c in r] for r in data]),
-         (0, (2, 7), [[c for c in r] for r in data]),
-         (0, (2, 9), [[c for c in r] for r in data])]
+    q = [(day23_heuristic(data, limits), 0, (0, 0), [[c for c in r] for r in data])]
 
     visited = set()
     while q:
-        e, (r, c), board = heappop(q)
-        key = day23_key(board)
-        print(key)
+        eur, e, (r, c), board = heappop(q)
+        print(e, eur)
+        key = (r, c, day23_key(board))
+        # print(key)
         if key in visited:
             continue
         visited.add(key)
 
         if day23_complete(board):
             return e
-        for ee, rr, cc in day23_move(r, c, board):
-            bb = [[c for c in r] for r in board]
-            bb[rr][cc] = bb[r][c]
-            bb[r][c] = "."
-            print(r, c, rr, cc)
-            # day23_print(bb)
 
-            heappush(q, (e + ee, (rr, cc), bb))
+        # day23_print(board)
+        for r, c in limits:
+            if board[r][c] in "ABCD":
+                for ee, rr, cc in day23_move(r, c, board):
+                    bb = [[c for c in r] for r in board]
+                    bb[rr][cc] = bb[r][c]
+                    bb[r][c] = "."
+                    # print(r, c, rr, cc)
+                    heappush(
+                        q, (e + ee + day23_heuristic(bb, limits), e + ee, (rr, cc), bb))
+                    # # day23_print(bb)
+                    # # day23_print(bb)
+                    # for rrr in range(len(bb)):
+                    #     for ccc in range(len(bb[rrr])):
+                    #         if (rrr != rr or ccc != cc) and bb[rrr][ccc] in "ABCD":
+                    #             heappush(q, (e + ee, (rrr, ccc), deepcopy(bb)))
     assert False
 
     # energy, active pod, board
