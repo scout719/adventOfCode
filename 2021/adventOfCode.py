@@ -2005,6 +2005,221 @@ def day22_2(robots):
     return n.total_on()
 
 
+""" DAY 23 """
+
+def day23_parse(data):
+    return data
+
+def day23_energy(c):
+    E = {
+        "A": 1,
+        "B": 10,
+        "C": 100,
+        "D": 1000
+    }
+    return E[c]
+
+def day23_room(c):
+    E = {
+        "A": 3,
+        "B": 5,
+        "C": 7,
+        "D": 9
+    }
+    return E[c]
+
+def day23_limits(rows):
+    m = []
+    for r in range(1, rows + 2):
+        for c in range(1, 12):
+            if r == 1 or c in [3, 5, 7, 9]:
+                m.append((r, c))
+    return m
+
+def day23_heuristic(positions, limits, rows):
+    remaining = 0
+    for r, c in limits:
+        if (r, c) in positions:
+            char = positions[(r, c)]
+            energy = day23_energy(char)
+            if day23_room(char) != c:
+                # effort to move to halway
+                remaining += abs(r - 1) * energy
+                # effort to move to correct room
+                remaining += abs(day23_room(char) - c) * energy
+                # effort to go to the back of room
+                remaining += 2 * energy
+            else:
+                # effort to go to the back of room
+                remaining += abs(rows + 1 - r) * energy
+    return remaining
+
+def day23_is_complete(positions, rows):
+    for r in range(2, rows + 2):
+        if not (r, 3) in positions or positions[(r, 3)] != "A":
+            return False
+        if not (r, 5) in positions or positions[(r, 5)] != "B":
+            return False
+        if not (r, 7) in positions or positions[(r, 7)] != "C":
+            return False
+        if not (r, 9) in positions or positions[(r, 9)] != "D":
+            return False
+    return True
+
+def day23_move_to(curr_r, curr_c, dest_r, dest_c, cost, occupied, limits):
+
+    D = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    visited = set()
+    q = [(curr_r, curr_c, 0)]
+    while q:
+        r, c, energy = heappop(q)
+        if r == dest_r and c == dest_c:
+            return energy
+        if (r, c) in visited:
+            continue
+        visited.add((r, c))
+        for dr, dc in D:
+            rr, cc = r + dr, c + dc
+            if (rr, cc) in limits and (rr, cc) not in occupied:
+                heappush(q, (rr, cc, energy + cost))
+
+    return 0
+
+def day23_print(positions, rows):
+    B = [
+        "#############",
+        "#...........#",
+        "###.#.#.#.###",
+        "  #.#.#.#.#",
+        "  #########"
+    ]
+
+    B2 = B[:3]
+    for _ in range(rows - 2):
+        B2.append("  #.#.#.#.#")
+    B2 += B[3:]
+    B = B2
+
+    for r in range(len(B)):
+        row = ""
+        for c in range(len(B[r])):
+            if (r, c) in positions:
+                row += positions[(r, c)]
+            else:
+                row += B[r][c]
+        print(row)
+    print()
+
+def day23_solve(positions, rows, limits):
+    hallway = [
+        (1, 1),
+        (1, 2),
+        (1, 4),
+        (1, 6),
+        (1, 8),
+        (1, 10),
+        (1, 11)
+    ]
+
+    counter = 0
+    q = [(day23_heuristic(positions, limits, rows), 0, counter)]
+    visited2 = {}
+    costs = None
+    states = {}
+    states[counter] = positions
+    counter += 1
+    while q:
+        _, energy, new_pos_i = heappop(q)
+        new_positions = states[new_pos_i]
+        if day23_is_complete(new_positions, rows):
+            return energy
+        if costs is not None and energy >= costs:
+            continue
+        key = tuple(sorted((char, r, c)
+                    for (r, c), char in new_positions.items()))
+        if key in visited2 and visited2[key] <= energy:
+            continue
+        visited2[key] = energy
+        occupied = new_positions.keys()
+
+        for (r, c), char in new_positions.items():
+            room = day23_room(char)
+            if r != 1:  # in a room
+                blocking = False
+                for rrr in range(r + 1, rows + 2):
+                    blocking |= (rrr, c) in new_positions and day23_room(
+                        new_positions[(rrr, c)]) != c
+                # wrong room or blocking other
+                if room != c or blocking:
+                    for rr, cc in hallway:  # try to move to hallway
+                        new_energy = day23_move_to(
+                            r, c, rr, cc, day23_energy(char), occupied, limits)
+                        if new_energy != 0:
+                            new_pos2 = {k: v for k, v in new_positions.items()}
+                            new_pos2[(rr, cc)] = char
+                            new_pos2.pop((r, c))
+                            states[counter] = new_pos2
+                            counter += 1
+                            heur = day23_heuristic(new_pos2, limits, rows)
+                            heappush(
+                                q, (heur + energy + new_energy, energy + new_energy, counter - 1))
+            else:  # in hallway
+                added = False
+                for rr in range(rows + 1, 1, -1):
+                    if added:
+                        break
+                    # try to move to room
+                    cc = room
+                    blocking = False
+                    for rrr in range(rr + 1, rows + 2):
+                        blocking |= ((rrr, cc) in new_positions and day23_room(
+                            new_positions[(rrr, cc)]) != cc)
+                    # if we don't block
+                    if not blocking:
+                        new_energy = day23_move_to(
+                            r, c, rr, cc, day23_energy(char), occupied, limits)
+                        if new_energy != 0:
+                            new_pos2 = {k: v for k, v in new_positions.items()}
+                            new_pos2[(rr, cc)] = char
+                            new_pos2.pop((r, c))
+                            states[counter] = new_pos2
+                            counter += 1
+                            heur = day23_heuristic(new_pos2, limits, rows)
+                            heappush(
+                                q, (heur + energy + new_energy, energy + new_energy, counter - 1))
+                            added = True
+                            break  # moved to back of room
+    assert False
+
+def day23_1(data):
+    data = day23_parse(data)
+    positions = {}
+    for r in range(len(data)):
+        for c in range(len(data[r])):
+            char = data[r][c]
+            if char in "ABCD":
+                positions[(r, c)] = char
+
+    limits = day23_limits(2)
+    return day23_solve(positions, 2, limits)
+
+def day23_2(data):
+    data = day23_parse(data)
+    positions = {}
+    data2 = data[:3]
+    data2.append("  #D#C#B#A#")
+    data2.append("  #D#B#A#C#")
+    data2 += data[3:]
+    for r in range(len(data2)):
+        for c in range(len(data2[r])):
+            char = data2[r][c]
+            if char in "ABCD":
+                positions[(r, c)] = char
+
+    limits = day23_limits(4)
+    return day23_solve(positions, 4, limits)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
