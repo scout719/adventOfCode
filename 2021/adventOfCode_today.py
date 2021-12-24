@@ -25,96 +25,23 @@ from common.utils import BLUE_CIRCLE, RED_SMALL_SQUARE  # NOQA: E402
 # pylint: enable=wrong-import-position
 
 YEAR = 2021
-DAY = 24
+DAY = 25
 EXPECTED_1 = None
 EXPECTED_2 = None
 
 
-""" DAY 24 """
+""" DAY 25 """
 
-def day24_parse(data):
-    P = []
-    ops = []
-    for line in data:
-        parts = line.split(" ")
-        inst = parts[0]
-        op = ()
-        if len(parts) == 2:
-            P.append(ops)
-            ops = []
-            op = (inst, parts[1])
-        else:
-            assert len(parts) == 3
-            snd = int(parts[2]) if parts[2].lstrip("-").isdigit() else parts[2]
-            op = (inst, parts[1], snd)
-        ops.append(op)
-    P.append(ops)
-    return P[1:]
-
-def day24_resolve(b, mem):
-    if isinstance(b, int):
-        return b
-    else:
-        return mem[b]
-
-def day24_exec(op, mem, inp):
-    inst = op[0]
-    if inst == "inp":
-        mem[op[1]] = inp.pop()
-    elif inst == "add":
-        b = day24_resolve(op[2], mem)
-        a = day24_resolve(op[1], mem)
-        mem[op[1]] = a + b
-    elif inst == "mul":
-        b = day24_resolve(op[2], mem)
-        a = day24_resolve(op[1], mem)
-        mem[op[1]] = a * b
-    elif inst == "div":
-        b = day24_resolve(op[2], mem)
-        a = day24_resolve(op[1], mem)
-        mem[op[1]] = a // b
-    elif inst == "mod":
-        b = day24_resolve(op[2], mem)
-        a = day24_resolve(op[1], mem)
-        mem[op[1]] = a % b
-    elif inst == "eql":
-        b = day24_resolve(op[2], mem)
-        a = day24_resolve(op[1], mem)
-        if a == b:
-            mem[op[1]] = 1
-        else:
-            mem[op[1]] = 0
-
-def day24_generate(d):
-    if d == 0:
-        return [d for d in range(1, 10)]
-    nums = []
-    for i in range(1, 10):
-        for n in day24_generate(d - 1):
-            nums.append(i + n)
-    return nums
-
-def day24_solve(P):
-    opts = day24_generate(13)
-    return len(opts)
-    while True:
-        mem = {"w": 0, "x": 0, "y": 0, "z": 0}
-        v = ""
-        for _ in range(14):
-            for c in range(1, 10):
-                for op in P:
-                    day24_exec(op, mem, [c])
-                    if mem["z"]:
-                        pass
-
-
-def day24_1(data):
-    data = day24_parse(data)
+def day25_parse(data):
     return data
 
-def day24_2(data):
-    data = day24_parse(data)
-    return None
+def day25_1(data):
+    data = day25_parse(data)
+    return data
+
+def day25_2(data):
+    data = day25_parse(data)
+    return data
 
 
 """ MAIN FUNCTION """
