@@ -2220,6 +2220,97 @@ def day23_2(data):
     return day23_solve(positions, 4, limits)
 
 
+""" DAY 24 """
+
+def day24_parse(data):
+    P = []
+    ops = []
+    for line in data:
+        parts = line.split(" ")
+        inst = parts[0]
+        op = ()
+        if len(parts) == 2:
+            P.append(ops)
+            ops = []
+            op = (inst, parts[1])
+        else:
+            assert len(parts) == 3
+            snd = int(parts[2]) if parts[2].lstrip("-").isdigit() else parts[2]
+            op = (inst, parts[1], snd)
+        ops.append(op)
+    P.append(ops)
+    return P[1:]
+
+def day24_resolve(b, mem):
+    if isinstance(b, int):
+        return b
+    else:
+        return mem[b]
+
+def day24_exec(op, mem, inp):
+    inst = op[0]
+    if inst == "inp":
+        mem[op[1]] = inp[0]
+        inp.remove(inp[0])
+    elif inst == "add":
+        b = day24_resolve(op[2], mem)
+        a = day24_resolve(op[1], mem)
+        mem[op[1]] = a + b
+    elif inst == "mul":
+        b = day24_resolve(op[2], mem)
+        a = day24_resolve(op[1], mem)
+        mem[op[1]] = a * b
+    elif inst == "div":
+        b = day24_resolve(op[2], mem)
+        a = day24_resolve(op[1], mem)
+        mem[op[1]] = a // b
+    elif inst == "mod":
+        b = day24_resolve(op[2], mem)
+        a = day24_resolve(op[1], mem)
+        mem[op[1]] = a % b
+    elif inst == "eql":
+        b = day24_resolve(op[2], mem)
+        a = day24_resolve(op[1], mem)
+        if a == b:
+            mem[op[1]] = 1
+        else:
+            mem[op[1]] = 0
+
+def day24_solve(Ps, inp):
+    inp_bak = inp[:]
+    mem = {"w": 0, "x": 0, "y": 0, "z": (0)}
+    for P in Ps[-len(inp):]:
+        for op in P:
+            day24_exec(op, mem, inp)
+    assert mem["z"] == 0
+
+    ans = 0
+    for i in inp_bak:
+        ans *= 10
+        ans += i
+    return ans
+
+
+def day24_1(data):
+    data = day24_parse(data)
+    # Value obtained by manual process
+    # Algorithm:
+    # Staring from the bottom
+    # if z was divided by 26 and x was added -A
+    # previous z is z*26 + (w + A)
+    # if z was divided 1 and y is added a value B on the 16th instruction
+    # Assert: required z must be 26*K + V
+    # previous z is K and W + B must equal V
+    P1 = [6, 9, 9, 1, 4, 9, 9, 9, 9, 7, 5, 3, 6, 9]
+    return day24_solve(data, P1)
+
+def day24_2(data):
+    data = day24_parse(data)
+    # Value obtained by manual process
+    P2 = [1, 4, 9, 1, 1, 6, 7, 5, 3, 1, 1, 1, 1, 4]
+    return day24_solve(data, P2)
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
