@@ -2136,7 +2136,7 @@ def day23_solve(positions, rows, limits):
         if costs is not None and energy >= costs:
             continue
         key = tuple(sorted((char, r, c)
-                    for (r, c), char in new_positions.items()))
+                           for (r, c), char in new_positions.items()))
         if key in visited2 and visited2[key] <= energy:
             continue
         visited2[key] = energy
@@ -2235,7 +2235,9 @@ def day24_parse(data):
             op = (inst, parts[1])
         else:
             assert len(parts) == 3
-            snd = int(parts[2]) if parts[2].lstrip("-").isdigit() else parts[2]
+            snd = parts[2]
+            if parts[2].lstrip("-").isdigit():
+                snd = int(parts[2])
             op = (inst, parts[1], snd)
         ops.append(op)
     P.append(ops)
@@ -2276,7 +2278,7 @@ def day24_exec(op, mem, inp):
         else:
             mem[op[1]] = 0
 
-def day24_solve(Ps, inp):
+def day24_validate(Ps, inp):
     inp_bak = inp[:]
     mem = {"w": 0, "x": 0, "y": 0, "z": (0)}
     for P in Ps[-len(inp):]:
@@ -2290,25 +2292,55 @@ def day24_solve(Ps, inp):
         ans += i
     return ans
 
+def day24_solve(Ps, i, required_z, maximize):
+    if i < 0:
+        return []
+
+    # Algorithm obtained by manual process
+    P = Ps[i]
+    if P[4][2] == 1:
+        # if z was divided 1 and
+        # instruction 16 is y + B
+        # Assert: required z must be 26*K + V
+        # previous z is K and W + B must equal V
+        y_val = P[15][2]
+        v_val = required_z[1]
+        max_w = v_val - y_val
+        if not 9 >= max_w >= 1:
+            return None
+        else:
+            assert 9 >= max_w >= 1
+            res = day24_solve(Ps, i - 1, required_z[0], maximize)
+            if res is None:
+                return None
+            return res + [max_w]
+    else:
+        # if z was divided by 26 and
+        # instruction 3 is x - A
+        # previous z is next_required_z*26 + (w + A)
+        assert P[4][2] == 26
+        val_a = P[5][2]
+        vals = range(1, 10)
+        if maximize:
+            vals = reversed(vals)
+        for w in vals:
+            res = day24_solve(
+                Ps, i - 1, [required_z, w + abs(val_a)], maximize)
+            if res is not None:
+                return res + [w]
+        return None
 
 def day24_1(data):
     data = day24_parse(data)
-    # Value obtained by manual process
-    # Algorithm:
-    # Staring from the bottom
-    # if z was divided by 26 and x was added -A
-    # previous z is z*26 + (w + A)
-    # if z was divided 1 and y is added a value B on the 16th instruction
-    # Assert: required z must be 26*K + V
-    # previous z is K and W + B must equal V
-    P1 = [6, 9, 9, 1, 4, 9, 9, 9, 9, 7, 5, 3, 6, 9]
-    return day24_solve(data, P1)
+
+    ans = day24_solve(data, len(data) - 1, [0, 0], True)
+    return day24_validate(data, ans)
 
 def day24_2(data):
     data = day24_parse(data)
-    # Value obtained by manual process
-    P2 = [1, 4, 9, 1, 1, 6, 7, 5, 3, 1, 1, 1, 1, 4]
-    return day24_solve(data, P2)
+
+    ans = day24_solve(data, len(data) - 1, [0, 0], False)
+    return day24_validate(data, ans)
 
 
 """ MAIN FUNCTION """
