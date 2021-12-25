@@ -2343,6 +2343,69 @@ def day24_2(data):
     return day24_validate(data, ans)
 
 
+""" DAY 25 """
+
+def day25_parse(data):
+    right = set()
+    down = set()
+    for r in range(len(data)):
+        for c in range(len(data[0])):
+            if data[r][c] == ">":
+                right.add((r, c))
+            elif data[r][c] == "v":
+                down.add((r, c))
+            else:
+                assert data[r][c] == "."
+    R = len(data)
+    C = len(data[0])
+    return right, down, R, C
+
+def day25_move(cucu, other_cucu, dr, dc, R, C):
+    any_move = False
+    new_cucu = set()
+    for r, c in cucu:
+        rr, cc = (r + dr) % R, (c + dc) % C
+        if (rr, cc) not in cucu and (rr, cc) not in other_cucu:
+            new_cucu.add((rr, cc))
+            any_move = True
+        else:
+            new_cucu.add((r, c))
+    cucu = new_cucu
+
+    return cucu, any_move
+
+def day25_print(right, down, R, C):
+    for r in range(R):
+        row = ""
+        for c in range(C):
+            if (r, c) in right:
+                row += ">"
+            elif (r, c) in down:
+                row += "v"
+            else:
+                row += "."
+        print(row)
+    print()
+
+def day25_1(data):
+    right, down, R, C = day25_parse(data)
+
+    t = 0
+    while True:
+        # day25_print(right, down, R, C)
+        t += 1
+        moved = False
+        right, has_moved = day25_move(right, down, 0, 1, R, C)
+        moved |= has_moved
+        down, has_moved = day25_move(down, right, 1, 0, R, C)
+        moved |= has_moved
+        if not moved:
+            return t
+
+def day25_2(_):
+    return "Merry Xmas!"
+
+
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
