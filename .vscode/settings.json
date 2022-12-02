@@ -27,6 +27,7 @@
     "python.linting.lintOnSave": true,
     "python.analysis.completeFunctionParens": true,
     "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
     // #############################################
     // #######################  <\PYTHON> ##########
     // #############################################

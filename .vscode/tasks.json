@@ -6,7 +6,7 @@
         {
             "label": "Get Input",
             "type": "shell",
-            "command": "${config:python.pythonPath} ${workspaceFolder}/get_input.py ${input:day}",
+            "command": "${config:python.defaultInterpreterPath} ${workspaceFolder}/get_input.py ${input:day}",
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -21,7 +21,7 @@
         {
             "label": "Execute",
             "type": "shell",
-            "command": "${config:python.pythonPath} ${file} ${input:day}",
+            "command": "${config:python.defaultInterpreterPath} ${file} ${input:day}",
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -51,7 +51,7 @@
         {
             "label": "Compile",
             "type": "shell",
-            "command": "${config:python.pythonPath} -m py_compile ${file}",
+            "command": "${config:python.defaultInterpreterPath} -m py_compile ${file}",
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -66,7 +66,7 @@
         {
             "label": "Lint",
             "type": "shell",
-            "command": "${config:python.pythonPath} -m autopep8 -i -r --ignore E302,E305 ${workspaceFolder}",
+            "command": "${config:python.defaultInterpreterPath} -m autopep8 -i -r --ignore E302,E305 ${workspaceFolder}",
             "group": "build",
             "presentation": {
                 "echo": true,
