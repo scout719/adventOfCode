@@ -1,28 +1,13 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=import-error
-# pylint: disable=unused-import
-# pylint: disable=wildcard-import
 # pylint: disable=wrong-import-position
-# pylint: disable=consider-using-enumerate
-from typing import Callable, Dict, Iterator, Union, Optional, List, ChainMap
-import functools
-import math
 import os
-from os.path import join
 import sys
-import time
-from copy import deepcopy
-from collections import Counter, defaultdict, deque
-from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-from common.utils import read_input, main, clear  # NOQA: E402
-from common.utils import day_with_validation, bcolors, WHITE_CIRCLE, WHITE_SQUARE  # NOQA: E402
-from common.utils import BLUE_CIRCLE, RED_SMALL_SQUARE  # NOQA: E402
-# pylint: enable=import-error
-# pylint: enable=wrong-import-position
+from common.utils import main  # NOQA: E402
+from common.utils import day_with_validation  # NOQA: E402
 
 YEAR = 2022
 DAY = 1
