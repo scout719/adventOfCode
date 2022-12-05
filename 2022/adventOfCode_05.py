@@ -12,7 +12,7 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
 from common.utils import main  # NOQA: E402
-from common.utils import day_with_validation # NOQA: E402
+from common.utils import day_with_validation  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
 
