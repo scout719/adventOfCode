@@ -19,7 +19,7 @@ from heapq import heappop, heappush
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-from common.utils import *  # NOQA: E402
+from common.utils import main, day_with_validation  # NOQA: E402
 # pylint: enable=import-error
 # pylint: enable=wrong-import-position
 
@@ -32,79 +32,80 @@ EXPECTED_2 = 24933642
 """ DAY 7 """
 
 def day7_parse(data):
-    m = defaultdict(set)
-    curr = ""
-    i = 0
-    while i < len(data):
-        line = data[i]
-        if line.startswith("$ "):
-            parts = line.split("$ ")[1].split(" ")
-            cmd = parts[0]
-            if cmd == "cd":
-                n = parts[1]
-                if n == "..":
-                    curr = "/".join(curr.split("/")[:-2]) + "/"
+    filesystem = defaultdict(set)
+    cwd = ""
+    curr_line = 0
+    while curr_line < len(data):
+        line = data[curr_line]
+        assert line[0] == "$"
+
+        # $ <cmd> <args>
+        parts = line.split(" ")[1:]
+        cmd = parts[0]
+        if cmd == "cd":
+            target = parts[1]
+            if target == "..":
+                cwd = "/".join(cwd.split("/")[:-2]) + "/"
+            else:
+                # avoid the // at the start
+                cwd += (target + "/").replace("//", "/")
+            curr_line += 1
+        elif cmd == "ls":
+            curr_line += 1
+            while curr_line < len(data) and not data[curr_line].startswith("$"):
+                line = data[curr_line]
+                parts = line.split(" ")
+                if parts[0] == "dir":
+                    filesystem[cwd].add((parts[1], True, 0))
                 else:
-                    if curr:
-                        curr += n + "/"
-                    else:
-                        curr = n
-                i += 1
-            elif cmd == "ls":
-                i += 1
-                while i < len(data) and not (data[i].startswith("$ ")):
-                    line = data[i]
-                    parts = line.split(" ")
-                    if parts[0] == "dir":
-                        m[curr].add((parts[1], True, 0))
-                    else:
-                        size = int(parts[0])
-                        f = parts[1]
-                        m[curr].add((f, False, size))
-                    i += 1
+                    size = int(parts[0])
+                    f = parts[1]
+                    filesystem[cwd].add((f, False, size))
+                curr_line += 1
 
-    return m
+    return filesystem
 
-def day7_total(m, d, mem):
-    if d in mem:
-        return mem[d]
-    t = 0
-    for c, is_dir, size in m[d]:
+def day7_directory_size(filesystem, directory, DP):
+    if directory in DP:
+        return DP[directory]
+    total_size = 0
+    for child, is_dir, size in filesystem[directory]:
         if is_dir:
-            t += day7_total(m, d + c + "/", mem)
+            total_size += day7_directory_size(filesystem,
+                                              directory + child + "/", DP)
         else:
-            t += size
-    mem[d] = t
-    return t
+            total_size += size
+    DP[directory] = total_size
+    return total_size
 
 def day7_1(data):
-    data = day7_parse(data)
+    filesystem = day7_parse(data)
 
-    mem = {}
-    day7_total(data, "/", mem)
-    ans = 0
-    q = ["/"]
-    while q:
-        curr = q.pop()
-        if mem[curr] <= 100000:
-            ans += mem[curr]
-        for c, is_dir, _ in data[curr]:
+    DP = {}
+    day7_directory_size(filesystem, "/", DP)
+    total = 0
+    directories = ["/"]
+    while directories:
+        directory = directories.pop()
+        if DP[directory] <= 100000:
+            total += DP[directory]
+        for child, is_dir, _ in filesystem[directory]:
             if is_dir:
-                q.append(curr + c + "/")
+                directories.append(directory + child + "/")
 
-    return ans
+    return total
 
 def day7_2(data):
     data = day7_parse(data)
-    mem = {}
-    day7_total(data, "/", mem)
-    unused = 70000000 - mem["/"]
-    target = 30000000 - unused
-    t = list()
-    for v in mem.values():
-        if v >= target:
-            t.append(v)
-    return min(t)
+    DP = {}
+    day7_directory_size(data, "/", DP)
+    unused_space = 70000000 - DP["/"]
+    min_to_free = 30000000 - unused_space
+    candidates = []
+    for size in DP.values():
+        if size >= min_to_free:
+            candidates.append(size)
+    return min(candidates)
 
 
 """ MAIN FUNCTION """
