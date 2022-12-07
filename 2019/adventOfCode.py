@@ -1551,7 +1551,7 @@ def day19_calc_dims(data, x, y):
         x += 1
         pos = [x, y]
     width = x - orig_x
-    if(width >= 100):
+    if (width >= 100):
         orig_x = x - 100
         width = 100
 

@@ -460,7 +460,7 @@ def day19_1(data):
         if grid[y][x] == "+":
             new_x, new_y, delta_x, delta_y = day19_crossroad(
                 grid, x, y, delta_x, delta_y)
-            if not(new_x == x and new_y == y):
+            if not (new_x == x and new_y == y):
                 x = new_x
                 y = new_y
             else:

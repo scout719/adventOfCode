@@ -430,7 +430,7 @@ def day22_2(data):
         # Flagged nodes become clean.
 
         pos = "#" if (r, c) in grid else "W" if (
-            r, c) in weak else "F" if(r, c) in flagged else "."
+            r, c) in weak else "F" if (r, c) in flagged else "."
         dr, dc = day22_turn(pos, dr, dc)
         if pos == "#":
             grid.remove((r, c))

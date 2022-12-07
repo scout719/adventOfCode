@@ -710,7 +710,7 @@ def day10_resolve(particles):
             particle) for particle in particles]
         new_size_x, new_size_y = day10_board_size(new_particles)
 
-        if(new_size_x > size_x and new_size_y > size_y):
+        if (new_size_x > size_x and new_size_y > size_y):
             break
         size_x = new_size_x
         size_y = new_size_y
