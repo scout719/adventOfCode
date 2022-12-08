@@ -78,7 +78,7 @@ def day8_2(data):
                     # Went out of bounds
                     rr -= dr
                     cc -= dc
-                total[r][c] *= abs(rr-r)*dr + abs(cc-c)*dc
+                total[r][c] *= abs(rr - r) * dr + abs(cc - c) * dc
 
     ans = 0
     for r in range(R):
