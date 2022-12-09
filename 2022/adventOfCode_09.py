@@ -5,16 +5,8 @@
 # pylint: disable=unused-wildcard-import
 # pylint: disable=wrong-import-position
 # pylint: disable=consider-using-enumerate
-from typing import Callable, Dict, Iterator, Union, Optional, List, ChainMap
-import functools
-import math
 import os
-from os.path import join
 import sys
-import time
-from copy import deepcopy
-from collections import Counter, defaultdict, deque
-from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -32,100 +24,70 @@ EXPECTED_2 = 36
 """ DAY 9 """
 
 def day9_parse(data):
-    x = []
+    motions = []
     for line in data:
-        d, a = line.split(" ")
-        a = int(a)
-        x.append((d, a))
-    return x
+        direction, steps = line.split(" ")
+        steps = int(steps)
+        motions.append((direction, steps))
+    return motions
 
-def day9_board(rope):
-    min_r = min([r for r, c in rope])
-    max_r = max([r for r, c in rope])
-    min_c = min([c for r, c in rope])
-    max_c = max([c for r, c in rope])
+def day9_move_head(head, direction):
+    if direction == "U":
+        head = (head[0] - 1, head[1])
+    elif direction == "D":
+        head = (head[0] + 1, head[1])
+    elif direction == "R":
+        head = (head[0], head[1] + 1)
+    elif direction == "L":
+        head = (head[0], head[1] - 1)
 
-    for r in range(min_r, max_r + 1):
-        line = ""
-        for c in range(min_c, max_c + 1):
-            ch = "."
-            if (r, c) in rope:
-                ch = str(rope.index((r, c)))
-            line += ch
-        print(line)
-    print()
-    time.sleep(1)
+    return head
 
-def day9_move(rope):
+def day9_get_delta(a, b):
+    return 0 if a == b else (a - b) / abs(a - b)
+
+def day9_follow_up(rope):
     i = 0
     while i < len(rope) - 1:
-        h = rope[i]
-        t = rope[i + 1]
+        head = rope[i]
+        tail = rope[i + 1]
 
-        if abs(h[0]-t[0]) == 2:
-            dr = (h[0]-t[0])/abs(h[0]-t[0])
-            dc = 0
-            if abs(h[1]-t[1]) >= 1:
-                dc = (h[1]-t[1])/abs(h[1]-t[1])
-            t = (t[0] +dr, t[1]+dc)
-        elif abs(h[1]-t[1]) == 2:
-            dc = (h[1]-t[1])/abs(h[1]-t[1])
-            dr = 0
-            if abs(h[0]-t[0]) >= 1:
-                dr = (h[0]-t[0])/abs(h[0]-t[0])
-            t = (t[0] +dr, t[1]+dc)
-        rope[i] = h
-        rope[i + 1] = t
+        dr = day9_get_delta(head[0], tail[0])
+        dc = day9_get_delta(head[1], tail[1])
+        # Moved UP or DOWN
+        if abs(head[0] - tail[0]) == 2:
+            tail = (tail[0] + dr, tail[1] + dc)
+        # Moved RIGHT or LEFT
+        elif abs(head[1] - tail[1]) == 2:
+            tail = (tail[0] + dr, tail[1] + dc)
+        rope[i] = head
+        rope[i + 1] = tail
         i += 1
     return rope
 
+def day9_solve(motions, size):
+    rope = [(0, 0) for _ in range(size)]
+    visited = set([rope[-1]])
+    for direction, steps in motions:
+        for _ in range(steps):
+            head = rope[0]
+            head = day9_move_head(head, direction)
+            rope[0] = head
+            rope = day9_follow_up(rope)
+
+            visited.add(rope[-1])
+
+    return len(visited)
+
 def day9_1(data):
-    data = day9_parse(data)
-    h = (0, 0)
-    t = (0, 0)
-    v = set()
-    for d, amt in data:
-        for _ in range(amt):
-            if d == "U":
-                h = (h[0] - 1, h[1])
-                if abs(t[0] - h[0]) == 2:
-                    t = (t[0] - 1, h[1])
-            elif d == "D":
-                h = (h[0] + 1, h[1])
-                if abs(t[0] - h[0]) == 2:
-                    t = (t[0] + 1, h[1])
-            elif d == "R":
-                h = (h[0], h[1] + 1)
-                if abs(t[1] - h[1]) == 2:
-                    t = (h[0], t[1] + 1)
-            elif d == "L":
-                h = (h[0], h[1] - 1)
-                if abs(t[1] - h[1]) == 2:
-                    t = (h[0], t[1] - 1)
-            v.add(t)
-    return len(v)
+    motions = day9_parse(data)
+    return day9_solve(motions, 2)
+
 
 def day9_2(data):
-    data = day9_parse(data)
-    rope = [(0, 0) for _ in range(10)]
-    v = set([rope[-1]])
-    for d, amt in data:
-        for _ in range(amt):
-            h = rope[0]
-            if d == "U":
-                h = (h[0] - 1, h[1])
-            elif d == "D":
-                h = (h[0] + 1, h[1])
-            elif d == "R":
-                h = (h[0], h[1] + 1)
-            elif d == "L":
-                h = (h[0], h[1] - 1)
-            rope[0] = h
-            rope = day9_move(rope)
-
-            v.add(rope[-1])
+    motions = day9_parse(data)
     # 2128
-    return len(v)
+    return day9_solve(motions, 10)
 
 
 """ MAIN FUNCTION """
