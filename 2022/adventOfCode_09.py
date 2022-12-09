@@ -31,7 +31,7 @@ def day9_parse(data):
         motions.append((direction, steps))
     return motions
 
-def day9_move_head(head, direction):
+def day9_move_head(head, direction) -> tuple:
     if direction == "U":
         head = (head[0] - 1, head[1])
     elif direction == "D":
