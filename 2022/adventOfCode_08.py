@@ -53,7 +53,7 @@ def day8_1(data):
         for c in range(C):
             for dr, dc in D:
                 rr, cc = day8_blocking_tree(r, c, dr, dc, grid)
-                if not(0 <= rr < R and 0 <= cc < C):
+                if not (0 <= rr < R and 0 <= cc < C):
                     # Went out of bounds
                     visible[r][c] = True
 
@@ -74,7 +74,7 @@ def day8_2(data):
         for c in range(C):
             for dr, dc in D:
                 rr, cc = day8_blocking_tree(r, c, dr, dc, grid)
-                if not(0 <= rr < R and 0 <= cc < C):
+                if not (0 <= rr < R and 0 <= cc < C):
                     # Went out of bounds
                     rr -= dr
                     cc -= dc
