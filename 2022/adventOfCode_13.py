@@ -5,17 +5,9 @@
 # pylint: disable=unused-wildcard-import
 # pylint: disable=wrong-import-position
 # pylint: disable=consider-using-enumerate
-from struct import pack
-from typing import Callable, Dict, Iterator, Union, Optional, List, ChainMap
-import functools
-import math
+from functools import cmp_to_key
 import os
-from os.path import join
 import sys
-import time
-from copy import deepcopy
-from collections import Counter, defaultdict, deque
-from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -44,87 +36,82 @@ def day13_parse(data):
     pairs.append(curr)
     return pairs
 
-def day13_compare(l, r):
-    res = None
-    if type(l) is int and type(r) is int:
-        if l > r:
-            res = False
-        elif r > l:
-            res = True
-    elif type(l) is list and type(r) is list:
+def day13_compare(left, right):
+    # return None if they are equal
+    result = None
+    if isinstance(left, int) and isinstance(right, int):
+        # both ints, compare between then
+        if left > right:
+            result = False
+        elif right > left:
+            result = True
+    elif isinstance(left, list) and isinstance(right, list):
+        # both lists, go through each item and compare
+        # stop on the first non tie
         in_order = None
-        # print("oi")
-        for n, ll in enumerate(l):
-            if n >= len(r):
-                in_order = False
-                break
-            rr = r[n]
-            # print(ll,rr)
+        i = 0
+        while i < len(left) and i < len(right):
+            left_e = left[i]
+            right_e = right[i]
 
-            comp = day13_compare(ll, rr)
-            if not comp is None:
-                in_order = comp
+            comparison = day13_compare(left_e, right_e)
+            if not comparison is None:
+                in_order = comparison
                 break
-        # in_order &= not len(r) > len(l)
+            i += 1
         if in_order is None:
-            if len(l) < len(r):
+            # All items were equal, so we must compare the lengths
+            if len(left) < len(right):
+                # ran out of left elements
                 in_order = True
-            # if len(l) > len(r):
-                # in_order = False
-        res = in_order
-    elif type(l) is int:
-        res = day13_compare([l], r)
+            elif len(left) > len(right):
+                # ran out of right elements
+                in_order = False
+        result = in_order
+    elif isinstance(left, int):
+        result = day13_compare([left], right)
     else:
-        res = day13_compare(l, [r])
-    # print(l,r, res)
-    return res
+        result = day13_compare(left, [right])
+    return result
 
-def day13_1(data):
-    data = day13_parse(data)
+def day13_1(pairs):
+    pairs = day13_parse(pairs)
     in_order = []
-    for n, pair in enumerate(data):
-        # print("###")
-        res = day13_compare(pair[0], pair[1])
-        if res is None or res:
-            in_order.append(n+1)
+    for i, pair in enumerate(pairs):
+        result = day13_compare(pair[0], pair[1])
+        if result is None or result:
+            # in_order or equal
+            in_order.append(i + 1)
 
     # 7066
     # 2804
     # 5509
-    # 4894
     return sum(in_order)
 
-def compare(item1, item2):
+def day13_cmp(item1, item2):
     r = day13_compare(item1, item2)
     if r is None:
         return 0
     return -1 if r else 1
 
-
-def day13_2(data):    
-    data = day13_parse(data)
+def day13_2(pairs):
+    pairs = day13_parse(pairs)
     packets = []
-    for pair in data:
+    for pair in pairs:
         packets.append(pair[0])
         packets.append(pair[1])
     packets.append([[2]])
     packets.append([[6]])
-    print(packets)
-    # Calling
-    from functools import cmp_to_key
-    new_packs = sorted(data, key=cmp_to_key(compare))
+    sorted_packs = sorted(packets, key=cmp_to_key(day13_cmp))
+
     in_order = []
-    print(new_packs)
-    for n, packet in enumerate(new_packs):
-        # print("###")
+    for i, packet in enumerate(sorted_packs):
         res = day13_compare(packet, [[2]])
         if res is None:
-            in_order.append(n+1)
+            in_order.append(i + 1)
         res = day13_compare(packet, [[6]])
         if res is None:
-            in_order.append(n+1)
-    # prin
-    print(in_order)
+            in_order.append(i + 1)
     return in_order[0] * in_order[1]
 
 
