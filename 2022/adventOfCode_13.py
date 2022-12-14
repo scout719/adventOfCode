@@ -8,6 +8,7 @@
 from functools import cmp_to_key
 import os
 import sys
+import json
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -32,7 +33,7 @@ def day13_parse(data):
             pairs.append(curr)
             curr = []
         else:
-            curr.append(eval(line))
+            curr.append(json.loads(line))
     pairs.append(curr)
     return pairs
 
