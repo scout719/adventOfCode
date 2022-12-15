@@ -5,15 +5,8 @@
 # pylint: disable=unused-wildcard-import
 # pylint: disable=wrong-import-position
 # pylint: disable=consider-using-enumerate
-from typing import Callable, Dict, Iterator, Union, Optional, List, ChainMap
-import functools
-import math
 import os
-from os.path import join
 import sys
-import time
-from copy import deepcopy
-from collections import Counter, defaultdict, deque
 from heapq import heappop, heappush
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -25,138 +18,145 @@ from common.utils import main, day_with_validation  # NOQA: E402
 
 YEAR = 2022
 DAY = 15
-EXPECTED_1 = None
-EXPECTED_2 = None
+EXPECTED_1 = 26
 EXPECTED_2 = 56000011
 
 
 """ DAY 15 """
 
 def day15_parse(data):
-    s = []
+    sensors = []
     for line in data:
         # Sensor at x=2, y=18: closest beacon is at x=-2, y=15
         parts = line.split(":")
-        sx = int(parts[0].split(",")[0].split("=")[1])
-        sy = int(parts[0].split(",")[1].split("=")[1])
-        cx = int(parts[1].split(",")[0].split("=")[1])
-        cy = int(parts[1].split(",")[1].split("=")[1])
-        s.append(((sx, sy), (cx, cy)))
-    return s
+        sensor_x = int(parts[0].split(",")[0].split("=")[1])
+        sensor_y = int(parts[0].split(",")[1].split("=")[1])
+        beacon_x = int(parts[1].split(",")[0].split("=")[1])
+        beacon_y = int(parts[1].split(",")[1].split("=")[1])
+        sensors.append(((sensor_x, sensor_y), (beacon_x, beacon_y)))
+    return sensors
 
 def day15_1(data):
-    s = day15_parse(data)
-    t = 2000000
-    return ""
+    sensors = day15_parse(data)
+    target_y = 10
+    if len(sensors) > 15:
+        # real input
+        target_y = 2000000
 
-    b_range_x = max(abs(bx - sx) for (sx, sy), (bx, by) in s)
-    lo_x = min(sx for (sx, sy), (bx, by) in s)
-    hi_x = max(sx for (sx, sy), (bx, by) in s)
-    # return b_range_x, lo_x, hi_x
-    n = set()
-    for i in range(lo_x - b_range_x, hi_x + b_range_x + 1):
-        y = t
-        x = i
-        for sen, b in s:
-            sx, sy = sen
-            bx, by = b
-            dist = abs(sx - bx) + abs(sy - by)
-            dist2 = abs(sx - x) + abs(sy - y)
-            if dist2 <= dist and not (x == bx and y == by):
-                n.add((x, y))
+    max_sensor_range = max(abs(beacon_x - sensor_x)
+                           for (sensor_x, _), (beacon_x, _) in sensors)
+    lowest_x = min(sensor_x for (sensor_x, _), _ in sensors)
+    highest_x = max(sensor_x for (sensor_x, _), _ in sensors)
+    not_in = set()
+    for x in range(lowest_x - max_sensor_range, highest_x + max_sensor_range + 1):
+        y = target_y
+        for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+            sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+            dist = abs(sensor_x - x) + abs(sensor_y - y)
+            if dist <= sensor_range and not (x == beacon_x and y == beacon_y):
+                not_in.add((x, y))
                 break
     # 4797228
-    # print(b_range_x, lo_x, hi_x)
-    # print(n)
-    return len([1 for x, y in n if y == t])
+    return len([_ for _, y in not_in if y == target_y])
 
-def day15_flood(cx,cy,dist,n, DP):
-    print(dist)
+def day15_flood(x, y, dist, not_in, DP):
     if dist < 0:
         return
-    k = (cx,cy)
-    if k in DP and DP[k] >= dist:
+    key = (x, y)
+    if key in DP and DP[key] >= dist:
         return
-    DP[k] = dist
-    n.add((cx,cy))
-    D = [(0,-1), (0,1), (-1,0), (1,0)]
-    for dx,dy in D:
-        day15_flood(cx+dx, cy+dy, dist-1, n, DP)
+    DP[key] = dist
+    not_in.add((x, y))
+    D = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+    for dx, dy in D:
+        day15_flood(x + dx, y + dy, dist - 1, not_in, DP)
 
+def day15_get_cost(x, y, sensors):
+    cost = 0
+    for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+        sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+        dist = abs(sensor_x - x) + abs(sensor_y - y)
+        # How inside of the range is x,y
+        cost += max(sensor_range - dist + 1, 0)
+    return cost
+
+def day15_within_range(x, y, sensors):
+    for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+        sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+        dist = abs(sensor_x - x) + abs(sensor_y - y)
+        # How inside of the range is x,y
+        if dist <= sensor_range:
+            return True
+    return False
+
+def day15_get_coords(sensor_x, sensor_y, radius, edge):
+    coords = []
+    top_left_x = sensor_x - radius
+    top_left_y = sensor_y - (edge - radius)
+    coords.append((top_left_x, top_left_y))
+    top_right_x = sensor_x + radius
+    top_right_y = sensor_y - (edge - radius)
+    coords.append((top_right_x, top_right_y))
+    bot_left_x = sensor_x - radius
+    bot_left_y = sensor_y + (edge - radius)
+    coords.append((bot_left_x, bot_left_y))
+    bot_right_x = sensor_x + radius
+    bot_right_y = sensor_y + (edge - radius)
+    coords.append((bot_right_x, bot_right_y))
+
+    return coords
+
+def day15_visit_all_borders(sensors, max_limit):
+    for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+        sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+        edge = sensor_range + 1
+        for radius in range(1, edge + 1):
+            for x, y in day15_get_coords(sensor_x, sensor_y, radius, edge):
+                if 0 <= x <= max_limit and 0 <= y <= max_limit:
+                    if not day15_within_range(x, y, sensors):
+                        return x * 4000000 + y
+    assert False
+
+def day15_next_positions(x, y, sensors):
+    positions = set()
+    for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+        sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+        dist = abs(sensor_x - x) + abs(sensor_y - y)
+        if dist <= sensor_range:
+            edge = sensor_range + 1
+            for radius in range(1, edge + 1):
+                for xx, yy in day15_get_coords(sensor_x, sensor_y, radius, edge):
+                    positions.add((xx, yy))
+    return positions
+
+def day15_original(sensors, max_limit):
+    visited = set()
+    start_x = max_limit // 2
+    start_y = max_limit // 2
+    queue = [(day15_get_cost(start_x, start_y, sensors), start_x, start_y)]
+    while queue:
+        cost, x, y = heappop(queue)
+        if cost == 0:
+            return x * 4000000 + y
+        if (x, y) in visited:
+            continue
+        visited.add((x, y))
+        for xx, yy in day15_next_positions(x, y, sensors):
+            if (xx, yy) not in visited and 0 <= xx <= max_limit and 0 <= yy <= max_limit:
+                heappush(queue, (day15_get_cost(xx, yy, sensors), xx, yy))
+    assert False
 
 def day15_2(data):
-    s = day15_parse(data)
-    t = 2000000
+    sensors = day15_parse(data)
+    max_limit = 20
+    if len(sensors) > 15:
+        # real input
+        max_limit = 4000000
 
-    b_range_x = max(abs(bx - sx) for (sx, sy), (bx, by) in s)
-    lo_x = min(sx for (sx, sy), (bx, by) in s)
-    hi_x = max(sx for (sx, sy), (bx, by) in s)
-    b_range_y = max(abs(by - sy) for (sx, sy), (bx, by) in s)
-    lo_y = min(sy for (sx, sy), (bx, by) in s)
-    hi_y = max(sy for (sx, sy), (bx, by) in s)
-    # return b_range_x, lo_x, hi_x
-    # n = set()
-    # for i in range(lo_x - b_range_x, hi_x + b_range_x + 1):
-    #     for j in range(lo_y - b_range_y, hi_y + b_range_y + 1):
-    #         y = j
-    #         x = i
-    #         for sen, b in s:
-    #             sx, sy = sen
-    #             bx, by = b
-    #             dist = abs(sx - bx) + abs(sy - by)
-    #             dist2 = abs(sx - x) + abs(sy - y)
-    #             if dist2 <= dist and not (x == bx and y == by):
-    #                 n.add((x, y))
-    #                 break
-    # 4797228
-    # print(b_range_x, lo_x, hi_x)
-    # print(n)
-    n = set(((bx,by) for (sx,sy),(bx,by) in s))
-    r = 4000000
-    r = 20
+    return day15_visit_all_borders(sensors, max_limit)
 
-    n = set()
-    DP = {}
-    for sen, b in s:
-        sx, sy = sen
-        bx, by = b
-        dist2 = abs(sx - bx) + abs(sy - by)
-        q = [(sx,sy, dist2)]
-        while q:
-            # print(len(q))
-            x,y,dist = q.pop()
-            if dist < 0:
-                continue
-            k = (x,y)
-            if k in DP and DP[k] >= dist:
-                continue
-            DP[k] = dist
-            n.add((x,y))
-            D = [(0,-1), (0,1), (-1,0), (1,0)]
-            for dx,dy in D:
-                q.append((x+dx, y+dy, dist-1))
-    print("finished")
-    for x in range(r+1):
-        for y in range(r+1):
-            if (x,y) not in n:
-                return x*4000000+y
-            # not_pos = False
-            # for sen, b in s:
-            #     sx, sy = sen
-            #     bx, by = b
-            #     dist = abs(sx - bx) + abs(sy - by)
-            #     dist2 = abs(sx - x) + abs(sy - y)
-            #     # if x == 2 and y == 10:
-            #         # print(sx,sy,bx,by,dist,dist2)
-            #     if dist2 <= dist and not (x == bx and y == by):
-            #         not_pos = True
-            #         break
-            
-            # if not not_pos and not (x,y) in n:
-            #     # print(x,y)
-            #     return x*4000000+y
-    assert False
-    # return len([1 for x, y in n if y == t])
+    # Original solution
+    # return day15_original(sensors, r)
 
 
 """ MAIN FUNCTION """
