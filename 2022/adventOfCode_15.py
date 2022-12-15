@@ -146,6 +146,29 @@ def day15_original(sensors, max_limit):
                 heappush(queue, (day15_get_cost(xx, yy, sensors), xx, yy))
     assert False
 
+def day15_solve_with_z3(sensors, max_limit):
+    from z3 import Int, Solver, If, Sum
+
+    x = Int('x')
+    y = Int('y')
+    solver = Solver()
+    solver.add(x >= 0, x <= max_limit, y >= 0, y <= max_limit)
+
+    for (sensor_x, sensor_y), (beacon_x, beacon_y) in sensors:
+        sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
+        solver.add(
+            # distance to sensor needs to be bigger that the range
+            sensor_range < Sum(If(x < sensor_x, sensor_x - x, x - sensor_x),
+                               If(y < sensor_y, sensor_y - y, y - sensor_y))
+        )
+
+    solver.check()
+    m = solver.model()
+    x_value = m[x].as_long()
+    y_value = m[y].as_long()
+
+    return x_value * 4000000 + y_value
+
 def day15_2(data):
     sensors = day15_parse(data)
     max_limit = 20
@@ -153,10 +176,13 @@ def day15_2(data):
         # real input
         max_limit = 4000000
 
-    return day15_visit_all_borders(sensors, max_limit)
+    return day15_solve_with_z3(sensors, max_limit)
+
+    # Improved solution
+    # return day15_visit_all_borders(sensors, max_limit)
 
     # Original solution
-    # return day15_original(sensors, r)
+    # return day15_original(sensors, max_limit)
 
 
 """ MAIN FUNCTION """
