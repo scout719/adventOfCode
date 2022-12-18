@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=import-error
-# pylint: disable=unused-import
-# pylint: disable=wildcard-import
-# pylint: disable=unused-wildcard-import
-# pylint: disable=wrong-import-position
-# pylint: disable=consider-using-enumerate
 import os
 import sys
 from heapq import heappop, heappush
 
+from z3 import Abs, Int, Solver, Sum
+
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-from common.utils import main, day_with_validation  # NOQA: E402
-# pylint: enable=import-error
-# pylint: enable=wrong-import-position
+# pylint: disable-next=wrong-import-position
+from common.utils import day_with_validation, main
 
 YEAR = 2022
 DAY = 15
@@ -147,8 +142,6 @@ def day15_original(sensors, max_limit):
     assert False
 
 def day15_solve_with_z3(sensors, max_limit):
-    from z3 import Int, Solver, If, Sum
-
     x = Int('x')
     y = Int('y')
     solver = Solver()
@@ -158,15 +151,16 @@ def day15_solve_with_z3(sensors, max_limit):
         sensor_range = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y)
         solver.add(
             # distance to sensor needs to be bigger that the range
-            sensor_range < Sum(If(x < sensor_x, sensor_x - x, x - sensor_x),
-                               If(y < sensor_y, sensor_y - y, y - sensor_y))
+            sensor_range < Sum(Abs(sensor_x - x),
+                               Abs(sensor_y - y))
         )
 
     solver.check()
     m = solver.model()
+    # pylint: disable-next=no-member
     x_value = m[x].as_long()
+    # pylint: disable-next=no-member
     y_value = m[y].as_long()
-
     return x_value * 4000000 + y_value
 
 def day15_2(data):
