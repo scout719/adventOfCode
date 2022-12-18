@@ -1,58 +1,52 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=import-error
-# pylint: disable=unused-import
-# pylint: disable=wildcard-import
-# pylint: disable=wrong-import-position
-# pylint: disable=consider-using-enumerate
 import functools
 import math
 import os
-from os.path import join
 import sys
 import time
+from collections import Counter, defaultdict, deque
 from copy import deepcopy
-from collections import defaultdict
 from heapq import heappop, heappush
+from os.path import join
+from typing import Callable, ChainMap, Dict, Iterator, List, Optional, Union
+
+from z3 import Abs, If, Int, Solver, Sum
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-from common.utils import read_input, main, clear  # NOQA: E402
-# pylint: enable=import-error
-# pylint: enable=wrong-import-position
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# pylint: disable-next=wrong-import-position
+from common.utils import day_with_validation, main  # NOQA: E402
+
+YEAR = XXXX
+DAY = 1
+EXPECTED_1 = None
+EXPECTED_2 = None
 
 
-WHITE_SQUARE = "█"
-WHITE_CIRCLE = "•"
-BLUE_CIRCLE = f"{bcolors.OKBLUE}{bcolors.BOLD}•{bcolors.ENDC}"
-RED_SMALL_SQUARE = f"{bcolors.FAIL}{bcolors.BOLD}■{bcolors.ENDC}"
-
-year = XXXX
-
-""" DAY 1 """
+""" DAY 01 """
 
 def day1_parse(data):
-    return data
+    x = []
+    for line in data:
+        x.append(x)
+    return x
 
 def day1_1(data):
-    # data = read_input(year, 101)
-    return day1_parse(data)
+    _x_ = day1_parse(data)
+    return ""
 
 def day1_2(data):
-    # data = read_input(year, 101)
-    return day1_parse(data)
+    _x_ = day1_parse(data)
+    return ""
 
 
 """ MAIN FUNCTION """
 
 if __name__ == "__main__":
-    main(sys.argv, globals(), year)
+    main(sys.argv, {
+        f"day{DAY}_1": lambda data: day_with_validation(globals(),
+                                                        YEAR, DAY, EXPECTED_1, 1, data),
+        f"day{DAY}_2": lambda data: day_with_validation(globals(),
+                                                        YEAR, DAY, EXPECTED_2, 2, data),
+    }, YEAR)
