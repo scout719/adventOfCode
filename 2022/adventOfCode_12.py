@@ -42,19 +42,20 @@ def day12_compute(data):
         for c in range(C):
             if grid[r][c] == "S":
                 start = (r, c)
+                lowest_starts.add((r, c))
             elif grid[r][c] == "E":
                 end = (r, c)
             elif grid[r][c] == "a":
                 lowest_starts.add((r, c))
-    grid[end[0]][end[1]] = chr(ord('z') + 1)
-    grid[start[0]][start[1]] = chr(ord('a') - 1)
+    grid[end[0]][end[1]] = 'z'
+    grid[start[0]][start[1]] = 'a'
 
     queue = [(0, end)]
     visited_steps = defaultdict(int)
     while queue:
         curr_steps, curr_pos = heappop(queue)
         r, c = curr_pos
-        if curr_pos in visited_steps and 0 < visited_steps[curr_pos] <= curr_steps:
+        if curr_pos in visited_steps:
             continue
         visited_steps[curr_pos] = curr_steps
         curr = grid[r][c]
