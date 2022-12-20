@@ -37,8 +37,7 @@ def day10_parse(data):
         inst.append(op)
     return inst
 
-def day10_cycle(cycle, x, val, p1, p2, display):
-    day10_draw(cycle, x, display)
+def day10_cycle(x, val, p1, p2):
     if len(p1) > 0:
         x += p1.pop()
     p1 = p2
@@ -77,11 +76,11 @@ def day10_1(data):
         if len(op) > 1:
             _, val = op
             val = int(val)
-            x, p_1, p_2 = day10_cycle(cycle, x, val, p_1, p_2, [])
+            x, p_1, p_2 = day10_cycle(x, val, p_1, p_2)
             cycle += 1
             if (cycle - 20) % 40 == 0:
                 total += cycle * x
-        x, p_1, p_2 = day10_cycle(cycle, x, 0, p_1, p_2, [])
+        x, p_1, p_2 = day10_cycle(x, 0, p_1, p_2)
         cycle += 1
     # 7040
     return total
@@ -99,11 +98,11 @@ def day10_2(data):
         if len(op) > 1:
             _, val = op
             val = int(val)
-            x, p_1, p_2 = day10_cycle(cycle, x, val, p_1, p_2, [])
+            x, p_1, p_2 = day10_cycle(x, val, p_1, p_2)
             cycle += 1
             day10_draw(cycle, x, display)
 
-        x, p_1, p_2 = day10_cycle(cycle, x, 0, p_1, p_2, display)
+        x, p_1, p_2 = day10_cycle(x, 0, p_1, p_2)
         cycle += 1
 
     day10_print(display)
