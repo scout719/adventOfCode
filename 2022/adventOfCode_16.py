@@ -52,7 +52,7 @@ def day16_time_to_valve(s, e, valves):
         for vs in valves[curr][1]:
             if vs in visited:
                 continue
-            q.append((t + 1, vs))
+            heappush(q,(t + 1, vs))
     return None
 
 def day16_get_cost(t, open_, valves, max_t):
@@ -108,7 +108,7 @@ def day16_time_to_valve2(s, e, valves):
         for vs in valves[curr][1]:
             # if vs in visited:
                 # continue
-            q.append((t + 1, vs, path + [vs]))
+            heappush(q,(t + 1, vs, path + [vs]))
     return None, []
 
 def day16_get_release(open_, valves):
