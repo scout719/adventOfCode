@@ -317,10 +317,14 @@ def day22_2(data):
             rr, cc = r + dr, c + dc
             ddr, ddc = dr, dc
             if (rr, cc) not in positions:
-                facing = day22_face_real(
-                    r, c, L) if R > 20 else day22_face_example(r, c, L)
-                rr, cc, ddr, ddc = day22_overflow_real(
-                    rr, cc, dr, dc, facing, L) if R > 20 else day22_overflow_example(rr, cc, dr, dc, facing, L)
+                if R <= 20:
+                    face = day22_face_example(r, c, L)
+                    rr, cc, ddr, ddc = day22_overflow_example(
+                        rr, cc, dr, dc, face, L)
+                else:
+                    face = day22_face_real(r, c, L)
+                    rr, cc, ddr, ddc = day22_overflow_real(
+                        rr, cc, dr, dc, face, L)
                 assert (rr, cc) in positions, (rr, cc)
 
             if is_ocuppied[(rr, cc)]:
