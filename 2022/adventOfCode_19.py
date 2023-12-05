@@ -12,8 +12,6 @@ from typing import Callable, ChainMap, Dict, Iterator, List, Optional, Union
 
 from z3 import Abs, If, Int, Solver, Sum
 
-from macpath import split
-
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
@@ -22,7 +20,7 @@ from common.utils import day_with_validation, main  # NOQA: E402
 
 YEAR = 2022
 DAY = 19
-EXPECTED_1 = None#33
+EXPECTED_1 = None  # 33
 EXPECTED_2 = None
 
 ORE = "ore"
@@ -145,9 +143,9 @@ def day19_cost(blue, mats, robots, t, tm):
     return (-robots[GEODE], -robots[OBSIDIAN], -robots[CLAY], -robots[ORE])
     return (
         max(0, mats[ORE] - blue[GEODE][ORE]) +
-            max(0, mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
+        max(0, mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
         max(0, mats[ORE] - blue[OBSIDIAN][ORE]) +
-            max(0, mats[CLAY] - blue[OBSIDIAN][CLAY]),
+        max(0, mats[CLAY] - blue[OBSIDIAN][CLAY]),
         max(0, mats[ORE] - blue[CLAY][ORE]),
         # max(0,mats[ORE] - blue[GEODE][ORE]) + max(0,mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
     )
@@ -258,14 +256,14 @@ def day19_compute(blues, tm):
         robots = day19_from_t(robots_)
         # print(c, mats_, robots_)
         best[t] = max(best[t], mats["geode"])
-        if t == tm:
+        if t == tm and robots[GEODE] > 0:
             ans = max(ans, mats[GEODE])
             print(c)
             print("\n".join([str(p) for p in path]))
             assert False, tuple([mats[GEODE], robots_, mats_])
             return mats[GEODE]
             continue
-        
+
         if robots[OBSIDIAN] > blues[GEODE][OBSIDIAN]:
             continue
         if robots[CLAY] > blues[OBSIDIAN][CLAY]:
@@ -329,19 +327,21 @@ def day19_compute(blues, tm):
     return best[tm]
 
 def day19_missing(blue, mats, robots):
-    return max(0,blue[GEODE][OBSIDIAN] - robots[OBSIDIAN2])
+    return max(0, blue[GEODE][OBSIDIAN] - robots[OBSIDIAN2])
 
     # how many t until GEODE
     if robots[OBSIDIAN2] > 0:
         return max(
-                    max(0, (blue[GEODE][ORE] - mats[ORE2]) // robots[ORE2]), 
-                    max(0, (blue[GEODE][OBSIDIAN] - mats[OBSIDIAN2]) // robots[OBSIDIAN2]),
-                )
+            max(0, (blue[GEODE][ORE] - mats[ORE2]) // robots[ORE2]),
+            max(0, (blue[GEODE][OBSIDIAN] - mats[OBSIDIAN2]) //
+                robots[OBSIDIAN2]),
+        )
     elif robots[CLAY2] > 0:
         # how many to a obsidian
         return max(
-                    max(0, (blue[OBSIDIAN][ORE] * blue[GEODE][OBSIDIAN] - mats[ORE2]) // robots[ORE2]), 
-                    max(0, (blue[OBSIDIAN][CLAY] * blue[GEODE][OBSIDIAN] - mats[CLAY2]) // robots[CLAY2]))
+            max(0, (blue[OBSIDIAN][ORE] * blue[GEODE]
+                    [OBSIDIAN] - mats[ORE2]) // robots[ORE2]),
+            max(0, (blue[OBSIDIAN][CLAY] * blue[GEODE][OBSIDIAN] - mats[CLAY2]) // robots[CLAY2]))
     else:
         # how many to a clay
         return max(0, (blue[CLAY][ORE] * blue[OBSIDIAN][CLAY] * blue[GEODE][OBSIDIAN] - mats[ORE2]) // robots[ORE2])
@@ -350,9 +350,9 @@ def day19_missing(blue, mats, robots):
         # return max(max(0, (blue[GEODE][ORE] - mats[ORE])//robots[ORE]), max(0, blue[GEODE][OBSIDIAN] - mats[OBSIDIAN])//robots[OBSIDIAN])
     return (
         max(0, mats[ORE] - blue[GEODE][ORE]) +
-            max(0, mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
+        max(0, mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
         max(0, mats[ORE] - blue[OBSIDIAN][ORE]) +
-            max(0, mats[CLAY] - blue[OBSIDIAN][CLAY]),
+        max(0, mats[CLAY] - blue[OBSIDIAN][CLAY]),
         max(0, mats[ORE] - blue[CLAY][ORE]),
         max(0, mats[ORE], blue[ORE][ORE])
         # max(0,mats[ORE] - blue[GEODE][ORE]) + max(0,mats[OBSIDIAN] - blue[GEODE][OBSIDIAN]),
@@ -375,8 +375,8 @@ def day19_can_build2(blue, mats):
 
 def day19_solve2(blue, tm):
     # t, mats, robots
-    q = [(0, 0, [0,0,0,0],
-                [0,0,0,1])]
+    q = [(0, 0, [0, 0, 0, 0],
+          [0, 0, 0, 1])]
     ans = 0
     seen = set()
     best = defaultdict(lambda: 1e9)
@@ -415,24 +415,28 @@ def day19_solve2(blue, tm):
                 for m2 in [GEODE2, OBSIDIAN2, CLAY2, ORE2]:
                     new_mats[m2] += robots[m2]
                 new_robots[day19_convert(m)] += 1
-                heappush(q, (day19_missing(blue, new_mats, new_robots), t + 1, new_mats, new_robots))
+                heappush(q, (day19_missing(blue, new_mats, new_robots),
+                             t + 1, new_mats, new_robots))
                 # break
         # if not day19_can_build2(blue[GEODE], mats):
         new_mats = deepcopy(mats)
         new_robots = deepcopy(robots)
         for m2 in [GEODE2, OBSIDIAN2, CLAY2, ORE2]:
             new_mats[m2] += robots[m2]
-        heappush(q, (day19_missing(blue, new_mats, new_robots), t + 1, new_mats, new_robots))
+        heappush(q, (day19_missing(blue, new_mats, new_robots),
+                     t + 1, new_mats, new_robots))
     return ans
 
 def f(t_left, robots, mats, blues, DP, best):
     if t_left == 0:
         return mats[GEODE]
-    
-    k = (t_left, tuple(robots[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]), tuple(mats[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]))
+
+    k = (t_left, tuple(robots[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]), tuple(
+        mats[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]))
     if k in DP:
+        # print("yeah")
         return DP[k]
-    
+
     # k2 = (k[1], k[2])
     # if k2 in best and best[k2] > t_left:
     #     return 0
@@ -440,11 +444,19 @@ def f(t_left, robots, mats, blues, DP, best):
 
     ans = 0
 
-    new_robots = deepcopy(robots)
-    new_mats = deepcopy(mats)
-    for m in robots:
-        new_mats[m] += robots[m]
-    ans = max(ans, f(t_left -1, new_robots, new_mats,blues, DP, best))
+    # if robots[OBSIDIAN] >= blues[GEODE][OBSIDIAN] and robots[ORE] >= blues[GEODE][ORE]:
+    #     print("HEY")
+    #     new_robots = deepcopy(robots)
+    #     new_mats = deepcopy(mats)
+    #     for m in blues[GEODE]:
+    #         new_mats[m] -= blues[GEODE][m]
+    #     for m in robots:
+    #         new_mats[m] += robots[m]
+    #     new_robots[GEODE] +=1
+    #     ans = f(t_left -1, new_robots, new_mats,blues, DP, best)
+
+    #     DP[k] = ans
+    #     return ans
 
     if day19_can_build(mats, blues[GEODE]):
         new_robots = deepcopy(robots)
@@ -453,12 +465,18 @@ def f(t_left, robots, mats, blues, DP, best):
             new_mats[m] -= blues[GEODE][m]
         for m in robots:
             new_mats[m] += robots[m]
-        new_robots[GEODE] +=1
-        ans = max(ans, f(t_left -1, new_robots, new_mats,blues, DP, best))
+        new_robots[GEODE] += 1
+        ans = f(t_left - 1, new_robots, new_mats, blues, DP, best)
 
         DP[k] = ans
         return ans
-        
+
+    new_robots = deepcopy(robots)
+    new_mats = deepcopy(mats)
+    for m in robots:
+        new_mats[m] += robots[m]
+    ans = f(t_left - 1, new_robots, new_mats, blues, DP, best)
+
     if day19_can_build(mats, blues[OBSIDIAN]):
         if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN]:
             new_robots = deepcopy(robots)
@@ -467,20 +485,22 @@ def f(t_left, robots, mats, blues, DP, best):
                 new_mats[m] -= blues[OBSIDIAN][m]
             for m in robots:
                 new_mats[m] += robots[m]
-            new_robots[OBSIDIAN] +=1
-            ans = max(ans, f(t_left -1, new_robots, new_mats,blues, DP, best))
-        
+            new_robots[OBSIDIAN] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
+
     if day19_can_build(mats, blues[CLAY]):
-        if robots[CLAY] < blues[OBSIDIAN][CLAY]:
+        if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN] and robots[CLAY] < blues[OBSIDIAN][CLAY]:
             new_robots = deepcopy(robots)
             new_mats = deepcopy(mats)
             for m in blues[CLAY]:
                 new_mats[m] -= blues[CLAY][m]
             for m in robots:
                 new_mats[m] += robots[m]
-            new_robots[CLAY] +=1
-            ans = max(ans, f(t_left -1, new_robots, new_mats,blues, DP, best))
-        
+            new_robots[CLAY] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
+
     if day19_can_build(mats, blues[ORE]):
         if robots[ORE] < max(blues[GEODE][ORE], blues[OBSIDIAN][ORE], blues[CLAY][ORE], blues[ORE][ORE]):
             new_robots = deepcopy(robots)
@@ -489,25 +509,288 @@ def f(t_left, robots, mats, blues, DP, best):
                 new_mats[m] -= blues[ORE][m]
             for m in robots:
                 new_mats[m] += robots[m]
-            new_robots[ORE] +=1
-            ans = max(ans, f(t_left -1, new_robots, new_mats,blues, DP, best))
+            new_robots[ORE] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
 
     DP[k] = ans
     return ans
 
+def f3(t_left, robots, mats, blues, DP, best):
+    if t_left == 0 or (robots[OBSIDIAN] >= blues[GEODE][OBSIDIAN] and robots[ORE] >= blues[GEODE][ORE]):
+        return (t_left, mats[GEODE])
+
+    k = (t_left, tuple(robots[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]), tuple(
+        mats[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]))
+    if k in DP:
+        return DP[k]
+
+    # k2 = (k[1], k[2])
+    # if k2 in best and best[k2] > t_left:
+    #     return 0
+    # best[k2] = t_left
+
+    ans = (0, 0)
+
+    if robots[OBSIDIAN] >= blues[GEODE][OBSIDIAN] and robots[ORE] >= blues[GEODE][ORE]:
+        new_robots = deepcopy(robots)
+        new_mats = deepcopy(mats)
+        for m in blues[GEODE]:
+            new_mats[m] -= blues[GEODE][m]
+        for m in robots:
+            new_mats[m] += robots[m]
+        new_robots[GEODE] += 1
+        ans = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+
+        DP[k] = ans
+        return ans
+
+    new_robots = deepcopy(robots)
+    new_mats = deepcopy(mats)
+    for m in robots:
+        new_mats[m] += robots[m]
+    ans = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+
+    if day19_can_build(mats, blues[GEODE]):
+        new_robots = deepcopy(robots)
+        new_mats = deepcopy(mats)
+        for m in blues[GEODE]:
+            new_mats[m] -= blues[GEODE][m]
+        for m in robots:
+            new_mats[m] += robots[m]
+        new_robots[GEODE] += 1
+        t2, g = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+        if t2 > ans[0]:
+            ans = (t2, g)
+        elif t2 == ans[0] and g > ans[0]:
+            ans = (t2, g)
+        DP[k] = ans
+        return ans
+
+    if day19_can_build(mats, blues[OBSIDIAN]):
+        if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN]:
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[OBSIDIAN]:
+                new_mats[m] -= blues[OBSIDIAN][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[OBSIDIAN] += 1
+            t2, g = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+            if t2 > ans[0]:
+                ans = (t2, g)
+            elif t2 == ans[0] and g > ans[0]:
+                ans = (t2, g)
+
+    if day19_can_build(mats, blues[CLAY]):
+        if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN] and robots[CLAY] < blues[OBSIDIAN][CLAY]:
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[CLAY]:
+                new_mats[m] -= blues[CLAY][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[CLAY] += 1
+            t2, g = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+            if t2 > ans[0]:
+                ans = (t2, g)
+            elif t2 == ans[0] and g > ans[0]:
+                ans = (t2, g)
+
+    if day19_can_build(mats, blues[ORE]):
+        if robots[ORE] < max(blues[GEODE][ORE], blues[OBSIDIAN][ORE], blues[CLAY][ORE], blues[ORE][ORE]):
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[ORE]:
+                new_mats[m] -= blues[ORE][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[ORE] += 1
+            t2, g = f3(t_left - 1, new_robots, new_mats, blues, DP, best)
+            if t2 > ans[0]:
+                ans = (t2, g)
+            elif t2 == ans[0] and g > ans[0]:
+                ans = (t2, g)
+
+    DP[k] = ans
+    return ans
+def f2(t_left, robots, mats, blues, DP, best):
+    q = [((0, 0, 0, 0), t_left, robots, mats)]
+    ans = 0
+    seen = set()
+    while q:
+        c, t, r, ma = heappop(q)
+
+        if t == 0:
+            ans = max(ans, ma[GEODE])
+            return ans
+
+        # k = (t, r,ma)
+        k = (tuple(r[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]),
+             tuple(ma[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]))
+
+        if k in seen:
+            continue
+        seen.add(k)
+
+        if day19_can_build(ma, blues[GEODE]):
+            new_robots = deepcopy(r)
+            new_mats = deepcopy(ma)
+            for m in blues[GEODE]:
+                new_mats[m] -= blues[GEODE][m]
+            for m in r:
+                new_mats[m] += r[m]
+            new_robots[GEODE] += 1
+            c = day19_cost(blues, new_mats, new_robots, t_left, 24)
+            heappush(q, (c, t_left - 1, new_robots, new_mats))
+            continue
+
+        new_robots = deepcopy(r)
+        new_mats = deepcopy(ma)
+        for m in r:
+            new_mats[m] += r[m]
+        c = day19_cost(blues, new_mats, new_robots, t_left, 24)
+        heappush(q, (c, t_left - 1, new_robots, new_mats))
+
+        if day19_can_build(ma, blues[OBSIDIAN]):
+            if r[OBSIDIAN] < blues[GEODE][OBSIDIAN]:
+                new_robots = deepcopy(r)
+                new_mats = deepcopy(ma)
+                for m in blues[OBSIDIAN]:
+                    new_mats[m] -= blues[OBSIDIAN][m]
+                for m in r:
+                    new_mats[m] += r[m]
+                new_robots[OBSIDIAN] += 1
+                c = day19_cost(blues, new_mats, new_robots, t_left, 24)
+                heappush(q, (c, t_left - 1, new_robots, new_mats))
+
+        if day19_can_build(ma, blues[CLAY]):
+            if r[OBSIDIAN] < blues[GEODE][OBSIDIAN] and r[CLAY] < blues[OBSIDIAN][CLAY]:
+                new_robots = deepcopy(r)
+                new_mats = deepcopy(ma)
+                for m in blues[CLAY]:
+                    new_mats[m] -= blues[CLAY][m]
+                for m in r:
+                    new_mats[m] += r[m]
+                new_robots[CLAY] += 1
+                c = day19_cost(blues, new_mats, new_robots, t_left, 24)
+                heappush(q, (c, t_left - 1, new_robots, new_mats))
+
+        if day19_can_build(ma, blues[ORE]):
+            if r[ORE] < max(blues[GEODE][ORE], blues[OBSIDIAN][ORE], blues[CLAY][ORE], blues[ORE][ORE]):
+                new_robots = deepcopy(r)
+                new_mats = deepcopy(ma)
+                for m in blues[ORE]:
+                    new_mats[m] -= blues[ORE][m]
+                for m in r:
+                    new_mats[m] += r[m]
+                new_robots[ORE] += 1
+                c = day19_cost(blues, new_mats, new_robots, t_left, 24)
+                heappush(q, (c, t_left - 1, new_robots, new_mats))
+    return ans
+
+    if t_left == 0:
+        return mats[GEODE]
+
+    k = (t_left, tuple(robots[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]), tuple(
+        mats[m] for m in [GEODE, OBSIDIAN, CLAY, ORE]))
+    if k in DP:
+        return DP[k]
+
+    # k2 = (k[1], k[2])
+    # if k2 in best and best[k2] > t_left:
+    #     return 0
+    # best[k2] = t_left
+
+    if r[OBSIDIAN] >= blues[GEODE][OBSIDIAN] and r[ORE] >= blues[GEODE][ORE]:
+        new_robots = deepcopy(r)
+        new_mats = deepcopy(m)
+        for m in blues[GEODE]:
+            new_mats[m] -= blues[GEODE][m]
+        for m in robots:
+            new_mats[m] += robots[m]
+        new_robots[GEODE] += 1
+        ans = f(t_left - 1, new_robots, new_mats, blues, DP, best)
+
+        DP[k] = ans
+        return ans
+
+    new_robots = deepcopy(robots)
+    new_mats = deepcopy(mats)
+    for m in robots:
+        new_mats[m] += robots[m]
+    ans = max(ans, f(t_left - 1, new_robots, new_mats, blues, DP, best))
+
+    if day19_can_build(mats, blues[GEODE]):
+        new_robots = deepcopy(robots)
+        new_mats = deepcopy(mats)
+        for m in blues[GEODE]:
+            new_mats[m] -= blues[GEODE][m]
+        for m in robots:
+            new_mats[m] += robots[m]
+        new_robots[GEODE] += 1
+        ans = max(ans, f(t_left - 1, new_robots, new_mats, blues, DP, best))
+
+        DP[k] = ans
+        return ans
+
+    if day19_can_build(mats, blues[OBSIDIAN]):
+        if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN]:
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[OBSIDIAN]:
+                new_mats[m] -= blues[OBSIDIAN][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[OBSIDIAN] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
+
+    if day19_can_build(mats, blues[CLAY]):
+        if robots[OBSIDIAN] < blues[GEODE][OBSIDIAN] and robots[CLAY] < blues[OBSIDIAN][CLAY]:
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[CLAY]:
+                new_mats[m] -= blues[CLAY][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[CLAY] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
+
+    if day19_can_build(mats, blues[ORE]):
+        if robots[ORE] < max(blues[GEODE][ORE], blues[OBSIDIAN][ORE], blues[CLAY][ORE], blues[ORE][ORE]):
+            new_robots = deepcopy(robots)
+            new_mats = deepcopy(mats)
+            for m in blues[ORE]:
+                new_mats[m] -= blues[ORE][m]
+            for m in robots:
+                new_mats[m] += robots[m]
+            new_robots[ORE] += 1
+            ans = max(ans, f(t_left - 1, new_robots,
+                             new_mats, blues, DP, best))
+
+    DP[k] = ans
+    return ans
+
+EXPECTED_1 = 33
+EXPECTED_2 = None
 def day19_1(data):
-    return ""
+    # return ""
     _x_ = day19_parse(data)
     ans = 0
     tm = 24
     ans = 0
-    for i,b in _x_:    
+    for i, b in _x_:
         DP = {}
-        best= {}
+        best = {}
         r_s = defaultdict(int)
         r_s["ore"] = 1
         res = f(tm, r_s, defaultdict(int), b, DP, best)
-        ans += i*res
+        # res = day19_compute(b, tm)
+        ans += i * res
+
+    # 851
     return ans
     # _x_ = _x_[0:1]
     _x_ = _x_[1:2]
@@ -619,9 +902,9 @@ def day19_2(data):
     ans = 0
     tm = 32
     ans = 1
-    for i,b in _x_:    
+    for i, b in _x_:
         DP = {}
-        best= {}
+        best = {}
         r_s = defaultdict(int)
         r_s["ore"] = 1
         res = f(tm, r_s, defaultdict(int), b, DP, best)
