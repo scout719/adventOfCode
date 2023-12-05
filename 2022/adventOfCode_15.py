@@ -9,7 +9,7 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
 # pylint: disable-next=wrong-import-position
-from common.utils import day_with_validation, main
+from common.utils import day_with_validation, main  # NOQA: E402
 
 YEAR = 2022
 DAY = 15
