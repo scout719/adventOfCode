@@ -83,7 +83,7 @@ def day23_solve(data, max_t):
         D_proposal = D_proposal[1:] + [D_proposal[0]]
         new_occupied = set(list(occupied))
         moved = False
-        for (r, c), (rr,cc) in proposals.items():
+        for (r, c), (rr, cc) in proposals.items():
             if counter[(rr, cc)] == 1:
                 new_occupied.add((rr, cc))
                 new_occupied.remove((r, c))

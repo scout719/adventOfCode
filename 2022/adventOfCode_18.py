@@ -69,7 +69,7 @@ def day18_is_inside(x, y, z, DP, drops):
     while q:
         xx, yy, zz = q.pop()
         if not (min_x <= xx <= max_x and min_y <= yy <= max_y and min_z <= zz <= max_z):
-            for xxx,yyy,zzz in visited:
+            for xxx, yyy, zzz in visited:
                 DP[(xxx, yyy, zzz)] = False
             return False
         if (xx, yy, zz) in visited:
@@ -80,7 +80,7 @@ def day18_is_inside(x, y, z, DP, drops):
         for dx, dy, dz in D:
             xxx, yyy, zzz = xx + dx, yy + dy, zz + dz
             q.append((xxx, yyy, zzz))
-    for xxx,yyy,zzz in visited:
+    for xxx, yyy, zzz in visited:
         DP[(xxx, yyy, zzz)] = True
     return True
 

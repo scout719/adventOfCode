@@ -42,13 +42,13 @@ def timeout(seconds_before_timeout):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
-            res = [SignalCatchingError('function [%s] timeout [%s seconds] exceeded!' %
-                                       (func.__name__, seconds_before_timeout))]
+            res = [SignalCatchingError(
+                f'function [{func.__name__}] timeout [{seconds_before_timeout} seconds] exceeded!')]
 
             def newFunc():
                 try:
                     res[0] = func(*args, **kwargs)
-                except BaseException as e:
+                except BaseException as e:  # pylint: disable=broad-except
                     res[0] = e
             t = Thread(target=newFunc)
             t.daemon = True
@@ -66,7 +66,7 @@ def timeout(seconds_before_timeout):
     return deco
 
 def execute_day(_globals, year, day, part):
-    func_name = "day{0}_{1}".format(day, part)
+    func_name = f"day{day}_{part}"
     if func_name in _globals:
         start = timer()
         try:
@@ -75,12 +75,11 @@ def execute_day(_globals, year, day, part):
         except SignalCatchingError:
             result = HEAVY_EXERCISE
         end = timer()
-        print("Day {0}, part {1}: {2} ({3:.3f} secs)".format(
-            day, part, result, end - start))
+        print(f"Day {day}, part {part}: {result} ({(end-start):.3f} secs)")
 
 def read_input(year, day):
     file_dir = os.path.dirname(os.path.realpath(__file__))
-    with open("{0}/../{1}/input/day{2}".format(file_dir, year, day), "r") as fileReader:
+    with open(f"{file_dir}/../{year}/input/day{day}", "r", encoding="ascii") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
 
 def day_with_validation(globals_, YEAR, DAY, expected_result, part, data):

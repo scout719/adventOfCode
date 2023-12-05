@@ -52,7 +52,7 @@ def day16_time_to_valve(s, e, valves):
         for vs in valves[curr][1]:
             if vs in visited:
                 continue
-            heappush(q,(t + 1, vs))
+            heappush(q, (t + 1, vs))
     return None
 
 def day16_get_cost(t, open_, valves, max_t):
@@ -90,7 +90,7 @@ def day16_1(data):
                     t2 = 30
                 pr2 = pr + (30 - t2) * valves[vs][0]
                 heappush(q, (-pr2 - day16_get_cost(t2, open2, valves,
-                         max_t), pr2, t2, vs, open2))
+                                                   max_t), pr2, t2, vs, open2))
     # 856
     # 2102
     assert False
@@ -108,7 +108,7 @@ def day16_time_to_valve2(s, e, valves):
         for vs in valves[curr][1]:
             # if vs in visited:
                 # continue
-            heappush(q,(t + 1, vs, path + [vs]))
+            heappush(q, (t + 1, vs, path + [vs]))
     return None, []
 
 def day16_get_release(open_, valves):
@@ -129,16 +129,16 @@ def day16_2(data):
     while q:
         _, pr, t, (curr, path, curr_e, path_e), open_ = heappop(q)
 
-        if t == max_t:# or len(open_) == len(vs_n):
+        if t == max_t:  # or len(open_) == len(vs_n):
             # 2170
             return pr
-        
+
         # 🔨
         if len(q) > 200000:
             new_q = sorted(q)[:170000]
             heapify(new_q)
             q = new_q
-        
+
         pr += day16_get_release(open_, valves)
         next_me = []
         next_e = []
@@ -206,9 +206,9 @@ def day16_2(data):
                 n_open = open2.union(open_e2)
                 pr2 = -pr
                 for vs in n_open:
-                    pr2 -= (max_t-(t+1))*valves[vs][0]
-                heappush(q, (pr2 - day16_get_cost(t+2, n_open, valves, max_t),
-                        pr, t + 1, (curr2, path2, curr_e2, path_e2), n_open))
+                    pr2 -= (max_t - (t + 1)) * valves[vs][0]
+                heappush(q, (pr2 - day16_get_cost(t + 2, n_open, valves, max_t),
+                             pr, t + 1, (curr2, path2, curr_e2, path_e2), n_open))
 
     assert False
 

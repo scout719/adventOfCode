@@ -22,13 +22,15 @@ day = str(datetime.now().day)
 
 if len(sys.argv) > 1:
     day = int(sys.argv[1])
+if len(sys.argv) > 2:
+    year = sys.argv[2]
 url = f"https://adventofcode.com/{year}/day/{day}/input"
-session = open("session").readline()
-data = requests.get(url, cookies={
+session = open("session", encoding="ascii").readline()
+data = requests.get(url, timeout=5, cookies={
     "session": session
 }, headers={
     "User-Agent":
     "https://github.com/scout719/adventOfCode/blob/master/get_input.py by scout719"
 })
-with open(path.join(year, "input", f"day{day}"), mode="w+") as f:
+with open(path.join(year, "input", f"day{day}"), mode="w+", encoding="ascii") as f:
     f.write(data.text)

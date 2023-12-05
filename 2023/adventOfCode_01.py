@@ -52,7 +52,7 @@ def day1_get(val: str) -> str:
     }
     sub = ""
     for c in val:
-        sub = sub+c
+        sub = sub + c
         if sub in mapping:
             return mapping[sub]
 

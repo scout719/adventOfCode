@@ -60,8 +60,8 @@ def day5_2(data: List[str]):
     ranges = []
     for i in range(0, len(seeds), 2):
         start = seeds[i]
-        s_r = seeds[i + 1]
-        ranges.append((start, s_r))
+        range_ = seeds[i + 1]
+        ranges.append((start, range_))
 
     for map_ in maps:
         new_ranges = []
