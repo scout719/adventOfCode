@@ -3,6 +3,7 @@
 import os
 import sys
 from collections import defaultdict
+import math
 from typing import List, Tuple, Set, Dict
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -33,6 +34,9 @@ def day6_solve(times: List[int], dists: List[int]):
     for i in range(L):
         curr_t = times[i]
         wins = 0
+        # y = (curr_t-x)*x = curr_t*x - x^2
+        # a = -1 b = curr_t c = 0
+        # y = -b +- sqrt(b^2 - 4ac ) /a*c
         for t in range(curr_t):
             speed = t
             time = curr_t - t
@@ -47,6 +51,14 @@ def day6_1(data: List[str]):
     times, dists = day6_parse(data)
     return day6_solve(times, dists)
 
+def day6_quadratic_roots(a: float, b: float, c: float):
+    # y = 0 -> x = -b +- sqrt(b^2 - 4ac) / 2a
+    ac = a * c
+    b_sqr = b * b
+    sqrt = math.sqrt(b_sqr - 4 * ac)
+    # Keep only integer part
+    return math.floor((-b + sqrt) / (2 * a)), math.floor((-b - sqrt) / (2 * a))
+
 def day6_2(data: List[str]):
     times, dists = day6_parse(data)
     T = ""
@@ -55,9 +67,22 @@ def day6_2(data: List[str]):
     D = ""
     for d in dists:
         D += str(d)
-    times = [int(T)]
-    dists = [int(D)]
-    return day6_solve(times, dists)
+
+    # original
+    # times = [int(T)]
+    # dists = [int(D)]
+    # return day6_solve(times, dists)
+
+    # y -> extra distance covered beyond record
+    # when pressing for x milliseconds
+    # y = (curr_t-x)*x - (dist+1) = curr_t*x - x^2 - (dist+1)
+    # a = -1 b = curr_t c = -(dist+1)
+    a = -1
+    b = int(T)
+    c = -(int(D) + 1)
+
+    left, right = day6_quadratic_roots(a, b, c)
+    return right - left
 
 
 """ MAIN FUNCTION """
