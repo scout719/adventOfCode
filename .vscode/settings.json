@@ -3,8 +3,7 @@
     // #######################  <PYTHON> ###########
     // #############################################
     "python.disableInstallationCheck": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
+    "pylint.args": [
         "--disable=E0401",
         "--disable=C0111",
         "--disable=W0105",
@@ -19,12 +18,10 @@
         "--disable=R0911",
         "--disable=R0902",
     ],
-    "python.formatting.autopep8Args": [
+    "autopep8.args": [
         "-v",
         "--ignore=E302,E121,E131"
     ],
-    "python.linting.enabled": true,
-    "python.linting.lintOnSave": true,
     "python.analysis.completeFunctionParens": true,
     "python.languageServer": "Pylance",
     // #############################################
