@@ -89,7 +89,6 @@ def day1_2(data):
             if v is not None:
                 curr += v
                 break
-        print(curr)
         total += int(curr if curr != "" else "0")
 
     return total
