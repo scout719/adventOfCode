@@ -19,7 +19,7 @@ EXPECTED_2 = 10
 """ DAY 10 """
 
 def day10_parse(data: List[str]):
-    return [[x for x in line] for line in data]
+    return [list(line) for line in data]
 
 def day10_delta(pipe):
     M: Mapping[str, Tuple[Tuple[int, int], Tuple[int, int]]] = {
@@ -32,16 +32,27 @@ def day10_delta(pipe):
     }
     return M[pipe]
 
-def day10_guess(grid):
-    if len(grid) == 5:
-        return "F"
-    elif len(grid) == 9:
-        return "F"
-    elif len(grid) == 10:
-        return "7"
-    else:
-        assert len(grid) == 140
-        return "|"
+def day10_guess(grid,r,c):
+    from_top = grid[r-1][c] in ["7", "F", "|"]
+    from_bottom = grid[r+1][c] in ["L", "J", "|"]
+    from_right = grid[r][c+1] in ["J", "7", "-"]
+    from_left= grid[r][c-1] in ["L", "F", "-"]
+    if from_top:
+        if from_right:
+            return "L"
+        elif from_bottom:
+            return "|" 
+        elif from_left:
+            return "J"
+    elif from_right:
+        if from_bottom:
+            return "F"
+        elif from_left:
+            return "-"
+    elif from_left:
+        if from_bottom:
+            return "7"
+    assert False, f"top={from_top} bottom={from_bottom} left={from_left} right={from_right}"
 
 def day10_loop(grid):
     R = len(grid)
@@ -50,7 +61,7 @@ def day10_loop(grid):
     for r in range(R):
         for c in range(C):
             if grid[r][c] == "S":
-                grid[r][c] = day10_guess(grid)
+                grid[r][c] = day10_guess(grid, r,c)
                 start = (r, c)
     seen = set()
     q: list[tuple[int, int]] = [start]
