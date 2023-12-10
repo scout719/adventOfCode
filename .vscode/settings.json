@@ -24,6 +24,7 @@
     ],
     "python.analysis.completeFunctionParens": true,
     "python.languageServer": "Pylance",
+    "python.analysis.autoImportCompletions": true,
     // #############################################
     // #######################  <\PYTHON> ##########
     // #############################################
