@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
+from ast import Tuple
 import os
 import sys
 from collections import defaultdict
 import time
-from typing import List, Mapping
+from typing import List, Mapping, Set, Tuple
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -31,62 +32,68 @@ def day8_parse(data: List[str]):
         M[orig] = dest
     return inst, M
 
+def day8_next(curr_dir, M, s) -> str:
+    if curr_dir == "L":
+        return M[s][0]
+    else:
+        assert curr_dir == "R"
+        return M[s][1]
+
 def day8_1(data: List[str]):
     inst, M = day8_parse(data)
-    st = "AAA"
-    q = []
+    node = "AAA"
     curr_i = 0
     count = 0
-    while st != "ZZZ":
-        if count % 1000 == 0:
-            print(count)
+    while node != "ZZZ":
         count += 1
         curr_dir = inst[curr_i]
         curr_i = (curr_i + 1) % len(inst)
-        if curr_dir == "L":
-            st = M[st][0]
-        else:
-            assert curr_dir == "R"
-            st = M[st][1]
+        node = day8_next(curr_dir, M, node)
 
     return count
+
+def day8_cycle(inst, M, node):
+    seen: Mapping[Tuple[int, str], int] = {}
+    path: List[str] = [node]
+    curr_i = 0
+    count = 0
+    while True:
+        curr_dir = inst[curr_i]
+        curr_i = (curr_i + 1) % len(inst)
+        count += 1
+        node = day8_next(curr_dir, M, node)
+        k = (curr_i, node)
+        if k in seen:
+            # find the position on path where the loop starts
+            return len(path) - path.index(node)
+        path += [node]
+        seen[k] = count
+
+def day8_gcd(x: int, y: int):
+    while y:
+        x, y = y, x % y
+    return x
+
+def day8_lcm(x, y):
+    lcm = (x * y) // day8_gcd(x, y)
+    return lcm
 
 def day8_2(data: List[str]):
+    # 23147 low
+    # 23519 low
     inst, M = day8_parse(data)
-    st: List[str] = []
-    for k in M.keys():
-        if k.endswith("A"):
-            st.append(k)
-    curr_i = 0
-    count = 0
-    st_l = len(st)
-    print(st_l)
-    rem = {s for s in st if not s.endswith("Z")}
-    while True:
-        if len(rem) == 0:
-            return count
+    starts: List[str] = []
+    for node in M:
+        if node.endswith("A"):
+            starts.append(node)
 
-        # if count % 1000 == 0:
-        #     print(count)
-        # if len(rem) < st_l:
-        #     print(rem)
-        count += 1
-        curr_dir = inst[curr_i]
-        curr_i = (curr_i + 1) % len(inst)
-        for i,s in enumerate(st):
-            s = st[i]
-            if st[i] in rem:
-                rem.remove(st[i])
-            if curr_dir == "L":
-                st[i] = M[s][0]
-            else:
-                assert curr_dir == "R"
-                st[i] = M[s][1]
-
-            if not st[i].endswith("Z"):
-                rem.add(st[i])
-
-    return count
+    cycles = []
+    for start in starts:
+        cycles.append(day8_cycle(inst, M, start))
+    lcm = day8_lcm(cycles[0], cycles[1])
+    for i in range(1, len(cycles)):
+        lcm = day8_lcm(lcm, cycles[i])
+    return lcm
 
 
 """ MAIN FUNCTION """
