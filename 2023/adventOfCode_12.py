@@ -72,8 +72,9 @@ def day12_final(sizes, springs, mem):
                         # not a working spring consume
                         pass
                 else:
-                    # no working spring available to 'close'' the group (we added an extra . to all to handle this)
-                    pass
+                    # no working spring available to 'close'' the group
+                    # If this was the last group, all is good
+                    ans += 1 if len(sizes) == 1 else 0
             else:
                 # no sequence of 'broken' springs to be consumed
                 pass
@@ -88,8 +89,8 @@ def day12_solve(rows: List[Tuple[str, List[int]]]):
     mem = {}
     for springs, sizes in rows:
         # append a . at the end to help the algorithm
-        springs = springs + "."
-        ans += day12_final(sizes, springs + ".", mem)
+        springs = springs
+        ans += day12_final(sizes, springs, mem)
     return ans
 
 def day12_1(data: List[str]):
