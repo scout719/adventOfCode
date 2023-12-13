@@ -68,9 +68,9 @@ def day13_mirror(p, R, C, rows: Mapping[int, Set[int]], cols: Mapping[int, Set[i
             rr_u = r - i
             rr_d = r + i + 1
         if mirror:
-            if old_m_r and m_r == old_m_r:
-                continue
             m_r = r
+            if old_m_r and m_r+1 == old_m_r:
+                continue
             break
     for c in range(C - 1):
         mirror = True
@@ -85,9 +85,9 @@ def day13_mirror(p, R, C, rows: Mapping[int, Set[int]], cols: Mapping[int, Set[i
             cc_l = c - i
             cc_r = c + i + 1
         if mirror:
-            if old_m_c and m_c == old_m_c:
-                continue
             m_c = c
+            if old_m_c and m_c+1 == old_m_c:
+                continue
             break
 
     return m_r + 1, m_c + 1
@@ -148,20 +148,19 @@ def day13_2(data: List[str]):
                 if m_r2 == 0 and m_c2 == 0:
                     continue
                 if m_r2 != m_r:
-                    print(m_r,m_c, m_r2, m_c2, rr,cc)
                     rs2 += m_r2
                     found = True
                     f = True
                     break
                 elif m_c2 != m_c:
-                    print(m_r,m_c, m_r2, m_c2, rr,cc)
                     cs2 += m_c2
                     found = True
                     f = True
                     break
             if found:
                 break
-        assert f, f"\n{R} {C} \n{"\n".join(p)}, {m_r}, {m_c}"
+        board = "\n".join(p)
+        assert f, f"\n{R} {C} \n{board}\n, {m_r}, {m_c}"
 
     # 22299 low
     return 100 * rs2 + cs2
