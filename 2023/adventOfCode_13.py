@@ -15,9 +15,8 @@ from common.utils import main  # NOQA: E402
 
 YEAR = 2023
 DAY = 13
-EXPECTED_1 = None  # 405
+EXPECTED_1 = 405
 EXPECTED_2 = 400
-
 
 """ DAY 13 """
 
@@ -35,135 +34,107 @@ def day13_parse(data: List[str]):
 
     return patterns
 
-def day13_mirror(p, R, C, rows: Mapping[int, Set[int]], cols: Mapping[int, Set[int]], opposite, old_m_r=None, old_m_c=None):
-    rows = deepcopy(rows)
-    cols = deepcopy(cols)
-    if opposite:
-        r, c = opposite
-        if c in rows[r]:
-            rows[r].remove(c)
-            # if not rows[r]:
-            #     rows.pop(r, None)
-        else:
-            rows[r].add(c)
-
-        if r in cols[c]:
-            cols[c].remove(r)
-            # if not cols[c]:
-            #     cols.pop(c, None)
-        else:
-            cols[c].add(r)
-    m_r = -1
-    m_c = -1
+def day13_mirror(R, C, rows: Mapping[int, Set[int]], cols: Mapping[int, Set[int]]):
+    mirror_rows = set()
+    mirror_columns = set()
     for r in range(R - 1):
         mirror = True
         i = 0
-        rr_u = r - i
-        rr_d = r + i + 1
-        while 0 <= rr_u < rr_d < R:
-            if rows[rr_u] != rows[rr_d]:
+        row_up, row_down = r - i, r + i + 1
+        while 0 <= row_up < row_down < R:
+            if rows[row_up] != rows[row_down]:
                 mirror = False
                 break
             i += 1
-            rr_u = r - i
-            rr_d = r + i + 1
+            row_up, row_down = r - i, r + i + 1
         if mirror:
-            m_r = r
-            if old_m_r and m_r+1 == old_m_r:
-                continue
-            break
+            mirror_rows.add(r + 1)
     for c in range(C - 1):
         mirror = True
         i = 0
-        cc_l = c - i
-        cc_r = c + i + 1
-        while 0 <= cc_l < cc_r < C:
-            if cols[cc_l] != cols[cc_r]:
+        col_left, col_right = c - i, c + i + 1
+        while 0 <= col_left < col_right < C:
+            if cols[col_left] != cols[col_right]:
                 mirror = False
                 break
             i += 1
-            cc_l = c - i
-            cc_r = c + i + 1
+            col_left, col_right = c - i, c + i + 1
         if mirror:
-            m_c = c
-            if old_m_c and m_c+1 == old_m_c:
-                continue
-            break
+            mirror_columns.add(c + 1)
 
-    return m_r + 1, m_c + 1
+    return mirror_rows, mirror_columns
 
+def day13_get_data(pattern):
+    R = len(pattern)
+    C = len(pattern[0])
+    rows = defaultdict(set)
+    cols = defaultdict(set)
+    for r in range(R):
+        for c in range(C):
+            if pattern[r][c] == "#":
+                rows[r].add(c)
+                cols[c].add(r)
+    return R, C, rows, cols
+
+def day13_single_mirror(R, C, rows, cols):
+    mirror_rows, mirror_cols = day13_mirror(R, C, rows, cols)
+    assert len(mirror_rows) + \
+        len(mirror_cols) == 1, f"{mirror_rows} {mirror_cols}"
+    return (mirror_rows.pop() if mirror_rows else 0,
+            mirror_cols.pop() if mirror_cols else 0)
 
 def day13_1(data):
     patterns = day13_parse(data)
-    rs = []
-    cs = []
-    rs2 = 0
-    cs2 = 0
-    for p in patterns:
-        R = len(p)
-        C = len(p[0])
-        rows = defaultdict(set)
-        cols = defaultdict(set)
-        points = set()
-        for r in range(R):
-            for c in range(C):
-                if p[r][c] == "#":
-                    rows[r].add(c)
-                    cols[c].add(r)
-                    points.add((r, c))
+    ans_r = 0
+    ans_c = 0
+    for pattern in patterns:
+        R, C, rows, cols = day13_get_data(pattern)
 
-        m_r, m_c = day13_mirror(p, R, C, rows, cols, None)
-        rs2 += m_r
-        cs2 += m_c
-    return 100 * rs2 + cs2
+        mirror_row, mirror_col = day13_single_mirror(R, C, rows, cols)
+        ans_r += mirror_row
+        ans_c += mirror_col
+    return 100 * ans_r + ans_c
 
 def day13_2(data: List[str]):
     patterns = day13_parse(data)
-    rs = []
-    cs = []
-    rs2 = 0
-    cs2 = 0
+    ans_r = 0
+    ans_c = 0
     for p in patterns:
-        # print("\n".join(p))
-        R = len(p)
-        C = len(p[0])
-        rows = defaultdict(set)
-        cols = defaultdict(set)
-        points = set()
+        R, C, rows, cols = day13_get_data(p)
+        mirror_row, mirror_col = day13_single_mirror(R, C, rows, cols)
+        found = False
         for r in range(R):
             for c in range(C):
-                if p[r][c] == "#":
-                    rows[r].add(c)
-                    cols[c].add(r)
-                    points.add((r, c))
+                n_rows = deepcopy(rows)
+                n_cols = deepcopy(cols)
+                if c in n_rows[r]:
+                    n_rows[r].remove(c)
+                else:
+                    n_rows[r].add(c)
 
-        m_r, m_c = day13_mirror(p, R, C, rows, cols, None)
-        f = False
-        for rr in range(R):
-            found = False
-            for cc in range(C):
-                # 10, 6
-                m_r2, m_c2 = day13_mirror(
-                    p, R, C, rows, cols, (rr, cc), m_r, m_c) 
-                if m_r2 == 0 and m_c2 == 0:
-                    continue
-                if m_r2 != m_r:
-                    rs2 += m_r2
+                if r in n_cols[c]:
+                    n_cols[c].remove(r)
+                else:
+                    n_cols[c].add(r)
+
+                mirror_rows, mirror_cols = day13_mirror(
+                    R, C, n_rows, n_cols)
+                mirror_rows -= set([mirror_row])
+                mirror_cols -= set([mirror_col])
+                if mirror_rows:
+                    ans_r += mirror_rows.pop()
                     found = True
-                    f = True
                     break
-                elif m_c2 != m_c:
-                    cs2 += m_c2
+                if mirror_cols:
+                    ans_c += mirror_cols.pop()
                     found = True
-                    f = True
                     break
             if found:
                 break
         board = "\n".join(p)
-        assert f, f"\n{R} {C} \n{board}\n, {m_r}, {m_c}"
+        assert found, f"\n{R} {C} \n{board}"
 
-    # 22299 low
-    return 100 * rs2 + cs2
+    return 100 * ans_r + ans_c
 
 
 """ MAIN FUNCTION """
