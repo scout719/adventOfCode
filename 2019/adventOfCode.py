@@ -497,7 +497,7 @@ def day7_solve(prog, start_phase, total_amps):
     return max(res)
 
 def day7_1(data):
-    #data = read_input(2019, 701)
+    # data = read_input(2019, 701)
     data = data[0].split(",")
     data = [int(j) for j in data]
     return day7_solve(data, 0, 5)
@@ -544,7 +544,7 @@ def day8_get_image(stack):
     return image
 
 def day8_1(data):
-    #data = read_input(2019, 801)
+    # data = read_input(2019, 801)
     data = [int(k) for k in data[0]]
     width = 25
     height = 6
@@ -559,7 +559,7 @@ def day8_1(data):
     return values_count[min_layer][1] * values_count[min_layer][2]
 
 def day8_2(data):
-    #data = read_input(2019, 801)
+    # data = read_input(2019, 801)
     data = [int(k) for k in data[0]]
     width = 25
     height = 6
@@ -590,13 +590,13 @@ def int_run(insts, inputs):
     return outputs
 
 def day9_1(data):
-    #data = read_input(2019,901)
+    # data = read_input(2019,901)
     data = [int(k) for k in data[0].split(",")]
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
     return int_run(data, [1])[0]
 
 def day9_2(data):
-    #data = read_input(2019,901)
+    # data = read_input(2019,901)
     data = [int(k) for k in data[0].split(",")]
     data = [data[i] if i < len(data) else 0 for i in range(100000)]
     return int_run(data, [2])[0]
@@ -604,7 +604,7 @@ def day9_2(data):
 """ DAY 10 """
 
 def day10_1(data):
-    #data = read_input(2019,1001)
+    # data = read_input(2019,1001)
     asteroids_counts = {}
     for y, line in enumerate(data):
         for x, char in enumerate(line):
@@ -649,9 +649,9 @@ def day10_measure_angle(origin_x, origin_y, p1_x, p1_y, p2_x, p2_y):
 def day10_2(data):
     origin_x = 28
     origin_y = 29
-    #data = read_input(2019,1001)
-    #origin_x = 11
-    #origin_y = 13
+    # data = read_input(2019,1001)
+    # origin_x = 11
+    # origin_y = 13
     asteroids = []
     for y, line in enumerate(data):
         for x, char in enumerate(line):
@@ -789,7 +789,7 @@ def day12_apply_velocity(moons, vels):
             moon[c] += vels[i][c]
 
 def day12_1(data):
-    #data = read_input(2019,1201)
+    # data = read_input(2019,1201)
     data = [l.lstrip("<").rstrip(">") for l in data]
     data = [l.split(", ") for l in data]
     moons = [[int(m[2:]) for m in l]for l in data]
@@ -839,7 +839,7 @@ def day12_lcm(a, b):
     return a * b // math.gcd(a, b)
 
 def day12_2(data):
-    #data = read_input(2019,1201)
+    # data = read_input(2019,1201)
     data = [l.lstrip("<").rstrip(">") for l in data]
     data = [l.split(", ") for l in data]
     moons = [[int(m[2:]) for m in l]for l in data]
@@ -1115,7 +1115,7 @@ def day16_parse_input(data):
     return [d for d in data[0]]
 
 def day16_1(data):
-    #data = read_input(2019, 1601)
+    # data = read_input(2019, 1601)
     data = day16_parse_input(data)
     data = [int(d) for d in data]
     size = len(data)
@@ -1153,7 +1153,7 @@ def day16_1(data):
     return ''.join([str(d) for d in workspace[data_idx][:8]])
 
 def day16_2(data):
-    #data = read_input(2019, 1601)
+    # data = read_input(2019, 1601)
     data = day16_parse_input(data)
     offset = int(''.join(data[0:7]))
     data = data * 10000
@@ -1208,7 +1208,7 @@ def day17_get_grid(insts):
     return grid
 
 def day17_1(data):
-    #data = read_input(2019, 1701)
+    # data = read_input(2019, 1701)
     data = day17_parse_input(data)
     output = int_run_17(data, [])
     view = ""
@@ -1225,7 +1225,7 @@ def day17_1(data):
     return inters
 
 def day17_2(data):
-    #data = read_input(2019, 1701)
+    # data = read_input(2019, 1701)
     data = day17_parse_input(data)
     data_backup = data[:]
     output = int_run_17(data, [])
@@ -1515,7 +1515,7 @@ def day18_2(data):
                 if k in seen3 and seen3[k] < steps + s:
                     continue
                 seen3[k] = steps + s
-                #q.append((steps + s, n_robots, n_ks))
+                # q.append((steps + s, n_robots, n_ks))
                 heappush(q, (steps + s, n_robots, ks_r, n_ks))
     return min_res
 
@@ -1525,7 +1525,7 @@ def day19_parse_input(data):
     return [int(d) for d in data[0].split(",")]
 
 def day19_1(data):
-    #data = read_input(2019, 1901)
+    # data = read_input(2019, 1901)
     data = day19_parse_input(data)
     grid = [[0 for _ in range(50)] for _ in range(50)]
     count = 0
@@ -1564,7 +1564,7 @@ def day19_calc_dims(data, x, y):
     return height, width, orig_x, orig_y
 
 def day19_2(data):
-    #data = read_input(2019, 1901)
+    # data = read_input(2019, 1901)
     data = day19_parse_input(data)
     count = 0
 
@@ -1604,7 +1604,7 @@ def int_run_19(insts, inputs, calculate_input=None):
 """ DAY 20 """
 
 def day20_1(data):
-    #data = read_input(2019, 2001)
+    # data = read_input(2019, 2001)
 
     grid = []
     for r, row in enumerate(data):
@@ -1670,7 +1670,7 @@ def day20_1(data):
             rportals[portals[key][1]] = key
 
     # del portals["##"]
-    #del portals["  "]
+    # del portals["  "]
     del portals[".."]
     del portals[".#"]
     del portals["#."]
@@ -1759,7 +1759,7 @@ def day20_2(data):
                     p = grid[r][irightc - 2] + grid[r][irightc - 1]
                     portals[p].append((r, c, -1))
     # del portals["##"]
-    #del portals["  "]
+    # del portals["  "]
     try:
         del portals[".."]
     except:
@@ -1986,7 +1986,7 @@ def day22_parse_input(data):
     return insts
 
 def day22_1(data):
-    #data = read_input(2019, 2203)
+    # data = read_input(2019, 2203)
     data = day22_parse_input(data)
     deck = [i for i in range(10007)]
     # deck = [i for i in range(10)]
@@ -2019,7 +2019,7 @@ def modinv(a, m):
 
 def day22_2(data):
     # 119315717514047
-    #data = read_input(2019, 2203)
+    # data = read_input(2019, 2203)
     data = day22_parse_input(data)
     # deck = [i for i in range(119315717514047)]
     # deck = [i for i in range(10007)]
@@ -2029,7 +2029,7 @@ def day22_2(data):
     l = 119315717514047
     it = 101741582076661
     nn = 2020
-    #l = 10007
+    # l = 10007
     it = 5
     # nn = 7798#4703
     nn_back = nn

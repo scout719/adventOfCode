@@ -139,7 +139,7 @@ def day3_process_row(acc, row):
 
 def day3_1(data):
     size = 1000
-    #data, size = (read_input(2018, 301), 8)
+    # data, size = (read_input(2018, 301), 8)
     fabric = day3_build_fabric(size)
     for claim in data:
         day3_fill_claim(day3_process_claim(claim), fabric)
@@ -155,7 +155,7 @@ def day3_check_prestine(claim, fabric):
 
 def day3_2(data):
     size = 1000
-    #data, size = (read_input(2018, 301), 8)
+    # data, size = (read_input(2018, 301), 8)
     fabric = day3_build_fabric(size)
     for claim in data:
         day3_fill_claim(day3_process_claim(claim), fabric)
@@ -222,7 +222,7 @@ def day4_process(data):
     return history
 
 def day4_1(data):
-    #data = read_input(2018, 401)
+    # data = read_input(2018, 401)
     history = day4_process(data)
     sleepiest_guard = sorted(
         [(k, sum(v)) for k, v in history.items()],
@@ -236,7 +236,7 @@ def day4_1(data):
     return m * sleepiest_guard
 
 def day4_2(data):
-    #data = read_input(2018, 401)
+    # data = read_input(2018, 401)
     history = day4_process(data)
     sleepiest_guard = sorted(
         [(k, max(v)) for k, v in history.items()],
@@ -271,7 +271,7 @@ def day5_collapse_and_count(polymer):
     return len(reduced_polymer)
 
 def day5_1(data):
-    #data = read_input(2018, 501)
+    # data = read_input(2018, 501)
     polymer = list(data[0])
     return day5_collapse_and_count(polymer)
 
@@ -279,7 +279,7 @@ def day5_remove_unit(polymer, letter):
     return [c for c in polymer if c != letter and c != letter.upper()]
 
 def day5_2(data):
-    #data = read_input(2018, 501)
+    # data = read_input(2018, 501)
     polymer = data[0]
     letters = list(string.ascii_lowercase)
     reduced_polymer = day5_colapse(list(polymer))
@@ -321,7 +321,7 @@ def day6_fill_grid(grid, coordinates):
             grid[i][j] = (min_id, min_dist)
 
 def day6_1(data):
-    #data = read_input(2018, 601)
+    # data = read_input(2018, 601)
     coordinates = [(int(entry.split(", ")[0]), int(
         entry.split(", ")[1])) for entry in data]
 
@@ -362,7 +362,7 @@ def day6_1(data):
 
 def day6_2(data):
     size = 10000
-    #data, size = (read_input(2018, 601), 32)
+    # data, size = (read_input(2018, 601), 32)
     coordinates = [(int(entry.split(", ")[0]), int(
         entry.split(", ")[1])) for entry in data]
 
@@ -422,7 +422,7 @@ def day7_inst_order(dependencies, letters):
     return completed
 
 def day7_1(data):
-    #data = read_input(2018, 701)
+    # data = read_input(2018, 701)
     (dependencies, _) = day7_parse_inst(data)
     return ''.join(day7_inst_order(dependencies, list(string.ascii_uppercase)))
 
@@ -522,7 +522,7 @@ def day8_sum_meta(node):
     return counter
 
 def day8_1(data):
-    #data = read_input(2018, 801)
+    # data = read_input(2018, 801)
     data = data[0].split(" ")
     tree = day8_parse_tree([int(n) for n in data])
     total = day8_sum_meta(tree)
@@ -542,7 +542,7 @@ def day8_node_value(node):
     return total
 
 def day8_2(data):
-    #data = read_input(2018, 801)
+    # data = read_input(2018, 801)
     data = data[0].split(" ")
     tree = day8_parse_tree([int(n) for n in data])
     total = day8_node_value(tree)
@@ -596,11 +596,11 @@ def day9_play_game_mine(players, highest_marble):
     current_marble = ListNode(0)
     current_marble.previous = current_marble
     current_marble.next = current_marble
-    #marble_0 = current_marble
+    # marble_0 = current_marble
     next_marble = 1
     player = 0
     while next_marble <= highest_marble:
-        #day9_debug_marbles(marble_0, current_marble)
+        # day9_debug_marbles(marble_0, current_marble)
         if next_marble % 23 != 0:
             for _ in range(2):
                 current_marble = current_marble.next
@@ -622,7 +622,7 @@ def day9_play_game_optimized(players, highest_marble):
     next_marble = 1
     player = 0
     while next_marble <= highest_marble:
-        #day9_debug_marbles2(marble_0, current_marble)
+        # day9_debug_marbles2(marble_0, current_marble)
         if next_marble % 23 != 0:
             marbles.rotate(-2)
             marbles.appendleft(next_marble)
@@ -642,16 +642,16 @@ def day9_parse_input(data):
 
 def day9_1(data):
     line = data[0]
-    #data = read_input(2018, 901)
-    #line = data[3]
+    # data = read_input(2018, 901)
+    # line = data[3]
     players, highest_marble = day9_parse_input(line)
     scores = day9_play_game_optimized(players, highest_marble)
     return max(scores)
 
 def day9_2(data):
     line = data[0]
-    #data = read_input(2018, 901)
-    #line = data[5]
+    # data = read_input(2018, 901)
+    # line = data[5]
     players, highest_marble = day9_parse_input(line)
     scores = day9_play_game_optimized(players, highest_marble * 100)
     return max(scores)
@@ -719,12 +719,12 @@ def day10_resolve(particles):
     return (particles, counter)
 
 def day10_1(data):
-    #data = read_input(2018, 1001)
+    # data = read_input(2018, 1001)
     particles, _ = day10_resolve(day10_parse_input(data))
     day10_print_particles(particles)
 
 def day10_2(data):
-    #data = read_input(2018, 1001)
+    # data = read_input(2018, 1001)
     _, counter = day10_resolve(day10_parse_input(data))
     return counter
 
@@ -745,7 +745,7 @@ def day11_grid(serial):
 def day11_solve_exact_size_aux(memoization, grid, x, y, size):
     if size == 1:
         return grid[y][x]
-    #current_total = day11_solve_exact_size(grid, x, y, size-1)
+    # current_total = day11_solve_exact_size(grid, x, y, size-1)
     key = str(x) + "_" + str(y) + "_" + str(size)
     if key in memoization:
         return memoization[key]
@@ -806,14 +806,14 @@ def day11_solve_range(grid, min_size, max_size):
     return (coordinate, max_size_total)
 
 def day11_1(data):
-    #data = read_input(2018, 1101)
+    # data = read_input(2018, 1101)
     memoization = {}
     serial = int(data[0])
     grid = day11_grid(serial)
     return day11_solve_exact_size(memoization, grid, 3)[0]
 
 def day11_2(data):
-    #data = read_input(2018, 1101)
+    # data = read_input(2018, 1101)
     serial = int(data[0])
     grid = day11_grid(serial)
     return day11_solve_range(grid, 2, 299)
@@ -902,12 +902,12 @@ def day12_solve(pots, rules, generations):
     return total
 
 def day12_1(data):
-    #data = read_input(2018, 1201)
+    # data = read_input(2018, 1201)
     pots, rules = day12_parse_input(data)
     return day12_solve(pots, rules, 20)
 
 def day12_2(data):
-    #data = read_input(2018, 1201)
+    # data = read_input(2018, 1201)
     pots, rules = day12_parse_input(data)
     return day12_solve(pots, rules, 50000000000)
 
@@ -1048,7 +1048,7 @@ def day13_move_cart(map_, positions, cart):
 
 def day13_solve(map_, positions):
     while True:
-        #day13_debug_map(map, positions)
+        # day13_debug_map(map, positions)
         for i, _ in enumerate(positions):
             new_position = day13_move_cart(map_, positions, i)
             if new_position[0] == "X":
@@ -1058,7 +1058,7 @@ def day13_solve(map_, positions):
 
 def day13_solve2(map_, positions):
     while True:
-        #day13_debug_map(map, positions)
+        # day13_debug_map(map, positions)
         crashing_carts = []
         for i, _ in enumerate(positions):
             new_position = day13_move_cart(map_, positions, i)
@@ -1074,12 +1074,12 @@ def day13_solve2(map_, positions):
         positions = sorted(positions, key=lambda v: (v[0], v[1]))
 
 def day13_1(data):
-    #data = read_input(2018, 1301)
+    # data = read_input(2018, 1301)
     map_, positions = day13_parse_input(data)
     return day13_solve(map_, positions)
 
 def day13_2(data):
-    #data = read_input(2018, 1302)
+    # data = read_input(2018, 1302)
     map_, positions = day13_parse_input(data)
     return day13_solve2(map_, positions)
 
@@ -1107,7 +1107,7 @@ def day14_solve(nr_recipes):
     elves = [0, 1]
     recipes_len = len(recipes)
     for _ in range(nr_recipes + 10):
-        #day14_debug_recipes(recipes, elves)
+        # day14_debug_recipes(recipes, elves)
         recipe_0 = recipes[elves[0]]
         recipe_1 = recipes[elves[1]]
         new_recipe = recipe_0 + recipe_1
@@ -1123,11 +1123,11 @@ def day14_solve2(nr_recipes, value):
     recipes = [3, 7]
     elves = [0, 1]
     start = 0
-    #value = str(nr_recipes)
+    # value = str(nr_recipes)
     size = len(value)
     recipes_len = len(recipes)
     while True:
-        #day14_debug_recipes(recipes, elves)
+        # day14_debug_recipes(recipes, elves)
         recipe_0 = recipes[elves[0]]
         recipe_1 = recipes[elves[1]]
         new_recipe = recipe_0 + recipe_1
@@ -1137,7 +1137,7 @@ def day14_solve2(nr_recipes, value):
         elves[0] = (elves[0] + recipe_0 + 1) % recipes_len
         elves[1] = (elves[1] + recipe_1 + 1) % recipes_len
         if recipes_len - start > size:
-            #day14_debug_recipes(recipes, [start, -1])
+            # day14_debug_recipes(recipes, [start, -1])
             while start < recipes_len - size:
                 if str(recipes[start]) == value[0]:
                     tmp_value = "".join([str(r)
@@ -1149,21 +1149,21 @@ def day14_solve2(nr_recipes, value):
     return recipes[nr_recipes:nr_recipes + 10]
 
 def day14_1(data):
-    #data = ["9"]
-    #data = ["5"]
-    #data = ["18"]
-    #data = ["2018"]
+    # data = ["9"]
+    # data = ["5"]
+    # data = ["18"]
+    # data = ["2018"]
 
     nr_recipes = int(data[0])
     return "".join([str(i) for i in day14_solve(nr_recipes)])
 
 def day14_2(data):
-    #data = ["9"]
-    #data = ["5"]
-    #data = ["18"]
-    #data = ["2018"]
+    # data = ["9"]
+    # data = ["5"]
+    # data = ["18"]
+    # data = ["2018"]
 
-    #data = ["59414"]
+    # data = ["59414"]
     nr_recipes = int(data[0])
     return day14_solve2(nr_recipes, data[0])
 
@@ -1536,12 +1536,12 @@ def day16_solve2(samples, program):
     return regs[0]
 
 def day16_1(data):
-    #data = read_input(2018, 1601)
+    # data = read_input(2018, 1601)
     samples, _ = day16_parse_input(data)
     return day16_solve1(samples)
 
 def day16_2(data):
-    #data = read_input(2018, 1601)
+    # data = read_input(2018, 1601)
 
     samples, program = day16_parse_input(data)
     return day16_solve2(samples, program)
@@ -1736,7 +1736,7 @@ def day17_flow_water(ground, y, x):
         if left_wall and right_wall:
             ground[i][j] = Day17_Type.settled
 
-        #day17_debug_ground_bmp(ground, i)
+        # day17_debug_ground_bmp(ground, i)
 
         if ground[i + 1][j] == Day17_Type.clay or ground[i + 1][j] == Day17_Type.settled:
             if ground[i][j - 1] != ground[i][j]:
@@ -1769,12 +1769,12 @@ def day17_solve(ground, min_x, min_y):
     return counter_water, counter_retained
 
 def day17_1(data):
-    #data = read_input(2018, 1701)
+    # data = read_input(2018, 1701)
     ground, min_x, min_y = day17_parse_input(data)
     return day17_solve(ground, min_x, min_y)[0]
 
 def day17_2(data):
-    #data = read_input(2018, 1701)
+    # data = read_input(2018, 1701)
     ground, min_x, min_y = day17_parse_input(data)
     return day17_solve(ground, min_x, min_y)[1]
 
@@ -1855,7 +1855,7 @@ def day18_process(area, minutes):
     return prev_area
 
 def day18_1(data):
-    #data = read_input(2018, 1801)
+    # data = read_input(2018, 1801)
     area = data
     new_area = day18_process(area, 10)
     trees = len(
@@ -1865,7 +1865,7 @@ def day18_1(data):
     return trees * lumberyards
 
 def day18_2(data):
-    #data = read_input(2018, 1801)
+    # data = read_input(2018, 1801)
     area = data
     new_area = day18_process(area, 1000000000)
     trees = len(
@@ -1941,12 +1941,12 @@ def day19_run_program(pointer, program, start_0, day, part):
     return regs
 
 def day19_1(data):
-    #data = read_input(2018, 1901)
+    # data = read_input(2018, 1901)
     pointer, program = day19_parse_input(data)
     return day19_run_program(pointer, program, 0, 19, 1)[0]
 
 def day19_2(data):
-    #data = read_input(2018, 1901)
+    # data = read_input(2018, 1901)
     pointer, program = day19_parse_input(data)
     return day19_run_program(pointer, program, 1, 19, 2)[0]
 
@@ -2032,14 +2032,14 @@ def day20_get_rooms_distances(path):
     return distances
 
 def day20_1(data):
-    #data = read_input(2018, 2001)
+    # data = read_input(2018, 2001)
     path = data[0]
     distances = day20_get_rooms_distances(path).values()
     best = sorted(distances, reverse=True, key=lambda v: v)[0]
     return best
 
 def day20_2(data):
-    #data = read_input(2018, 2001)
+    # data = read_input(2018, 2001)
     path = data[0]
     distances = day20_get_rooms_distances(path).values()
     return len([d for d in distances if d >= 1000])
@@ -2267,12 +2267,12 @@ def day22_find_path(depth, target):
     raise ValueError
 
 def day22_1(data):
-    #data = read_input(2018, 2201)
+    # data = read_input(2018, 2201)
     depth, target = day22_parse_input(data)
     return day22_total_risk(depth, target)
 
 def day22_2(data):
-    #data = read_input(2018, 2201)
+    # data = read_input(2018, 2201)
     depth, target = day22_parse_input(data)
     node = day22_find_path(depth, target)
 
@@ -2505,12 +2505,12 @@ def day23_best_location(bots, zone):
     return day23_calculate_best_distance(locations)
 
 def day23_1(data):
-    #data = read_input(2018, 2301)
+    # data = read_input(2018, 2301)
     bots = day23_parse_input(data)
     return len(day23_bots_in_range(bots, bots[0]))
 
 def day23_2(data):
-    #data = read_input(2018, 2302)
+    # data = read_input(2018, 2302)
     bots = day23_parse_input(data)
     starting_zone = day23_bounds(bots)
     return day23_best_location(bots, starting_zone)
@@ -2732,7 +2732,7 @@ def day24_boost_immune(armies):
     return remaining
 
 def day24_1(data):
-    #data = read_input(2018, 2401)
+    # data = read_input(2018, 2401)
     armies = day24_parse_input(data)
     armies = day24_fight(armies)
     total1 = sum([group[P_24.Units] for group in armies[0]])
@@ -2740,7 +2740,7 @@ def day24_1(data):
     return max(total1, total2)
 
 def day24_2(data):
-    #data = read_input(2018, 2401)
+    # data = read_input(2018, 2401)
     armies = day24_parse_input(data)
     return day24_boost_immune(armies)
 
@@ -2791,7 +2791,7 @@ def day25_parse_input(data):
     return points
 
 def day25_1(data):
-    #data = read_input(2018, 2504)
+    # data = read_input(2018, 2504)
     points = day25_parse_input(data)
     return len(day25_constellations(points))
 

@@ -32,16 +32,16 @@ def day10_delta(pipe):
     }
     return M[pipe]
 
-def day10_guess(grid,r,c):
-    from_top = grid[r-1][c] in ["7", "F", "|"]
-    from_bottom = grid[r+1][c] in ["L", "J", "|"]
-    from_right = grid[r][c+1] in ["J", "7", "-"]
-    from_left= grid[r][c-1] in ["L", "F", "-"]
+def day10_guess(grid, r, c):
+    from_top = grid[r - 1][c] in ["7", "F", "|"]
+    from_bottom = grid[r + 1][c] in ["L", "J", "|"]
+    from_right = grid[r][c + 1] in ["J", "7", "-"]
+    from_left = grid[r][c - 1] in ["L", "F", "-"]
     if from_top:
         if from_right:
             return "L"
         elif from_bottom:
-            return "|" 
+            return "|"
         elif from_left:
             return "J"
     elif from_right:
@@ -61,7 +61,7 @@ def day10_loop(grid):
     for r in range(R):
         for c in range(C):
             if grid[r][c] == "S":
-                grid[r][c] = day10_guess(grid, r,c)
+                grid[r][c] = day10_guess(grid, r, c)
                 start = (r, c)
     seen = set()
     q: list[tuple[int, int]] = [start]

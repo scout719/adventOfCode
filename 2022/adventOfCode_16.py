@@ -107,7 +107,7 @@ def day16_time_to_valve2(s, e, valves):
         visited.add(curr)
         for vs in valves[curr][1]:
             # if vs in visited:
-                # continue
+            #     continue
             heappush(q, (t + 1, vs, path + [vs]))
     return None, []
 

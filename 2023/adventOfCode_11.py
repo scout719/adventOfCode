@@ -41,7 +41,7 @@ def day11_info(img):
 
 def day11_expand(galaxies, empty_r, empty_c, size):
     for i, r in enumerate(empty_r):
-        r = r + i*(size)
+        r = r + i * (size)
         new_gal = []
         for rr, cc in galaxies:
             assert rr != r, r
@@ -51,7 +51,7 @@ def day11_expand(galaxies, empty_r, empty_c, size):
                 new_gal.append((rr, cc))
         galaxies = new_gal
     for i, c in enumerate(empty_c):
-        c = c + i*size
+        c = c + i * size
         new_gal = []
         for rr, cc in galaxies:
             assert cc != c, c
@@ -63,7 +63,7 @@ def day11_expand(galaxies, empty_r, empty_c, size):
     return galaxies
 
 def day11_solve(img, size):
-    size = size-1
+    size = size - 1
     empty_r, empty_c, galaxies = day11_info(img)
     galaxies = day11_expand(galaxies, empty_r, empty_c, size)
 

@@ -190,7 +190,7 @@ def day19_cost(blue, mats, robots, t, tm):
     # need_clay = obs_geode*clay_obs
     # if no clay:
     # need_ore += ore_clay*clay_obs*obs_geode
-    #max(max(0,mats[ORE]-need_ore) // ore_robots, need_obs // obs_robots, need_clay // clay_robots)
+    # max(max(0,mats[ORE]-need_ore) // ore_robots, need_obs // obs_robots, need_clay // clay_robots)
     need_ore = blue[GEODE][ORE]
     need_obs = blue[GEODE][OBSIDIAN]
     need_clay = 0

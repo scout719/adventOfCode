@@ -60,7 +60,7 @@ def day17_make_move(grid, grid_width, t, max_r, jets, curr_jet):
 
         is_pushed = True
         for rr, cc in shape:
-            if not(0 <= cc + dc < grid_width) or (rr, cc + dc) in grid:
+            if not (0 <= cc + dc < grid_width) or (rr, cc + dc) in grid:
                 is_pushed = False
                 break
         if is_pushed:

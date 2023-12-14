@@ -1523,7 +1523,7 @@ def day21_1(data):
     return ans
 
 def day21_2(data):
-    #data = read_input(2020, 2101)
+    # data = read_input(2020, 2101)
     foods = day21_parse(data)
     table_i, _ = day21_extract_info(foods)
 

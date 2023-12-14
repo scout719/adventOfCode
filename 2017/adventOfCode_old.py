@@ -121,9 +121,9 @@ def day18_process(map_, inst, queue, otherQueue):
             # print("sleeping...")
             return 0
     elif comm == Instruction.jgz:
-        #print("jump? " + str(parts[1]))
+        # print("jump? " + str(parts[1]))
         if day18_jgz(map_, arg1):
-            #print("jumping: " + str(parts[2]))
+            # print("jumping: " + str(parts[2]))
             jump = arg2
     return jump
 
@@ -176,7 +176,7 @@ def day18_2(input_):
 
     return snd_count
 
-#input = "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2";
+# input = "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2";
 #   input = "snd 1\nsnd 2\nsnd p\nrcv a\nrcv b\nrcv c\nrcv d"
 
 
@@ -439,7 +439,7 @@ def day19_crossroad(grid, x, y, delta_x, delta_y):
 
 def day19_1(data):
     grid = data
-    #day19_debug_grid(grid, 0, 0)
+    # day19_debug_grid(grid, 0, 0)
     start_pos = -1
     for i in range(len(grid[0])):
         if grid[0][i] != " ":
@@ -454,7 +454,7 @@ def day19_1(data):
     steps = 0
     while True:
         steps += 1
-        #day19_debug_grid(grid, x, y)
+        # day19_debug_grid(grid, x, y)
         if grid[y][x].isalpha():
             path += grid[y][x]
         if grid[y][x] == "+":
