@@ -84,8 +84,8 @@ def day14_1(data):
     return day14_solve(grid, False)
 
 def day14_2(data: List[str]):
-    x = day14_parse(data)
-    return day14_solve(x, True)
+    grid = day14_parse(data)
+    return day14_solve(grid, True)
 
 
 """ MAIN FUNCTION """

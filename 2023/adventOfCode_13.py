@@ -21,8 +21,8 @@ EXPECTED_2 = 400
 """ DAY 13 """
 
 def day13_parse(data: List[str]):
-    patterns = []
-    pattern = []
+    patterns: List[List[str]] = []
+    pattern: List[str] = []
     for line in data:
         if line:
             pattern.append(line)
