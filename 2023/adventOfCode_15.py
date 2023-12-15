@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
 from collections import defaultdict
-from copy import deepcopy
 import os
-import string
 import sys
-from typing import List, Mapping, Tuple, Set
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -20,7 +17,7 @@ EXPECTED_2 = 145
 
 """ DAY 15 """
 
-def day15_parse(data: List[str]):
+def day15_parse(data: list[str]):
     return [step for step in data[0].split(",")]
 
 def day15_hash(label):
@@ -40,7 +37,7 @@ def day15_1(data):
         ans += hash_
     return ans
 
-def day15_2(data: List[str]):
+def day15_2(data: list[str]):
     sequence = day15_parse(data)
     boxes = defaultdict(list)
     for step in sequence:
