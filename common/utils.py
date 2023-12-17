@@ -75,7 +75,7 @@ def execute_day(_globals, year, day, part):
         except SignalCatchingError:
             result = HEAVY_EXERCISE
         end = timer()
-        print(f"Day {day}, part {part}: {result} ({(end-start):.3f} secs)")
+        print(f"Day {day}, part {part}: {result} ({(end - start):.3f} secs)")
 
 def read_input(year, day):
     file_dir = os.path.dirname(os.path.realpath(__file__))

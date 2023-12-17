@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
 from heapq import heappop, heappush
 import os
 import sys
@@ -32,8 +31,7 @@ def day17_solve(city, part2):
     C = len(city[0])
 
     # down, right, up , left
-    DR = [1, 0, -1, 0]
-    DC = [0, 1, 0, -1]
+    D = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
     # heur, heat, r, c, d, straigth_left
     q = []
@@ -60,7 +58,7 @@ def day17_solve(city, part2):
             # can keep going straight
             dirs.append(d)
         for dd in dirs:
-            dr, dc = DR[dd], DC[dd]
+            dr, dc = D[dd]
             rr, cc = r + dr, c + dc
             if not (0 <= rr < R and 0 <= cc < C):
                 continue
@@ -68,7 +66,6 @@ def day17_solve(city, part2):
             n_heat = heat + city[rr][cc]
             n_heur = heat + (R - rr) + (C - cc)
             heappush(q, (n_heur, n_heat, rr, cc, dd, n_straight_rem))
-        # right
     return None
 
 def day17_1(data):
