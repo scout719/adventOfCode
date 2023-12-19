@@ -70,7 +70,11 @@ def execute_day(_globals, year, day, part):
     if func_name in _globals:
         start = timer()
         try:
-            result = timeout(seconds_before_timeout=EXERCISE_TIMEOUT)(
+            timeout_secs = EXERCISE_TIMEOUT
+            if sys.gettrace() is not None:
+                # debugger attached
+                timeout_secs = EXERCISE_TIMEOUT * 1000
+            result = timeout(seconds_before_timeout=timeout_secs)(
                 _globals[func_name])(read_input(year, day))
         except SignalCatchingError:
             result = HEAVY_EXERCISE
