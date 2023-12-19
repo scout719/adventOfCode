@@ -4,7 +4,6 @@ from collections import defaultdict
 from copy import deepcopy
 import os
 import sys
-from tracemalloc import start
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -50,14 +49,15 @@ def day19_parse(data: list[str]):
         i += 1
         line = line.lstrip("{").rstrip("}")
         ratings = line.split(",")
-        ratings = {rating.split("=")[0]: int(
-            rating.split("=")[1]) for rating in ratings}
+        ratings = {
+            rating.split("=")[0]: int(rating.split("=")[1])
+            for rating in ratings}
         parts.append(ratings)
 
     return workflows, parts
 
-def day19_solve(x: tuple[dict[str, list[tuple[tuple[str, str, int] | None, str]]], list[dict[str, int]]], part2):
-    workflow, parts = x
+def day19_1(data):
+    workflow, parts = day19_parse(data)
     ans = 0
     for part in parts:
         curr_name = "in"
@@ -88,20 +88,8 @@ def day19_solve(x: tuple[dict[str, list[tuple[tuple[str, str, int] | None, str]]
 
     return ans
 
-def day19_1(data):
-    x = day19_parse(data)
-    return day19_solve(x, False)
-
-def day19_merge(states, n_states):
-    for k in states:
-        left = states[k]
-        right = n_states[k]
-        # if
-
-
 def day19_2(data: list[str]):
-    x = day19_parse(data)
-    workflow, _ = x
+    workflow, _ = day19_parse(data)
     res: dict[str, list[dict[str, tuple[int, int]]]] = defaultdict(list)
     res["in"] = [{
         "x": (1, 4001),
@@ -124,13 +112,13 @@ def day19_2(data: list[str]):
             if not cond:
                 res[name] += deepcopy(states)
             else:
-                rat, op, val = cond
+                rating, op, val = cond
 
                 if op == ">":
                     left: tuple[int, int] = (0, 0)
                     right: tuple[int, int] = (0, 0)
                     for i, st in enumerate(states):
-                        r_start, r_end = st[rat]
+                        r_start, r_end = st[rating]
                         if r_end <= val:
                             left = (r_start, r_end)
                         elif r_start > val:
@@ -140,17 +128,16 @@ def day19_2(data: list[str]):
                             left = (r_start, val + 1)
                             if val < r_end - 1:
                                 right = (val + 1, r_end)
-                        # assert name not in res, f"{res=} {name=}"
                         n_st = deepcopy(st)
-                        n_st[rat] = right
-                        states[i][rat] = left
+                        n_st[rating] = right
+                        states[i][rating] = left
                         res[name].append(n_st)
                 else:
                     assert op == "<"
                     left: tuple[int, int] = (0, 0)
                     right: tuple[int, int] = (0, 0)
                     for i, st in enumerate(states):
-                        r_start, r_end = st[rat]
+                        r_start, r_end = st[rating]
                         if r_end <= val:
                             left = (r_start, r_end)
                         elif r_start > val:
@@ -160,10 +147,9 @@ def day19_2(data: list[str]):
                             left = (r_start, val)
                             if val < r_end - 1:
                                 right = (val, r_end)
-                        # assert name not in res, f"{res=} {name=}"
                         n_st = deepcopy(st)
-                        n_st[rat] = left
-                        states[i][rat] = right
+                        n_st[rating] = left
+                        states[i][rating] = right
                         res[name].append(n_st)
     ans = 0
     for st in res["A"]:
