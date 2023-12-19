@@ -15,7 +15,7 @@ from common.utils import main  # NOQA: E402
 YEAR = 2023
 DAY = 19
 EXPECTED_1 = 19114
-EXPECTED_2 = -1
+EXPECTED_2 = 167409079868000
 
 """ DAY 19 """
 
@@ -104,16 +104,16 @@ def day19_2(data: list[str]):
     workflow, _ = x
     res: dict[str, list[dict[str, tuple[int, int]]]] = defaultdict(list)
     res["in"] = [{
-        "x": (0, 4001),
-            "m": (0, 4001),
-            "a": (0, 4001),
-            "s": (0, 4001),
+        "x": (1, 4001),
+        "m": (1, 4001),
+        "a": (1, 4001),
+        "s": (1, 4001),
     }]
     q = ["in"]
     while q:
         curr = q.pop()
 
-        if not curr in res or curr in ["R", "A"]:
+        if curr in ["R", "A"]:
             continue
 
         states = res[curr]
@@ -122,7 +122,7 @@ def day19_2(data: list[str]):
         for cond, name in rules:
             q.append(name)
             if not cond:
-                res[name] = deepcopy(states)
+                res[name] += deepcopy(states)
             else:
                 rat, op, val = cond
 
@@ -137,7 +137,7 @@ def day19_2(data: list[str]):
                             right = (r_start, r_end)
                         else:
                             assert r_start < val <= r_end
-                            left = (r_start, val)
+                            left = (r_start, val + 1)
                             if val < r_end - 1:
                                 right = (val + 1, r_end)
                         # assert name not in res, f"{res=} {name=}"
@@ -159,13 +159,12 @@ def day19_2(data: list[str]):
                             assert r_start < val <= r_end
                             left = (r_start, val)
                             if val < r_end - 1:
-                                right = (val + 1, r_end)
+                                right = (val, r_end)
                         # assert name not in res, f"{res=} {name=}"
                         n_st = deepcopy(st)
                         n_st[rat] = left
                         states[i][rat] = right
                         res[name].append(n_st)
-    # print(res["A"])
     ans = 0
     for st in res["A"]:
         x_min, x_max = st["x"]
