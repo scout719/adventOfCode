@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
 from collections import defaultdict
+from copy import deepcopy
 import os
 import sys
 from tracemalloc import start
@@ -20,14 +21,14 @@ EXPECTED_2 = -1
 
 def day19_parse(data: list[str]):
     i = 0
-    workflows = {}
+    workflows: dict[str, list[tuple[None | tuple[str, str, int], str]]] = {}
     while data[i] != "":
         line = data[i]
         i += 1
         label, rest = line.split("{")
         rest = rest.rstrip("}")
         rules_ = rest.split(",")
-        rules = []
+        rules: list[tuple[None | tuple[str, str, int], str]] = []
         for rule in rules_:
             if ":" in rule:
                 cond, name = rule.split(":")
@@ -42,7 +43,7 @@ def day19_parse(data: list[str]):
         workflows[label] = rules
 
     i += 1
-    parts = []
+    parts: list[dict[str, int]] = []
     while i < len(data):
         # {x=787,m=2655,a=1222,s=2876}
         line = data[i]
@@ -55,7 +56,7 @@ def day19_parse(data: list[str]):
 
     return workflows, parts
 
-def day19_solve(x, part2):
+def day19_solve(x: tuple[dict[str, list[tuple[tuple[str, str, int] | None, str]]], list[dict[str, int]]], part2):
     workflow, parts = x
     ans = 0
     for part in parts:
@@ -91,9 +92,89 @@ def day19_1(data):
     x = day19_parse(data)
     return day19_solve(x, False)
 
+def day19_merge(states, n_states):
+    for k in states:
+        left = states[k]
+        right = n_states[k]
+        # if
+
+
 def day19_2(data: list[str]):
     x = day19_parse(data)
-    return day19_solve(x, True)
+    workflow, _ = x
+    res: dict[str, list[dict[str, tuple[int, int]]]] = defaultdict(list)
+    res["in"] = [{
+        "x": (0, 4001),
+            "m": (0, 4001),
+            "a": (0, 4001),
+            "s": (0, 4001),
+    }]
+    q = ["in"]
+    while q:
+        curr = q.pop()
+
+        if not curr in res or curr in ["R", "A"]:
+            continue
+
+        states = res[curr]
+
+        rules = workflow[curr]
+        for cond, name in rules:
+            q.append(name)
+            if not cond:
+                res[name] = deepcopy(states)
+            else:
+                rat, op, val = cond
+
+                if op == ">":
+                    left: tuple[int, int] = (0, 0)
+                    right: tuple[int, int] = (0, 0)
+                    for i, st in enumerate(states):
+                        r_start, r_end = st[rat]
+                        if r_end <= val:
+                            left = (r_start, r_end)
+                        elif r_start > val:
+                            right = (r_start, r_end)
+                        else:
+                            assert r_start < val <= r_end
+                            left = (r_start, val)
+                            if val < r_end - 1:
+                                right = (val + 1, r_end)
+                        # assert name not in res, f"{res=} {name=}"
+                        n_st = deepcopy(st)
+                        n_st[rat] = right
+                        states[i][rat] = left
+                        res[name].append(n_st)
+                else:
+                    assert op == "<"
+                    left: tuple[int, int] = (0, 0)
+                    right: tuple[int, int] = (0, 0)
+                    for i, st in enumerate(states):
+                        r_start, r_end = st[rat]
+                        if r_end <= val:
+                            left = (r_start, r_end)
+                        elif r_start > val:
+                            right = (r_start, r_end)
+                        else:
+                            assert r_start < val <= r_end
+                            left = (r_start, val)
+                            if val < r_end - 1:
+                                right = (val + 1, r_end)
+                        # assert name not in res, f"{res=} {name=}"
+                        n_st = deepcopy(st)
+                        n_st[rat] = left
+                        states[i][rat] = right
+                        res[name].append(n_st)
+    # print(res["A"])
+    ans = 0
+    for st in res["A"]:
+        x_min, x_max = st["x"]
+        m_min, m_max = st["m"]
+        a_min, a_max = st["a"]
+        s_min, s_max = st["s"]
+        ans += (x_max - x_min) * (m_max - m_min) * \
+            (a_max - a_min) * (s_max - s_min)
+    return ans
 
 
 """ MAIN FUNCTION """
