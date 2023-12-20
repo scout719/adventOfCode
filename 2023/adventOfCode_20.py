@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
 from collections import defaultdict
+from copy import deepcopy
 from email.policy import default
+from math import lcm
 import os
+import string
 import sys
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -37,60 +40,55 @@ def day20_solve(x, part2):
     T = 1000 if not part2 else int(1e10)
     ff = defaultdict(bool)
     con = {}
-    for m, (typ, _) in modules.items():
+    for m, (typ, dest) in modules.items():
         if typ == "&":
             con[m] = {}
-    for m, (typ, l) in modules.items():
-        for k, v in con.items():
-            if k in l:
-                v[m] = 0
+    for m, (typ, dest) in modules.items():
+        for k, mem in con.items():
+            if k in dest:
+                mem[m] = 0
     for t in range(T):
-        _, next_ = modules["broadcaster"]
-        q = [("broadcaster", m, 0) for m in next_]
+        _, start = modules["broadcaster"]
+        q = [("broadcaster", module, 0) for module in start]
         low += 1
-        print(t)
         while q:
-            n_q = []
-            for src, m_n, pulse in q:
+            new_q = []
+            for src, module, pulse in q:
                 if pulse == 1:
                     high += 1
                 else:
                     assert pulse == 0
-                    if part2 and m_n == "rx":
-                        return t+1
+                    if part2 and module == "rx":
+                        return t + 1
                     low += 1
-                if m_n not in modules:
+                if module not in modules:
                     # ignore
                     continue
-                typ, l = modules[m_n]
+                typ, dest = modules[module]
                 if typ == "%":
                     if pulse == 1:
                         # ignore high
                         pass
                     else:
-                        ff[m_n] = not ff[m_n]
-                        if ff[m_n]:
-                            n_p = 1
-                            # high += 1
+                        ff[module] = not ff[module]
+                        if ff[module]:
+                            new_pulse = 1
                         else:
-                            n_p = 0
-                            # low += 1
-                        for n in l:
-                            n_q.append((m_n, n, n_p))
+                            new_pulse = 0
+                        for dest_module in dest:
+                            new_q.append((module, dest_module, new_pulse))
                 elif typ == "&":
-                    con[m_n][src] = pulse
-                    if all(v == 1 for v in con[m_n].values()):
-                        n_p = 0
-                        # low += 1
+                    con[module][src] = pulse
+                    if all(last_pulse == 1 for last_pulse in con[module].values()):
+                        new_pulse = 0
                     else:
-                        n_p = 1
-                        # high += 1
+                        new_pulse = 1
 
-                    for n in l:
-                        n_q.append((m_n, n, n_p))
+                    for dest_module in dest:
+                        new_q.append((module, dest_module, new_pulse))
                 else:
                     assert False
-            q = n_q
+            q = new_q
 
     return low * high
 
@@ -99,9 +97,35 @@ def day20_1(data):
     # low 281157474
     return day20_solve(x, False)
 
+def day20_partial(modules, counters, target_module):
+    modules = deepcopy(modules)
+    # Remove other counters
+    for m in counters:
+        if m != target_module:
+            del modules[m]
+
+    return day20_solve(modules, True)
+
 def day20_2(data: list[str]):
-    x = day20_parse(data)
-    return day20_solve(x, True)
+    modules = day20_parse(data)
+    # find aggregator of rx
+    aggr = None
+    for m, (_, l) in modules.items():
+        if "rx" in l:
+            assert not aggr
+            aggr = m
+    assert aggr
+
+    # Get all counters
+    counters = []
+    for m, (_, l) in modules.items():
+        if aggr in l:
+            counters.append(m)
+
+    ans = []
+    for c in counters:
+        ans.append(day20_partial(modules, counters, c))
+    return lcm(*ans)
 
 
 """ MAIN FUNCTION """

@@ -2,8 +2,6 @@
 broadcaster -> ct, hr, ft, qm
 %bh -> lj
 &zz -> th, hr, jk, bh, js
-&js -> cl
-&cl -> rx
 %rn -> ml
 %ks -> xk, kd
 &cm -> jp, sk, ft, dt, gb
@@ -44,10 +42,8 @@ broadcaster -> ct, hr, ft, qm
 %hr -> zz, zq
 %vk -> jg
 %qj -> kd
-&qs -> cl
 %cx -> jk, zz
 %mf -> mp, zz
-&dt -> cl
 %lz -> tk, mh
 %vs -> pg
 %ct -> mh, mj
@@ -55,4 +51,8 @@ broadcaster -> ct, hr, ft, qm
 %ft -> qn, cm
 %fs -> zz, lh
 &kd -> qm, ml, ts, qv, rn
+&cl -> rx
+&js -> cl
+&qs -> cl
+&dt -> cl
 &ts -> cl
