@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from ast import Tuple
 from math import lcm
 import os
 import sys
-from collections import defaultdict
-import time
-from typing import List, Mapping, Set, Tuple
+from typing import List, Mapping, Tuple
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -18,7 +15,6 @@ YEAR = 2023
 DAY = 8
 EXPECTED_1 = None
 EXPECTED_2 = 6
-
 
 """ DAY 8 """
 
@@ -82,7 +78,7 @@ def day8_2(data: List[str]):
     cycles = []
     for start in starts:
         cycles.append(day8_cycle(inst, M, start))
-    
+
     return lcm(*cycles)
 
 

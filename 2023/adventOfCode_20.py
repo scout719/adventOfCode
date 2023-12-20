@@ -2,10 +2,8 @@
 # pylint: disable=wrong-import-position
 from collections import defaultdict
 from copy import deepcopy
-from email.policy import default
 from math import lcm
 import os
-import string
 import sys
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
