@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
 from ast import Tuple
+from math import lcm
 import os
 import sys
 from collections import defaultdict
@@ -69,15 +70,6 @@ def day8_cycle(inst, M, node):
         path += [node]
         seen[k] = count
 
-def day8_gcd(x: int, y: int):
-    while y:
-        x, y = y, x % y
-    return x
-
-def day8_lcm(x, y):
-    lcm = (x * y) // day8_gcd(x, y)
-    return lcm
-
 def day8_2(data: List[str]):
     # 23147 low
     # 23519 low
@@ -90,10 +82,8 @@ def day8_2(data: List[str]):
     cycles = []
     for start in starts:
         cycles.append(day8_cycle(inst, M, start))
-    lcm = day8_lcm(cycles[0], cycles[1])
-    for i in range(1, len(cycles)):
-        lcm = day8_lcm(lcm, cycles[i])
-    return lcm
+    
+    return lcm(*cycles)
 
 
 """ MAIN FUNCTION """
