@@ -14,7 +14,7 @@ from common.utils import main  # NOQA: E402
 
 YEAR = 2023
 DAY = 21
-EXPECTED_1 = 16
+EXPECTED_1 = None
 EXPECTED_2 = None
 
 """ DAY 21 """
@@ -94,18 +94,70 @@ def day21_reachable(R, C, rocks, r, c, max_l):
             continue
         seen.add(k)
         if l % 2 == 1:
-            reacheable_odd.add((k,l))
+            reacheable_odd.add((k, l))
         else:
-            reacheable_even.add((k,l))
+            reacheable_even.add((k, l))
         D = [(0, 1), (1, 0), (-1, 0), (0, -1)]
         for dr, dc in D:
             rr, cc = (r + dr), (c + dc)
             if (rr, cc) not in rocks and 0 <= rr < R and 0 <= cc < C:
                 q2.append(((rr, cc), l + 1))
-    return reacheable_odd, reacheable_even
+    return [x for x, l in reacheable_odd if l <= max_l], [x for x, l in reacheable_even if l <= max_l]
+
+def day21_total(R, C, rocks, st, mid_r, mid_c, corner_r, corner_c):
+    mid_odd, mid_even = day21_reachable(R, C, rocks, mid_r, mid_c, R + C)
+    corner_odd, corner_even = day21_reachable(
+        R, C, rocks, corner_r, corner_c, R + C)
+
+    n_full = st // R
+    full_line = n_full - 1
+    full_line_odd = full_line // 2
+    full_line_even = full_line - full_line_odd
+    assert full_line_even >= full_line_odd
+    extreme_half_full_is_odd = full_line_even > full_line_odd
+    extreme_odd, extreme_even = day21_reachable(R, C, rocks, mid_r, mid_c, R-1)
+    extreme_half_full = len(
+        extreme_odd) if extreme_half_full_is_odd else len(extreme_even)
+
+    total_full = ((n_full + 1) * n_full) // 2
+    full_diags = total_full - full_line * 2 - 1
+    y = max(0, (full_line - 2) if (full_line - 1) %
+            2 == 0 else (full_line - 1))
+    full_diag_odd = y * y
+    z = max(0, (full_line - 1) if (full_line - 1) %
+            2 == 0 else (full_line - 2))
+    full_diag_even = full_diags - full_diag_odd  # (z // 2) * ((z // 2) + 1)
+    assert full_diag_even == full_diag_odd == 0 or full_diag_even == (
+        full_diags - full_diag_odd)
+
+    half_full_partial = full_line
+    half_empty_partial = full_line + 1
+
+    half_full_partial_is_odd = extreme_half_full_is_odd
+    half_empty_partial_is_odd = not half_full_partial_is_odd
+    half_empty_odd, half_empty_even = day21_reachable(
+        R, C, rocks, corner_r, corner_c, R // 2 -1)
+    half_full_odd, half_full_even = day21_reachable(
+        R, C, rocks, corner_r, corner_c, (R-1) + R // 2)
+    half_full = half_full_odd if half_full_partial_is_odd else half_full_even
+    half_empty = half_empty_odd if half_empty_partial_is_odd else half_empty_even
+
+    return full_line_odd * len(mid_odd) + \
+        full_line_even * len(mid_even) + \
+        extreme_half_full + \
+        full_diag_even * len(corner_even) + \
+        full_diag_odd * len(corner_odd) + \
+        half_full_partial * len(half_full) + \
+        half_empty_partial * len(half_empty)  # lonely extreme
 
 def day21_2(data: list[str]):
     x = day21_parse(data)
+
+#     Right and right donw
+# down and left down
+# left and up left
+# up and top right
+
     grid = x
     R = len(grid)
     C = len(grid[0])
@@ -120,6 +172,24 @@ def day21_2(data: list[str]):
             else:
                 assert grid[r][c] == "."
     st = 26501365
+    # R = 5
+    # st = 8
+    # rocks = set()
+    st = 27
+    # https://docs.google.com/spreadsheets/d/1St7OyhUKuvzdPOLTK7qejzADFwP-LLFuJOm5MUsJBQ4/edit?usp=sharing
+    center_odd, _ = day21_reachable(R, R, rocks, R // 2, R // 2, R + R)
+    center = len(center_odd)
+    right_down_right = day21_total(
+        R, R, rocks, st, R // 2, R - 1, R - 1, R - 1)
+    down_down_left = day21_total(R, R, rocks, st, R - 1, R // 2, R - 1, 0)
+    left_up_left = day21_total(R, R, rocks, st, R // 2, 0, 0, 0)
+    up_up_right = day21_total(R, R, rocks, st, 0, R // 2, 0, R - 1)
+    # aa,bb,cc,dd =
+
+    # too low: 614455686113224
+    #          614455686112704
+    #          614455686112700
+    return center + right_down_right + down_down_left + left_up_left + up_up_right
 
     d = defaultdict(lambda: defaultdict(list))
 
@@ -131,18 +201,16 @@ def day21_2(data: list[str]):
     # R = 131
     print(start)
 
-    center_odd, _ = day21_reachable(R, C, rocks, start[0], start[1], R+C)
-    top_left_odd, _ = day21_reachable(R, C, rocks, 0, 0,R+C)
-    top_right_odd, _ = day21_reachable(R, C, rocks, 0, C - 1,R+C)
-    bottom_left_odd, _ = day21_reachable(R, C, rocks, R - 1, 0,R+C)
-    bottom_right_odd, _ = day21_reachable(R, C, rocks, R - 1, C - 1,R+C)
+    center_odd, _ = day21_reachable(R, C, rocks, start[0], start[1], R + C)
+    top_left_odd, _ = day21_reachable(R, C, rocks, 0, 0, R + C)
+    top_right_odd, _ = day21_reachable(R, C, rocks, 0, C - 1, R + C)
+    bottom_left_odd, _ = day21_reachable(R, C, rocks, R - 1, 0, R + C)
+    bottom_right_odd, _ = day21_reachable(R, C, rocks, R - 1, C - 1, R + C)
 
-    _, mid_top_even = day21_reachable(R, C, rocks, 0, C // 2,R+C)
-    _, mid_bottom_even = day21_reachable(R, C, rocks, R - 1, C // 2,R+C)
-    _, mid_left_even = day21_reachable(R, C, rocks, R // 2, 0,R+C)
-    _, mid_right_even = day21_reachable(R, C, rocks, R // 2, C - 1,R+C)
-
-
+    _, mid_top_even = day21_reachable(R, C, rocks, 0, C // 2, R + C)
+    _, mid_bottom_even = day21_reachable(R, C, rocks, R - 1, C // 2, R + C)
+    _, mid_left_even = day21_reachable(R, C, rocks, R // 2, 0, R + C)
+    _, mid_right_even = day21_reachable(R, C, rocks, R // 2, C - 1, R + C)
 
     # reacheable_odd -> center
     # left_side
@@ -151,10 +219,10 @@ def day21_2(data: list[str]):
     x = (max_len + 1) * (max_len) // 2
     full_diags = x - full_lines - 1
 
-    half_empty = full_lines + 1 # R//2 moves left corner
-    half_full = half_empty-1 # R moves left corner
-    extremes = 4 
-    extremes_half_full = 4 # R moves left sides
+    half_empty = full_lines + 1  # R//2 moves left corner
+    half_full = half_empty - 1  # R moves left corner
+    extremes = 4
+    extremes_half_full = 4  # R moves left sides
     # print(full_diags, full_lines)
     # print(top_left_odd, top_right_odd, bottom_left_odd, bottom_right_odd, mid_top_even, mid_bottom_even, mid_left_even, mid_right_even)
     return len(center_odd) + \
@@ -166,16 +234,16 @@ def day21_2(data: list[str]):
         full_diags * len(top_right_odd) + \
         full_diags * len(bottom_left_odd) + \
         full_diags * len(bottom_right_odd) + \
-        half_empty * len([1 for (_,_), l in top_left_odd if l <= R//2]) + \
-        half_empty * len([1 for (_,_), l in top_right_odd if l <= R//2]) + \
-        half_empty * len([1 for (_,_), l in bottom_left_odd if l <= R//2]) + \
-        half_empty * len([1 for (_,_), l in bottom_right_odd if l <= R//2]) + \
-        half_full * len([1 for (_,_), l in top_left_odd if l <= R//2 + R]) + \
-        half_full * len([1 for (_,_), l in top_right_odd if l <= R//2+ R]) + \
-        half_full * len([1 for (_,_), l in bottom_left_odd if l <= R//2+ R]) + \
-        half_full * len([1 for (_,_), l in bottom_right_odd if l <= R//2+ R]) + \
-        extremes + \
-        extremes_half_full * len([1 for (_,_), l in  if l <= R]) + \
+        half_empty * len([1 for (_, _), l in top_left_odd if l <= R // 2]) + \
+        half_empty * len([1 for (_, _), l in top_right_odd if l <= R // 2]) + \
+        half_empty * len([1 for (_, _), l in bottom_left_odd if l <= R // 2]) + \
+        half_empty * len([1 for (_, _), l in bottom_right_odd if l <= R // 2]) + \
+        half_full * len([1 for (_, _), l in top_left_odd if l <= R // 2 + R]) + \
+        half_full * len([1 for (_, _), l in top_right_odd if l <= R // 2 + R]) + \
+        half_full * len([1 for (_, _), l in bottom_left_odd if l <= R // 2 + R]) + \
+        half_full * len([1 for (_, _), l in bottom_right_odd if l <= R // 2 + R]) + \
+        extremes
+    # extremes_half_full * len([1 for (_,_), l in  if l <= R]) + \
 
     # for rrr in [start[0]]:#range(R):
     #     for ccc in [start[1]]:#range(C):
