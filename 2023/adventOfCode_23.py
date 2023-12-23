@@ -47,21 +47,20 @@ def day23_show(grid):
     print((junc, len(junc)))
 
 def day23_path(r, c, rr, cc, juncs, grid):
-    q = [(r, c, 0)]
+    q = [(r, c, set())]
     D: list[tuple[int, int]] = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     R = len(grid)
     C = len(grid[0])
     paths = set()
-    seen = set()
     while q:
-        rrr, ccc, d = q.pop()
-        if (rrr, ccc) in seen:
+        rrr, ccc, path = q.pop()
+        if (rrr, ccc) in path:
             continue
-        seen.add((rrr, ccc))
+        path.add((rrr, ccc))
 
         if (rrr, ccc) == (rr, cc):
-            # originally was looking for the longest path
-            return d
+            paths.add(len(path)-1)
+            continue
 
         if (rrr, ccc) in juncs and (rrr, ccc) != (r, c):
             continue
@@ -69,7 +68,7 @@ def day23_path(r, c, rr, cc, juncs, grid):
         for dr, dc in D:
             rrrr, cccc = rrr + dr, ccc + dc
             if 0 <= rrrr < R and 0 <= cccc < C and grid[rrrr][cccc] != "#":
-                q.append((rrrr, cccc, d + 1))
+                q.append((rrrr, cccc, set() | path))
 
     return max(paths) if paths else None
 
