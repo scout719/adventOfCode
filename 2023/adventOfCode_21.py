@@ -109,20 +109,22 @@ def day21_total(R, C, rocks, st, mid_r, mid_c, corner_r, corner_c):
     corner_odd, corner_even = day21_reachable(
         R, C, rocks, corner_r, corner_c, R + C)
 
-    n_full = st // R
-    full_line = n_full - 1
-    full_line_odd = full_line // 2
-    full_line_even = full_line - full_line_odd
-    assert full_line_even >= full_line_odd
-    extreme_half_full_is_odd = full_line_even > full_line_odd
-    extreme_odd, extreme_even = day21_reachable(R, C, rocks, mid_r, mid_c, R-1)
+    n_full = (st // R) - 1
+    full_line = n_full
+    full_line_even = full_line // 2
+    full_line_odd = full_line - full_line_even
+    assert full_line_even <= full_line_odd
+    extreme_half_full_is_odd = full_line_even == full_line_odd
+    extreme_odd, extreme_even = day21_reachable(
+        R, C, rocks, mid_r, mid_c, R - 1)
     extreme_half_full = len(
         extreme_odd) if extreme_half_full_is_odd else len(extreme_even)
 
-    total_full = ((n_full + 1) * n_full) // 2
-    full_diags = total_full - full_line * 2 - 1
+    total_full = (n_full * (n_full+1)) // 2
+    full_diags = total_full - n_full
     y = max(0, (full_line - 2) if (full_line - 1) %
             2 == 0 else (full_line - 1))
+    y = (y//2)+1
     full_diag_odd = y * y
     z = max(0, (full_line - 1) if (full_line - 1) %
             2 == 0 else (full_line - 2))
@@ -133,12 +135,12 @@ def day21_total(R, C, rocks, st, mid_r, mid_c, corner_r, corner_c):
     half_full_partial = full_line
     half_empty_partial = full_line + 1
 
-    half_full_partial_is_odd = extreme_half_full_is_odd
-    half_empty_partial_is_odd = not half_full_partial_is_odd
+    half_empty_partial_is_odd = extreme_half_full_is_odd
+    half_full_partial_is_odd = not extreme_half_full_is_odd
     half_empty_odd, half_empty_even = day21_reachable(
-        R, C, rocks, corner_r, corner_c, R // 2 -1)
+        R, C, rocks, corner_r, corner_c, (R // 2)-1)
     half_full_odd, half_full_even = day21_reachable(
-        R, C, rocks, corner_r, corner_c, (R-1) + R // 2)
+        R, C, rocks, corner_r, corner_c, (R-1) + (R // 2))
     half_full = half_full_odd if half_full_partial_is_odd else half_full_even
     half_empty = half_empty_odd if half_empty_partial_is_odd else half_empty_even
 
@@ -172,10 +174,12 @@ def day21_2(data: list[str]):
             else:
                 assert grid[r][c] == "."
     st = 26501365
-    # R = 5
-    # st = 8
+    # print(R)
+    assert R == C
+    #R, st, rocks = 7, 31, set()
+    # st = 31
     # rocks = set()
-    st = 27
+    # st = 10
     # https://docs.google.com/spreadsheets/d/1St7OyhUKuvzdPOLTK7qejzADFwP-LLFuJOm5MUsJBQ4/edit?usp=sharing
     center_odd, _ = day21_reachable(R, R, rocks, R // 2, R // 2, R + R)
     center = len(center_odd)
@@ -186,9 +190,14 @@ def day21_2(data: list[str]):
     up_up_right = day21_total(R, R, rocks, st, 0, R // 2, 0, R - 1)
     # aa,bb,cc,dd =
 
-    # too low: 614455686113224
-    #          614455686112704
-    #          614455686112700
+    #           614455686112700
+    #           614455686112704
+    #           614455686113074
+    # too low:  614455686113224
+
+    #           622926941971282
+    
+    # too high: 631398149479603
     return center + right_down_right + down_down_left + left_up_left + up_up_right
 
     d = defaultdict(lambda: defaultdict(list))
@@ -268,6 +277,7 @@ def day21_2(data: list[str]):
     #                 if 0 <= rr < R and 0 <= cc < C and (rr, cc) not in rocks:
     #                     q.append(((rr, cc), l + 1))
     # return len(d)
+
 
     # R//2
     # return len(day20_dp(start[0], start[1], st, R, C, rocks, {}))
