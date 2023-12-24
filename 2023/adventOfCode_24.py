@@ -146,6 +146,18 @@ def day24_2(data: list[str]):
         solver.add((xk + t * dxk) == (x1 + t * vx1))
         solver.add((yk + t * dyk) == (y1 + t * vy1))
         solver.add((zk + t * dzk) == (z1 + t * vz1))
+        solver.add(t > 0)
+
+    min_x = min(x for (x, y, z), v in hails)
+    max_x = max(x for (x, y, z), v in hails)
+    min_y = min(y for (x, y, z), v in hails)
+    max_y = max(y for (x, y, z), v in hails)
+    min_z = min(z for (x, y, z), v in hails)
+    max_z = max(z for (x, y, z), v in hails)
+    
+    solver.add(z3.IntVal(min_x - 10) <= xk, xk <= z3.IntVal(max_x + 10))
+    solver.add(z3.IntVal(min_y - 10) <= yk, yk <= z3.IntVal(max_y + 10))
+    solver.add(z3.IntVal(min_z - 10) <= zk, zk <= z3.IntVal(max_z + 10))
 
     solver.check()
     m = solver.model()
