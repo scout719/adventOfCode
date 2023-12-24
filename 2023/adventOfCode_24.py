@@ -6,6 +6,7 @@ from heapq import heappop, heappush
 from math import lcm
 import os
 import sys
+import z3
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -16,11 +17,11 @@ from common.utils import main  # NOQA: E402
 YEAR = 2023
 DAY = 24
 EXPECTED_1 = 2  # None
-EXPECTED_2 = -1  # None
+EXPECTED_2 = 47  # None
 
 """ DAY 24 """
 
-def day24_parse(data: list[str]):
+def day24_parse(data: list[str]) -> list[tuple[tuple[int, int, int], tuple[int, int, int]]]:
     hail = list()
     for line in data:
         pos, vel = line.split(" @ ")
@@ -120,7 +121,36 @@ def day24_1(data):
 
 def day24_2(data: list[str]):
     x = day24_parse(data)
-    return day24_solve(x, True)
+    hails = x
+
+    # a = xa+dxa, ya+dya, za+dza
+    # b = xb+dxb, yb+dyb, zb+dzb
+
+    # (xk,yk,zk), (dxk,dyk,dzk) s.t.
+    # k + T1*dk = a + T1*da
+    # k + T2*dk = b + T2*db
+    # k + T3*dk = c + T3*dc
+
+    xk = z3.Int('xk')
+    yk = z3.Int('yk')
+    zk = z3.Int("zk")
+    dxk = z3.Int("dxk")
+    dyk = z3.Int("dyk")
+    dzk = z3.Int("dzk")
+    solver = z3.Solver()
+    for i, hail in enumerate(hails):
+        t = z3.Int("k" + str(i))
+        (x1, y1, z1), (vx1, vy1, vz1) = hail
+        (x1, y1, z1), (vx1, vy1, vz1) = (z3.IntVal(x1), z3.IntVal(y1),
+                                         z3.IntVal(z1)), (z3.IntVal(vx1), z3.IntVal(vy1), z3.IntVal(vz1))
+        solver.add((xk + t * dxk) == (x1 + t * vx1))
+        solver.add((yk + t * dyk) == (y1 + t * vy1))
+        solver.add((zk + t * dzk) == (z1 + t * vz1))
+
+    solver.check()
+    m = solver.model()
+
+    return int(str(m[xk])) + int(str(m[yk])) + int(str(m[zk]))
 
 
 """ MAIN FUNCTION """
