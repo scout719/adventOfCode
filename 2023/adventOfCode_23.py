@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict, deque
-from copy import deepcopy
-from heapq import heappop, heappush
-from math import lcm
+from collections import defaultdict
 import os
 import sys
 
@@ -59,7 +56,7 @@ def day23_path(r, c, rr, cc, juncs, grid):
         path.add((rrr, ccc))
 
         if (rrr, ccc) == (rr, cc):
-            paths.add(len(path)-1)
+            paths.add(len(path) - 1)
             continue
 
         if (rrr, ccc) in juncs and (rrr, ccc) != (r, c):

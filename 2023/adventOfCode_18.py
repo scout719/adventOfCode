@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
 import os
 import sys
 

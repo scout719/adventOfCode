@@ -5,7 +5,6 @@
 # pylint: disable=wrong-import-position
 # pylint: disable=consider-using-enumerate
 import os
-from os.path import join
 import sys
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))

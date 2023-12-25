@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import Counter, defaultdict, deque
-from copy import deepcopy
-from heapq import heappop, heappush
-from math import lcm
+from collections import defaultdict, deque
 import os
 import sys
-import z3
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
 sys.path.insert(0, FILE_DIR + "/../")
-from common.utils import WHITE_SQUARE, day_with_validation  # NOQA: E402
+from common.utils import day_with_validation  # NOQA: E402
 from common.utils import main  # NOQA: E402
 
 YEAR = 2023

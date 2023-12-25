@@ -2,7 +2,6 @@
 # pylint: disable=wrong-import-position
 import os
 import sys
-from collections import defaultdict
 from typing import List
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))

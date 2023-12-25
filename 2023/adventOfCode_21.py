@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict, deque
-from copy import deepcopy
-from math import lcm
+from collections import deque
 import os
 import sys
 

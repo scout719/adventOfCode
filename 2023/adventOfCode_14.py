@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
-from copy import deepcopy
 import os
-import string
 import sys
-from typing import List, Mapping, Tuple, Set
+from typing import List
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")

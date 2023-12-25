@@ -2,7 +2,6 @@
 # pylint: disable=wrong-import-position
 from collections import defaultdict
 from copy import deepcopy
-from math import lcm
 import os
 import sys
 

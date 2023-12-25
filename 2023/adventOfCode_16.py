@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
 import os
 import sys
 
@@ -85,10 +84,10 @@ def day16_2(data: list[str]):
         for c in range(C):
             if r == 0 or c == 0 or r == R - 1 or c == C - 1:
                 dr = 1 if r == 0 else \
-                    -1 if r == R-1 else \
+                    -1 if r == R - 1 else \
                     0
                 dc = 1 if c == 0 else \
-                    -1 if c == C-1 else \
+                    -1 if c == C - 1 else \
                     0
                 D = [(dr, dc)]
                 if abs(dr) + abs(dc) == 2:
@@ -96,11 +95,12 @@ def day16_2(data: list[str]):
                     D = [(dr, 0), (0, dc)]
 
                 for ddr, ddc in D:
-                    assert abs(ddr) + abs(ddc) == 1, f"r={r} c={c} dr={dr} dc={dc}"
+                    assert abs(ddr) + abs(ddc) == 1, \
+                        f"r={r} c={c} dr={dr} dc={dc}"
                     energy = day16_solve(grid, r, c, ddr, ddc)
                     if energy > ans:
                         ans = energy
-    return ans 
+    return ans
 
 
 """ MAIN FUNCTION """

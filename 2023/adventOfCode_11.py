@@ -2,7 +2,7 @@
 # pylint: disable=wrong-import-position
 import os
 import sys
-from typing import List, Mapping, Tuple
+from typing import List
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")

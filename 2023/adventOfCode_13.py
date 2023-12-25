@@ -3,9 +3,8 @@
 from collections import defaultdict
 from copy import deepcopy
 import os
-import string
 import sys
-from typing import List, Mapping, Tuple, Set
+from typing import List, Mapping, Set
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")

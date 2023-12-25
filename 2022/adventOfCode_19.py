@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-import functools
-import math
 import os
 import sys
-import time
-from collections import Counter, defaultdict, deque
+from collections import defaultdict
 from copy import deepcopy
 from heapq import heappop, heappush
-from os.path import join
-from typing import Callable, ChainMap, Dict, Iterator, List, Optional, Union
 
-from z3 import Abs, If, Int, Solver, Sum
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")

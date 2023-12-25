@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict, deque
-from copy import deepcopy
-from heapq import heappop, heappush
-from math import lcm
 import os
 import sys
 import z3
@@ -154,7 +150,7 @@ def day24_2(data: list[str]):
     max_y = max(y for (x, y, z), v in hails)
     min_z = min(z for (x, y, z), v in hails)
     max_z = max(z for (x, y, z), v in hails)
-    
+
     solver.add(z3.IntVal(min_x - 10) <= xk, xk <= z3.IntVal(max_x + 10))
     solver.add(z3.IntVal(min_y - 10) <= yk, yk <= z3.IntVal(max_y + 10))
     solver.add(z3.IntVal(min_z - 10) <= zk, zk <= z3.IntVal(max_z + 10))
