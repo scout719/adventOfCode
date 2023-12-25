@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from math import ceil, sqrt
 import os
 import sys
 
@@ -21,32 +22,29 @@ def day20_parse(data):
     return int(data[0])
 
 def day20_divisors(n):
-    res = []
-    i = n
-    while i > 0:
+    large_divisors: list = []
+    for i in range(1, int(sqrt(n) + 1)):
         if n % i == 0:
-            res.append(i)
-        i -= 1
-    return res
-
+            yield i
+            if i * i != n:
+                large_divisors.append(n / i)
+    for divisor in reversed(large_divisors):
+        yield divisor
 
 def day20_1(data):
     data = day20_parse(data)
-    i = 1
-    curr = 1
-    while curr < data:
-        d = day20_divisors(i)
-        curr2 = 0
-        for d2 in d:
-            curr2 += d2 * 10
-        curr = curr2
-        print(i, curr2, d)
-        if curr2 >= data:
-            return i
-        i += 1
-    curr = data // 2
 
-    return data
+    house = 1
+    while house < data:
+        ans = 0
+        ans = sum(day20_divisors(house)) * 10
+        if ans >= data:
+            # low: 448351
+            #      448387
+            return house
+        house += 1
+
+    assert False
 
 def day20_2(data):
     data = day20_parse(data)
