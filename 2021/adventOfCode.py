@@ -41,7 +41,7 @@ def day1_parse(data):
     # return data
 
 def day1_1(data):
-    # data = read_input(2021, 101)
+    data = read_input(2021, 101, True)
     data = day1_parse(data)
     greater = 0
     for i in range(len(data)):

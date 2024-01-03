@@ -81,15 +81,17 @@ def execute_day(_globals, year, day, part):
         end = timer()
         print(f"Day {day}, part {part}: {result} ({(end - start):.3f} secs)")
 
-def read_input(year, day):
+def read_input(year, day, is_sample=False):
     file_dir = os.path.dirname(os.path.realpath(__file__))
-    with open(f"{file_dir}/../{year}/input/day{day}", "r", encoding="ascii") as fileReader:
+    inputs_folder = "input/sample" if is_sample else "input"
+    path = f"{file_dir}/../{year}/{inputs_folder}/day{day}"
+    with open(path, "r", encoding="ascii") as fileReader:
         return [line.rstrip('\n') for line in fileReader]
 
 def day_with_validation(globals_, YEAR, DAY, expected_result, part, data):
     func = globals_[f"day{DAY}_{part}"]
     if expected_result is not None:
-        data_ex = read_input(YEAR, DAY * 100 + 1)
+        data_ex = read_input(YEAR, DAY * 100 + 1, True)
         result = func(data_ex)
         if result != expected_result:
             print(f"{bcolors.FAIL}FAIL")

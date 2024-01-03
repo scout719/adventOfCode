@@ -1284,12 +1284,9 @@ def day17_2(data):
     # C L,10,R,10,L,6
     main = [ord(c)
             for c in "A|,|B|,|B|,|A|,|C|,|B|,|C|,|C|,|B|,|A".split("|")] + [10]
-    A = f"{ord('R')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord(
-        'L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|10".split("|")
-    B = f"{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord('L')}|{ord(',')}|{
-        ord('6')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
-    C = f"{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{
-        ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
+    A = f"{ord('R')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|10".split("|")
+    B = f"{ord('R')}|{ord(',')}|{ord('8')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
+    C = f"{ord('L')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('R')}|{ord(',')}|{ord('1')}|{ord('0')}|{ord(',')}|{ord('L')}|{ord(',')}|{ord('6')}|10".split("|")
     response = f"{ord('n')}|10".split("|")
     main = [int(d) for d in main]
     A = [int(d) for d in A]

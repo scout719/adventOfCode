@@ -52,8 +52,7 @@ def day10_guess(grid, r, c):
     elif from_left:
         if from_bottom:
             return "7"
-    assert False, f"top={from_top} bottom={
-        from_bottom} left={from_left} right={from_right}"
+    assert False, f"top={from_top} bottom={from_bottom} left={from_left} right={from_right}"
 
 def day10_loop(grid):
     R = len(grid)
