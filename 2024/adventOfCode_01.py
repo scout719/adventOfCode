@@ -21,7 +21,7 @@ EXPECTED_2 = 31
 """ DAY 1 """
 
 def day1_parse(data):
-    left, right = [],[]
+    left, right = [], []
     for l in data:
         le, ri = l.split("   ")
         left.append(int(le))

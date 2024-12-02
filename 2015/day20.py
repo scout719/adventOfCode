@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from math import ceil, sqrt
+from math import sqrt
 import os
 import sys
 from typing import Counter
@@ -44,7 +44,7 @@ def day20_sum_divisors(n):
     t = 1
     for p in c.keys():
         s = 0
-        for i in range(c[p]+1):
+        for i in range(c[p] + 1):
             s += p**i
         t *= s
 
