@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
-from email.policy import default
 import os
 import sys
-from typing import Counter, List
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
@@ -26,7 +23,7 @@ def day2_parse(data):
         reports.append([int(x) for x in l.split()])
     return reports
 
-def day2_test(r, idx):
+def day2_test(r):
     i = 1
     prev = r[0]
     diff = r[1] - prev
@@ -52,7 +49,7 @@ def day2_1(data):
     reports = day2_parse(data)
     c = 0
     for r in reports:
-        if day2_test(r, None):
+        if day2_test(r):
             c += 1
     return c
 
@@ -60,12 +57,12 @@ def day2_2(data):
     reports = day2_parse(data)
     c = 0
     for r in reports:
-        if day2_test(r, None):
+        if day2_test(r):
             c += 1
         else:
             for i in range(len(r)):
                 r2 = r[:i] + r[i + 1:]
-                if day2_test(r2, None):
+                if day2_test(r2):
                     c += 1
                     break
     return c

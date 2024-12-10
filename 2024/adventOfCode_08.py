@@ -46,14 +46,14 @@ def day8_solve(data, part2):
                 if part2:
                     multipliers = range(100)
                 for k in multipliers:
-                    new_r = r2 + k*dr
-                    new_c = c2 + k*dc
+                    new_r = r2 + k * dr
+                    new_c = c2 + k * dc
                     if 0 <= new_r < R and 0 <= new_c < C:
-                        antinodes.add((new_r,new_c))
-                    new_r = r1 - k*dr
-                    new_c = c1 - k*dc
+                        antinodes.add((new_r, new_c))
+                    new_r = r1 - k * dr
+                    new_c = c1 - k * dc
                     if 0 <= new_r < R and 0 <= new_c < C:
-                        antinodes.add((new_r,new_c))
+                        antinodes.add((new_r, new_c))
                 j += 1
             i += 1
     return len(antinodes)

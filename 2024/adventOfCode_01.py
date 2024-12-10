@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-from collections import defaultdict
-from email.policy import default
 import os
 import sys
-from typing import Counter, List
+from typing import Counter
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, FILE_DIR + "/")
