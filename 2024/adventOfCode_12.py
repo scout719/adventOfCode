@@ -65,68 +65,41 @@ def day12_solve(data, part2):
     for region in regions:
         area = len(region)
         fence = []
-        typ = None
-        fence2 = set()
-        points = set()
-        points2 = []
+        corners = []
         for r, c in region:
-            typ = data[r][c]
-
-            for dr in [-1, 0, 1]:
-                for dc in [-1, 0, 1]:
-                    if dc == dr == 0:
-                        continue
-
-                    rr, cc = r + dr, c + dc
-                    # Is diag?
-                    if dr != 0 and dc != 0:
-                        # Cross section
-                        # ......
-                        # ...BB.
-                        # ...BB.  L__ this corner needs to be accounted for as well
-                        # .BB...
-                        # .BB...
-                        # ......
-                        if (rr, cc) in region and ((r, cc) not in region and (rr, c) not in region):
-                            fr = min(rr, r) + (max(rr, r) - min(r, rr)) / 2
-                            fc = min(cc, c) + (max(cc, c) - min(c, cc)) / 2
-                            fence2.add((fr, fc))
-                            points.add((fr, fc))
-
-                    if (rr, cc) not in region:
-                        fr = min(rr, r) + (max(rr, r) - min(r, rr)) / 2
-                        fc = min(cc, c) + (max(cc, c) - min(c, cc)) / 2
-                        fence2.add((fr, fc))
+            for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                rr, cc = r + dr, c + dc
+                fr = min(rr, r) + (max(rr, r) - min(r, rr)) / 2
+                fc = min(cc, c) + (max(cc, c) - min(c, cc)) / 2
+                if (rr, cc) in region:
+                    # Cross section
+                    # AAAAAA
+                    # AAA..A
+                    # AAA..A
+                    # A..AAA
+                    # A..AAA
+                    # AAAAAA
+                    if (r, cc) not in region and (rr, c) not in region:
+                        corners.append((fr, fc))
+                else:
+                    # Inner corner
+                    if (r, cc) in region and (rr, c) in region:
+                        corners.append((fr, fc))
+                    # Outer corner
+                    elif (r, cc) not in region and (rr, c) not in region:
+                        corners.append((fr, fc))
 
             for dr, dc in D:
                 rr, cc = r + dr, c + dc
-                if data[rr][cc] != data[r][c]:
+                if (rr, cc) not in region:
                     fence.append((rr, cc))
 
-        new_fence2 = set()
-        # keep only corners
-        for fr, fc in fence2:
-            if fr % 1 != 0:
-                if (fr - 0.5, fc) in fence2 and (fr + 0.5, fc) in fence2:
-                    continue
-            if fc % 1 != 0:
-                if (fr, fc - 0.5) in fence2 and (fr, fc + 0.5) in fence2:
-                    continue
-            if fr % 1 == 0 or fc % 1 == 0:
-                continue
-            new_fence2.add((fr, fc))
-        # if part2:
-            # print(typ, fence2)
-            # day12_print(R * 2, C * 2, list((r * 2 // 1, c * 2 // 1)
-            #             for r, c in fence2), "X")
-            # day12_print(R * 2, C * 2, list((r * 2 // 1, c * 2 // 1)
-            #             for r, c in new_fence2), "X")
-            # day12_print(R * 2, C * 2, list((r * 2 // 1, c * 2 // 1)
-            #             for r, c in points), "X")
-        fence2 = new_fence2
         if part2:
-            ans += area * (len(fence2) + len(points) * 2)
+            # day12_print(R * 2, C * 2, list((r * 2 // 1, c * 2 // 1)
+            #             for r, c in corners), "X")
+            ans += area * (len(corners))
         else:
+            # day12_print(R, C, fence, "X")
             ans += area * len(fence)
     return ans
 
