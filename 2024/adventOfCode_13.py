@@ -65,6 +65,9 @@ def day13_solve(data, part2):
         if part2:
             px, py = 10000000000000 + px, 10000000000000 + py
 
+        # k*ax + m * bx = px
+        # k*ay + m * by = py
+        # Consider only 'integer' solutions
         m = ((py / ay) - (px / ax)) / ((by / ay) - (bx / ax))
         margin_m = abs(round(m) - m)
         margin = 1e-100
