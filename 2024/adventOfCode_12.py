@@ -71,23 +71,12 @@ def day12_solve(data, part2):
                 rr, cc = r + dr, c + dc
                 fr = min(rr, r) + (max(rr, r) - min(r, rr)) / 2
                 fc = min(cc, c) + (max(cc, c) - min(c, cc)) / 2
-                if (rr, cc) in region:
-                    # Cross section
-                    # AAAAAA
-                    # AAA..A
-                    # AAA..A
-                    # A..AAA
-                    # A..AAA
-                    # AAAAAA
-                    if (r, cc) not in region and (rr, c) not in region:
-                        corners.append((fr, fc))
-                else:
-                    # Inner corner
-                    if (r, cc) in region and (rr, c) in region:
-                        corners.append((fr, fc))
-                    # Outer corner
-                    elif (r, cc) not in region and (rr, c) not in region:
-                        corners.append((fr, fc))
+                # Outer corner
+                if (r, cc) not in region and (rr, c) not in region:
+                    corners.append((fr, fc))
+                # Inner corner
+                elif (r, cc) in region and (rr, c) in region and (rr,cc) not in region:
+                    corners.append((fr, fc))
 
             for dr, dc in D:
                 rr, cc = r + dr, c + dc
