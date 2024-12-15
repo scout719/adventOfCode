@@ -44,9 +44,6 @@ def day14_solve(data, part2):
     if len(data) < 50:
         R, C = 7, 11
     for t in range(100000 if part2 else 100):
-        # new_robots = []
-        # for r, c, vr, vc in robots:
-        #     new_robots.append(((r + vr) % R, (c + vc) % C, vr, vc))
         robots = [((r + vr) % R, (c + vc) % C, vr, vc)
                   for r, c, vr, vc in robots]
         occupied = {(r, c) for r, c, _, _ in robots}
@@ -75,11 +72,6 @@ def day14_1(data):
     return day14_solve(data, False)
 
 def day14_2(data):
-    # 28007972338388 low
-    # 91586853503821 high
-    # 75596115797987 wrong
-    # 75631907391616 wrong
-    # 60439165206075 wrong
     return day14_solve(data, True)
 
 
