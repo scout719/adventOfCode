@@ -21,6 +21,21 @@
         {
             "label": "Execute",
             "type": "shell",
+            "command": "${config:python.defaultInterpreterPath} ${file}",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Execute input",
+            "type": "shell",
             "command": "${config:python.defaultInterpreterPath} ${file} ${input:day}",
             "group": "build",
             "presentation": {
@@ -35,6 +50,21 @@
         },
         {
             "label": "Execute pypy",
+            "type": "shell",
+            "command": "${config:custom.pypyPath} ${file}",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Execute pypy input",
             "type": "shell",
             "command": "${config:custom.pypyPath} ${file} ${input:day}",
             "group": "build",
