@@ -102,6 +102,7 @@ def day_with_validation(globals_, YEAR, DAY, expected_result, part, data):
     return func(data)
 
 def main(argv_, globals_, year):
+    sys.setrecursionlimit(9999)
     start_day = None
     if len(argv_) > 1:
         try:
