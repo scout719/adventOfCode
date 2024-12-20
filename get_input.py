@@ -9,7 +9,7 @@ import http.client as http_client
 import logging
 import requests
 
-http_client.HTTPConnection.debuglevel = 1
+http_client.HTTPConnection.debuglevel = 0
 
 # You must initialize logging, otherwise you'll not see debug output.
 logging.basicConfig()
@@ -33,4 +33,9 @@ data = requests.get(url, timeout=5, cookies={
     "https://github.com/scout719/adventOfCode/blob/master/get_input.py by scout719"
 })
 with open(path.join(year, "input", f"day{day}"), mode="w+", encoding="ascii") as f:
-    f.write(data.text)
+    value = data.text
+    f.write(value)
+    lines = value.split("\n")
+    # print 15 first line
+    n = min(len(lines), 15)
+    print("\n".join(lines[:n]))
