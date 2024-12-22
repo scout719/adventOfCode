@@ -37,17 +37,20 @@ def day22_solve(data, part2):
     p1 = 0
     p2 = Counter()
     for n in nums:
-        prev = n % 10
+        prev_price = n % 10
         seen = set()
-        changes = []
+        # changes = []
+        last_4, last_3, last_2, last_1 = 0, 0, 0, 0
         for t in range(2000):
             n = day22_next(n)
             price = n % 10
-            changes.append(price - prev)
-            prev = price
+            last_4 = last_3
+            last_3 = last_2
+            last_2 = last_1
+            last_1 = price - prev_price
+            prev_price = price
             if t >= 3:
-                sequence = (changes[-4], changes[-3],
-                            changes[-2], changes[-1])
+                sequence = (last_4, last_3, last_2, last_1)
                 if sequence not in seen:
                     seen.add(sequence)
                     p2[sequence] += price
