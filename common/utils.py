@@ -1,6 +1,7 @@
 # pylint: disable=import-error
 from threading import Thread
 import functools
+import threading
 from timeit import default_timer as timer
 import sys
 import os
@@ -27,7 +28,7 @@ class SignalCatchingError(Exception):
 
 
 HEAVY_EXERCISE = "nil (too computationally heavy)"
-EXERCISE_TIMEOUT = 120  # secs
+EXERCISE_TIMEOUT = 300  # secs
 
 def clear():
     # for windows
@@ -42,7 +43,7 @@ def timeout(seconds_before_timeout):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
-            res = [SignalCatchingError(
+            res: list[BaseException] = [SignalCatchingError(
                 f'function [{func.__name__}] timeout [{seconds_before_timeout} seconds] exceeded!')]
 
             def newFunc():
@@ -73,7 +74,7 @@ def execute_day(_globals, year, day, part):
             timeout_secs = EXERCISE_TIMEOUT
             if sys.gettrace() is not None:
                 # debugger attached
-                timeout_secs = EXERCISE_TIMEOUT * 1000
+                timeout_secs = threading.TIMEOUT_MAX
             result = timeout(seconds_before_timeout=timeout_secs)(
                 _globals[func_name])(read_input(year, day))
         except SignalCatchingError:
