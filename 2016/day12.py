@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import deque
-from copy import deepcopy
-import functools
 import os
 import sys
 
