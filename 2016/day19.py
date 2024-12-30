@@ -31,8 +31,6 @@ def day19_solve_naive(n_elves):
         line.pop(next_i)
         if next_i < i:
             i -= 1
-        if len(line) % 1000 == 0:
-            print(len(line))
         i = (i + 1) % len(line)
 
     return line[0]
