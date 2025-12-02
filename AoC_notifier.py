@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import traceback
 import requests
 from win11toast import notify
@@ -20,7 +20,8 @@ def process_board(id_, last_check, year, session):
             d = u['completion_day_level'][d_]
             for s_ in d:
                 s = d[s_]
-                ts = datetime.fromtimestamp(int(s['get_star_ts']))
+                ts = datetime.fromtimestamp(
+                    int(s['get_star_ts']), timezone.utc)
                 msg = f"{ts.time()} [Day {d_} star {s_}] {u['name']}"
                 l.append((ts, msg))
 
@@ -31,15 +32,16 @@ def process_board(id_, last_check, year, session):
 
 def main():
     year = datetime.now().year
-    sleep = 20
+    sleep = 5 * 60
     session = open("session", encoding="ascii").readline()
-    last_check = datetime.now() - timedelta(hours=6)
+    last_check = datetime.now(timezone.utc) - timedelta(hours=6)
     boards = [321349, 194943]
     while True:
+        print(f"Checking boards at {datetime.now(timezone.utc).time()}")
         try:
             for id_ in boards:
                 process_board(id_, last_check, year, session)
-            last_check = datetime.now()
+            last_check = datetime.now(timezone.utc)
         except Exception:  # pylint: disable=broad-exception-caught
             traceback.print_exc()
         time.sleep(sleep)
