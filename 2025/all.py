@@ -14,7 +14,7 @@ from common.utils import main  # NOQA: E402
 if __name__ == "__main__":
     import importlib
     import inspect
-    for i in range(1, 26):
+    for i in range(1, 13):
         try:
             m = importlib.import_module(f"adventOfCode_{i:02}")
             for k, v in inspect.getmembers(m):

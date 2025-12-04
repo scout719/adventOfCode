@@ -37,7 +37,6 @@ def main():
     last_check = datetime.now(timezone.utc) - timedelta(hours=6)
     boards = [321349, 194943]
     while True:
-        print(f"Checking boards at {datetime.now(timezone.utc).time()}")
         try:
             for id_ in boards:
                 process_board(id_, last_check, year, session)
