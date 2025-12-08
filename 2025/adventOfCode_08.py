@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
 from collections import defaultdict
-from email.policy import default
 from heapq import heappop, heappush
 from math import sqrt
 import os
@@ -27,29 +26,6 @@ def day8_parse(data: list[str]):
         z = int(z)
         boxes.append((x, y, z))
     return boxes
-
-def day7_timelines(DP, splits, grid, r, c):
-    C = len(grid[0])
-    if not 0 <= c < C:
-        return 0
-
-    if r >= len(grid):
-        return 1
-
-    if (r, c) in DP:
-        return DP[(r, c)]
-
-    total = 0
-    if grid[r][c] == "^":
-        splits.add((r, c))
-        total = day7_timelines(DP, splits, grid, r, c - 1) + \
-            day7_timelines(DP, splits, grid, r, c + 1)
-    else:
-        total = day7_timelines(DP, splits, grid, r + 1, c)
-
-    DP[(r, c)] = total
-    return total
-
 
 def day8_solve(data, part2):
     boxes = day8_parse(data)
