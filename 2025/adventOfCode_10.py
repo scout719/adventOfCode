@@ -39,11 +39,16 @@ def day10_solve(data, part2):
         total = 0
         for lights, buttons, _ in machines:
             q = deque([(0, set())])
+            seen = set()
             while q:
                 presses, on = q.popleft()
                 if on == lights:
                     total += presses
                     break
+
+                if tuple(on) in seen:
+                    continue
+                seen.add(tuple(on))
 
                 for button in buttons:
                     new_on = set(on)
